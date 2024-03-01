@@ -24,7 +24,7 @@ composer require ozankurt/laravel-security
 Publish configuration, language, and migrations
 
 ```bash
-php artisan vendor:publish --tag=firewall
+php artisan vendor:publish --tag=security
 ```
 
 ### 3. Database
@@ -37,7 +37,7 @@ php artisan migrate
 
 ### 4. Configure
 
-You can change the firewall settings of your app from `config/security.php` file
+You can change the security settings of your app from `config/security.php` file
 
 ## Usage
 

@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Security\Tests;
 
-use OzanKurt\Security\Provider;
+use OzanKurt\Security\SecurityServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -15,7 +15,7 @@ abstract class TestCase extends BaseTestCase
 
         $this->setUpConfig();
 
-        $this->artisan('vendor:publish', ['--tag' => 'firewall']);
+        $this->artisan('vendor:publish', ['--tag' => 'security']);
         $this->artisan('migrate:refresh', ['--database' => 'testbench']);
     }
 
@@ -27,7 +27,7 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageProviders($app)
     {
         return [
-            Provider::class,
+            SecurityServiceProvider::class,
         ];
     }
 
@@ -45,14 +45,14 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUpConfig()
     {
-        config(['firewall' => require __DIR__ . '/../src/Config/firewall.php']);
+        config(['security' => require __DIR__ . '/../config/security.php']);
 
-        config(['firewall.notifications.mail.enabled' => false]);
-        config(['firewall.middleware.ip.methods' => ['all']]);
-        config(['firewall.middleware.lfi.methods' => ['all']]);
-        config(['firewall.middleware.rfi.methods' => ['all']]);
-        config(['firewall.middleware.sqli.methods' => ['all']]);
-        config(['firewall.middleware.xss.methods' => ['all']]);
+        config(['security.notifications.mail.enabled' => false]);
+        config(['security.middleware.ip.methods' => ['all']]);
+        config(['security.middleware.lfi.methods' => ['all']]);
+        config(['security.middleware.rfi.methods' => ['all']]);
+        config(['security.middleware.sqli.methods' => ['all']]);
+        config(['security.middleware.xss.methods' => ['all']]);
     }
 
     public function getNextClosure()
