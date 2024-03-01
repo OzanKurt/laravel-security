@@ -10,16 +10,17 @@ class Ip extends Middleware
 {
     public function check($patterns)
     {
-        $status = false;
+        $isBlocked = false;
 
         try {
-            $ip = config('firewall.models.ip', Model::class);
-            $status = $ip::blocked($this->ip())->pluck('id')->first();
+            $ip = config('security.database.ip.model', Model::class);
+
+            $isBlocked = $ip::blocked($this->ip())->exists();
         } catch (QueryException $e) {
             // Base table or view not found
-            //$status = ($e->getCode() == '42S02') ? false : true;
+            //$isBlocked = ($e->getCode() == '42S02') ? false : true;
         }
 
-        return $status;
+        return $isBlocked;
     }
 }

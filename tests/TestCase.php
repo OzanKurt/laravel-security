@@ -47,6 +47,8 @@ abstract class TestCase extends BaseTestCase
     {
         config(['security' => require __DIR__ . '/../config/security.php']);
 
+        config(['security.database.connection' => 'testbench']);
+
         config(['security.notifications.mail.enabled' => false]);
         config(['security.middleware.ip.methods' => ['all']]);
         config(['security.middleware.lfi.methods' => ['all']]);

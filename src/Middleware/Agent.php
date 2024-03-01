@@ -72,7 +72,7 @@ class Agent extends Middleware
 
     protected function isBrowser()
     {
-        if (! $browsers = config('firewall.middleware.' . $this->middleware . '.browsers')) {
+        if (! $browsers = config('security.middleware.' . $this->middleware . '.browsers')) {
             return false;
         }
 
@@ -89,7 +89,7 @@ class Agent extends Middleware
 
     protected function isPlatform()
     {
-        if (! $platforms = config('firewall.middleware.' . $this->middleware . '.platforms')) {
+        if (! $platforms = config('security.middleware.' . $this->middleware . '.platforms')) {
             return false;
         }
 
@@ -106,7 +106,7 @@ class Agent extends Middleware
 
     protected function isDevice()
     {
-        if (! $devices = config('firewall.middleware.' . $this->middleware . '.devices')) {
+        if (! $devices = config('security.middleware.' . $this->middleware . '.devices')) {
             return false;
         }
 
@@ -145,7 +145,7 @@ class Agent extends Middleware
 
     protected function isProperty()
     {
-        if (! $agents = config('firewall.middleware.' . $this->middleware . '.properties')) {
+        if (! $agents = config('security.middleware.' . $this->middleware . '.properties')) {
             return false;
         }
 

@@ -15,8 +15,10 @@ class IpTest extends TestCase
 
     public function testShouldBlock()
     {
-        Model::create(['ip' => '127.0.0.1', 'log_id' => 1]);
+        Model::create(['ip' => '127.0.0.1', 'is_blocked' => 1]);
 
-        $this->assertEquals('403', (new Ip())->handle($this->app->request, $this->getNextClosure())->getStatusCode());
+        $response = (new Ip())->handle($this->app->request, $this->getNextClosure());
+
+        $this->assertEquals('403', $response->getStatusCode());
     }
 }

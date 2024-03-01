@@ -55,7 +55,7 @@ class Rfi extends Middleware
 
     protected function applyExceptions($string)
     {
-        $exceptions = config('firewall.middleware.' . $this->middleware . '.exceptions');
+        $exceptions = config('security.middleware.' . $this->middleware . '.exceptions');
 
         $domain = $this->request->getHost();
 

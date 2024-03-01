@@ -7,21 +7,24 @@ return [
     'whitelist' => explode(',', env('FIREWALL_WHITELIST', '')),
 
     'database' => [
-        'table_prefix' => 'sec_',
-        'tables' => [
-            'firewall_ips' => 'firewall_ips',
-            'firewall_logs' => 'firewall_logs',
+        'connection' => env('FIREWALL_DB_CONNECTION', env('DB_CONNECTION', 'mysql')),
+
+        'table_prefix' => env('FIREWALL_DB_PREFIX', 'security_'),
+
+        'user' => [
+            'model' => \App\Models\User::class,
         ],
-    ],
 
-    'models' => [
-        'user' => \App\Models\User::class,
-        // 'log' => '\App\Models\YourLogModel',
-        // 'ip' => '\App\Models\YourIpModel',
-    ],
+        'log' => [
+            'model' => \OzanKurt\Security\Models\Log::class,
+            'table' => 'logs',
+            'max_request_data_size' => 2048,
+        ],
 
-    'log' => [
-        'max_request_size' => 2048,
+        'ip' => [
+            'model' => \OzanKurt\Security\Models\Ip::class,
+            'table' => 'ips',
+        ],
     ],
 
     'cron' => [

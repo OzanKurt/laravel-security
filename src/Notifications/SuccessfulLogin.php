@@ -26,7 +26,7 @@ class SuccessfulLogin extends Notification implements ShouldQueue
     public function __construct(Authenticated $event)
     {
         $this->event = $event;
-        $this->notifications = config('firewall.middleware.' . $log->middleware . '.notifications', config('firewall.notifications'));
+        $this->notifications = config('security.middleware.' . $log->middleware . '.notifications', config('security.notifications'));
     }
 
     /**

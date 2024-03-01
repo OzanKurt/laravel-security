@@ -32,7 +32,7 @@ class AttackDetected extends Notification implements ShouldQueue
     public function __construct($log)
     {
         $this->log = $log;
-        $this->notifications = config('firewall.middleware.' . $log->middleware . '.notifications', config('firewall.notifications'));
+        $this->notifications = config('security.middleware.' . $log->middleware . '.notifications', config('security.notifications'));
     }
 
     /**

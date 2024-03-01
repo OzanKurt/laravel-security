@@ -45,23 +45,14 @@ class SecurityServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/security.php' => config_path('security.php'),
             __DIR__ . '/../resources/lang' => $langPath,
-            __DIR__ . '/../database/migrations/create_firewall_ips_table.php' => $this->getMigrationPath($migrationFile),
-            __DIR__ . '/../database/migrations/create_firewall_logs_table.php' => $this->getMigrationPath($migrationFile),
+            __DIR__ . '/../database/migrations/create_ips_table.php' => $this->getMigrationPathFor('ip'),
+            __DIR__ . '/../database/migrations/create_logs_table.php' => $this->getMigrationPathFor('log'),
         ], 'security');
 
         $this->registerMiddleware($router);
         $this->registerListeners();
         $this->registerTranslations($langPath);
         $this->registerCommands();
-    }
-
-    public function getMigrationPath(string $migrationKey): string
-    {
-        $prefix = date('Y_m_d').'_000000';
-        $tablePrefix = config('security.database.table_prefix', 'sec_');
-        $tableName = $tablePrefix.config("security.database.tables.{$migrationKey}", 'firewall_ips');
-
-        return database_path("migrations/{$prefix}_create_{$tableName}_table.php");
     }
 
     /**
@@ -73,7 +64,7 @@ class SecurityServiceProvider extends ServiceProvider
      */
     public function registerMiddleware($router)
     {
-        $router->middlewareGroup('firewall.all', config('firewall.all_middleware'));
+        $router->middlewareGroup('firewall.all', config('security.all_middleware'));
         $router->aliasMiddleware('firewall.agent', \OzanKurt\Security\Middleware\Agent::class);
         $router->aliasMiddleware('firewall.bot', \OzanKurt\Security\Middleware\Bot::class);
         $router->aliasMiddleware('firewall.ip', \OzanKurt\Security\Middleware\Ip::class);
@@ -125,5 +116,21 @@ class SecurityServiceProvider extends ServiceProvider
                 app(Schedule::class)->command('security:unblockip')->cron(config('security.cron.expression'));
             });
         }
+    }
+
+    public function getMigrationPathFor(string $modelKey): string
+    {
+        $prefix = date('Y_m_d').'_000000';
+        $tableName = $this->getNameTable($modelKey);
+
+        return database_path("migrations/{$prefix}_create_{$tableName}_table.php");
+    }
+
+    public function getNameTable(string $modelKey): string
+    {
+        $tablePrefix = config('security.database.table_prefix', 'sec_');
+        $tableName = config("security.database.{$modelKey}.table", $modelKey);
+
+        return $tablePrefix.$tableName;
     }
 }

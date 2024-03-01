@@ -2,9 +2,11 @@
 
 namespace OzanKurt\Security\Traits;
 
-use OzanKurt\Security\Models\Log;
 use Illuminate\Http\Request;
+use OzanKurt\Security\Models\Log;
+use OzanKurt\Security\Enums\LogLevel;
 use Symfony\Component\HttpFoundation\IpUtils;
+use Jenssegers\Agent\Agent as Parser;
 
 trait Helper
 {
@@ -16,7 +18,7 @@ trait Helper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        return config('firewall.middleware.' . $middleware . '.enabled', config('firewall.enabled'));
+        return config('security.middleware.' . $middleware . '.enabled', config('security.enabled', false));
     }
 
     public function isDisabled($middleware = null)
@@ -26,14 +28,14 @@ trait Helper
 
     public function isWhitelist()
     {
-        return IpUtils::checkIp($this->ip(), config('firewall.whitelist'));
+        return IpUtils::checkIp($this->ip(), config('security.whitelist', []));
     }
 
     public function isMethod($middleware = null)
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (! $methods = config('firewall.middleware.' . $middleware . '.methods')) {
+        if (! $methods = config('security.middleware.' . $middleware . '.methods')) {
             return false;
         }
 
@@ -48,7 +50,7 @@ trait Helper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (! $routes = config('firewall.middleware.' . $middleware . '.routes')) {
+        if (! $routes = config('security.middleware.' . $middleware . '.routes')) {
             return false;
         }
 
@@ -75,7 +77,7 @@ trait Helper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (! $inputs = config('firewall.middleware.' . $middleware . '.inputs')) {
+        if (! $inputs = config('security.middleware.' . $middleware . '.inputs')) {
             return true;
         }
 
@@ -86,24 +88,52 @@ trait Helper
         return ! in_array((string) $name, (array) $inputs['except']);
     }
 
-    public function log($middleware = null, $user_id = null, $level = 'medium')
+    public function log(
+        ?string $middleware = null,
+        ?int $user_id = null,
+        LogLevel $level = LogLevel::MEDIUM
+    ): Log
     {
         $middleware = $middleware ?? $this->middleware;
         $user_id = $user_id ?? $this->user_id;
 
-        $model = config('firewall.models.log', Log::class);
-
-        $input = urldecode(http_build_query($this->request->input()));
+        $model = config('security.database.log.model', Log::class);
 
         return $model::create([
-            'ip' => $this->ip(),
-            'level' => $level,
-            'middleware' => $middleware,
             'user_id' => $user_id,
+            'middleware' => $middleware,
+            'level' => $level,
+            'ip' => $this->ip(),
             'url' => $this->request->fullUrl(),
-            'referrer' => substr($this->request->server('HTTP_REFERER'), 0, 191) ?: 'NULL',
-            'request' => substr($input, 0, config('firewall.log.max_request_size')),
+            'user_agent' => $this->getUserAgent(),
+            'referrer' => substr($this->request->server('HTTP_REFERER'), 0, 191) ?: null,
+            'request_data' => $this->getRequestData(),
         ]);
+    }
+
+    public function getUserAgent(): ?string
+    {
+        $parser = new Parser();
+
+        return $parser->getUserAgent();
+    }
+
+    public function getRequestData(): ?array
+    {
+        $requestData = $this->request->input();
+        $requestDataJson = json_encode($requestData);
+
+        $maxSize = config('security.database.log.max_request_data_size', 2048);
+        $size = mb_strlen($requestDataJson, '8bit');
+
+        if ($size > $maxSize) {
+            $requestData = [
+                'message' => 'Request data has been deleted.',
+                'size' => $size,
+            ];
+        }
+
+        return $requestData;
     }
 
     public function ip()

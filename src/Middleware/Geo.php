@@ -33,7 +33,7 @@ class Geo extends Middleware
     protected function isEmpty($places)
     {
         foreach ($places as $place) {
-            if (! $list = config('firewall.middleware.' . $this->middleware . '.' . $place)) {
+            if (! $list = config('security.middleware.' . $this->middleware . '.' . $place)) {
                 continue;
             }
 
@@ -49,7 +49,7 @@ class Geo extends Middleware
 
     protected function isFiltered($location, $place)
     {
-        if (! $list = config('firewall.middleware.' . $this->middleware . '.' . $place)) {
+        if (! $list = config('security.middleware.' . $this->middleware . '.' . $place)) {
             return false;
         }
 
@@ -71,7 +71,7 @@ class Geo extends Middleware
         $location = new \stdClass();
         $location->continent = $location->country = $location->region = $location->city = null;
 
-        $service = config('firewall.middleware.' . $this->middleware . '.service');
+        $service = config('security.middleware.' . $this->middleware . '.service');
 
         return $this->$service($location);
     }

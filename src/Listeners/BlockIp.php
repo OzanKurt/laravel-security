@@ -19,19 +19,19 @@ class BlockIp
     public function handle(AttackDetected $event)
     {
         $end = Carbon::now(config('app.timezone'));
-        $start = $end->copy()->subSeconds(config('firewall.middleware.' . $event->log->middleware . '.auto_block.frequency'));
+        $start = $end->copy()->subSeconds(config('security.middleware.' . $event->log->middleware . '.auto_block.frequency'));
 
-        $log = config('firewall.models.log', Log::class);
+        $log = config('security.database.log.model', Log::class);
         $count = $log::where('ip', $event->log->ip)
                     ->where('middleware', $event->log->middleware)
                     ->whereBetween('created_at', [$start, $end])
                     ->count();
 
-        if ($count != config('firewall.middleware.' . $event->log->middleware . '.auto_block.attempts')) {
+        if ($count < config('security.middleware.' . $event->log->middleware . '.auto_block.attempts')) {
             return;
         }
 
-        $ip = config('firewall.models.ip', Ip::class);
+        $ip = config('security.database.ip.model', Ip::class);
         $ip::create([
             'ip' => $event->log->ip,
             'log_id' => $event->log->id,

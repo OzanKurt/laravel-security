@@ -10,12 +10,12 @@ class Notifiable
 
     public function routeNotificationForMail()
     {
-        return config('firewall.notifications.mail.to');
+        return config('security.notifications.mail.to');
     }
 
     public function routeNotificationForSlack()
     {
-        return config('firewall.notifications.slack.to');
+        return config('security.notifications.slack.to');
     }
 
     public function getKey()

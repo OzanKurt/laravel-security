@@ -16,7 +16,7 @@ class Bot extends Middleware
             return false;
         }
 
-        if (! $crawlers = config('firewall.middleware.' . $this->middleware . '.crawlers')) {
+        if (! $crawlers = config('security.middleware.' . $this->middleware . '.crawlers')) {
             return false;
         }
 

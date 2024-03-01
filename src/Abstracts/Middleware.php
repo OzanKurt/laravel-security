@@ -26,7 +26,7 @@ abstract class Middleware
         }
 
         if ($this->check($this->getPatterns())) {
-            return $this->respond(config('firewall.responses.block'));
+            return $this->respond(config('security.responses.block'));
         }
 
         return $next($request);
@@ -64,7 +64,7 @@ abstract class Middleware
 
     public function getPatterns()
     {
-        return config('firewall.middleware.' . $this->middleware . '.patterns', []);
+        return config('security.middleware.' . $this->middleware . '.patterns', []);
     }
 
     public function check($patterns)
