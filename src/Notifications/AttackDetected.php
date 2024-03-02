@@ -7,6 +7,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
+use NotificationChannels\Discord\DiscordChannel;
+use NotificationChannels\Discord\DiscordMessage;
 
 class AttackDetected extends Notification implements ShouldQueue
 {
@@ -52,6 +54,8 @@ class AttackDetected extends Notification implements ShouldQueue
 
             $channels[] = $channel;
         }
+
+        $channels[] = DiscordChannel::class;
 
         return $channels;
     }
@@ -118,5 +122,23 @@ class AttackDetected extends Notification implements ShouldQueue
                     'URL' => $this->log->url,
                 ]);
             });
+    }
+
+    public function toDiscord($notifiable)
+    {
+        $message = trans('security::notifications.slack.message', [
+            'domain' => request()->getHttpHost(),
+        ]);
+
+        $string = 'string';
+        $array = [];
+
+        dd(123);
+
+        return DiscordMessage::create($message)
+            ->body($string)
+            ->embed($array)
+            ->components($array)
+        ;
     }
 }

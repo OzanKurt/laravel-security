@@ -25,7 +25,8 @@
         "php": "^8.0",
         "laravel/framework": "^9.0|^10.0|^11.0",
         "guzzlehttp/guzzle": "^7.4",
-        "jenssegers/agent": "2.6.*"
+        "jenssegers/agent": "2.6.*",
+        "laravel-notification-channels/discord": "^1.5"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5|^10.0",
@@ -47,6 +48,9 @@
                 "OzanKurt\\Security\\SecurityServiceProvider"
             ]
         }
+    },
+    "suggest": {
+        "laravel-notification-channels/discord": "Allows the usage of Discord Notification Channel"
     },
     "scripts": {
         "test": "vendor/bin/phpunit"

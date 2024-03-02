@@ -2,7 +2,8 @@
 
 namespace OzanKurt\Security;
 
-use OzanKurt\Security\Commands\UnblockIp;
+use OzanKurt\Security\Commands\UnblockIpsCommand;
+use OzanKurt\Security\Commands\SendReportMailCommand;
 use OzanKurt\Security\Events\AttackDetected;
 use OzanKurt\Security\Listeners\BlockIp;
 use OzanKurt\Security\Listeners\CheckLogin;
@@ -109,11 +110,12 @@ class SecurityServiceProvider extends ServiceProvider
 
     public function registerCommands()
     {
-        $this->commands(UnblockIp::class);
+        $this->commands(UnblockIpsCommand::class);
+        $this->commands(SendReportMailCommand::class);
 
         if (config('security.cron.enabled')) {
             $this->app->booted(function () {
-                app(Schedule::class)->command('security:unblockip')->cron(config('security.cron.expression'));
+                app(Schedule::class)->command('security:unblock-ips')->cron(config('security.cron.expression'));
             });
         }
     }

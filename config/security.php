@@ -4,7 +4,7 @@ return [
 
     'enabled' => env('FIREWALL_ENABLED', true),
 
-    'whitelist' => explode(',', env('FIREWALL_WHITELIST', '')),
+    'whitelist' => explode(',', env('FIREWALL_WHITELIST', '127.0.0.0/24')),
 
     'database' => [
         'connection' => env('FIREWALL_DB_CONNECTION', env('DB_CONNECTION', 'mysql')),
@@ -61,6 +61,15 @@ return [
             'to' => env('FIREWALL_SLACK_TO'), // webhook url
             'channel' => env('FIREWALL_SLACK_CHANNEL', null), // set null to use the default channel of webhook
             'queue' => env('FIREWALL_SLACK_QUEUE', 'default'),
+        ],
+
+        'discord' => [
+            'enabled' => env('FIREWALL_DISCORD_ENABLED', false),
+            'emoji' => env('FIREWALL_DISCORD_EMOJI', ':fire:'),
+            'from' => env('FIREWALL_DISCORD_FROM', 'Laravel Security'),
+            'to' => env('FIREWALL_DISCORD_TO'), // webhook url
+            'channel' => env('FIREWALL_DISCORD_CHANNEL', null), // set null to use the default channel of webhook
+            'queue' => env('FIREWALL_DISCORD_QUEUE', 'default'),
         ],
 
     ],

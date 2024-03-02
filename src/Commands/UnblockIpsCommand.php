@@ -6,40 +6,18 @@ use OzanKurt\Security\Models\Ip;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class UnblockIp extends Command
+class UnblockIpsCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'security:unblockip';
+    protected $signature = 'security:unblock-ips';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Unblock ips based on their block period';
 
-    /**
-     * Create a new command instance.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
     public function handle()
     {
         $now = Carbon::now(config('app.timezone'));
 
-        $ip = config('security.database.ip.model', Ip::class);
+        $ip = config('security.database.ip.model');
+
         $ip::with('log')->blocked()->each(function ($ip) use ($now) {
             if (empty($ip->log)) {
                 return;

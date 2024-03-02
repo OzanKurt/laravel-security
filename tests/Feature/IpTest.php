@@ -3,7 +3,7 @@
 namespace OzanKurt\Security\Tests\Feature;
 
 use OzanKurt\Security\Middleware\Ip;
-use OzanKurt\Security\Models\Ip as Model;
+use OzanKurt\Security\Models\Ip as IpModel;
 use OzanKurt\Security\Tests\TestCase;
 
 class IpTest extends TestCase
@@ -15,7 +15,7 @@ class IpTest extends TestCase
 
     public function testShouldBlock()
     {
-        Model::create(['ip' => '127.0.0.1', 'is_blocked' => 1]);
+        IpModel::create(['ip' => '127.0.0.1', 'is_blocked' => 1]);
 
         $response = (new Ip())->handle($this->app->request, $this->getNextClosure());
 

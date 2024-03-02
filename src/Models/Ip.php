@@ -23,7 +23,7 @@ class Ip extends Model
         }
 
         if (! isset($this->table)) {
-            $this->setTable(config('security.database.tables.firewall_logs'));
+            $this->setTable(config('security.database.ip.table'));
         }
 
         parent::__construct($attributes);
