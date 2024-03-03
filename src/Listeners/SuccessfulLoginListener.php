@@ -4,8 +4,9 @@ namespace OzanKurt\Security\Listeners;
 
 use OzanKurt\Security\Traits\Helper;
 use Illuminate\Auth\Events\Failed as Event;
+use OzanKurt\Security\Notifications\SuccessfulLoginNotification;
 
-class CheckSuccessfulLogin
+class SuccessfulLoginListener
 {
     use Helper;
 
@@ -22,7 +23,7 @@ class CheckSuccessfulLogin
         $this->request['password'] = '[redacted]';
 
         try {
-            (new Notifiable)->notify(new SuccessfulLogin($event));
+            (new Notifiable)->notify(new SuccessfulLoginNotification($event));
         } catch (Throwable $e) {
             report($e);
         }

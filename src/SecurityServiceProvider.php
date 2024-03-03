@@ -2,6 +2,7 @@
 
 namespace OzanKurt\Security;
 
+use Illuminate\Support\Facades\View;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use OzanKurt\Security\Listeners\BlockIp;
@@ -11,7 +12,7 @@ use OzanKurt\Security\Listeners\NotifyUsers;
 use Illuminate\Auth\Events\Failed as FailedLogin;
 use OzanKurt\Security\Commands\UnblockIpsCommand;
 use OzanKurt\Security\Listeners\CheckFailedLogin;
-use OzanKurt\Security\Commands\SendReportMailCommand;
+use OzanKurt\Security\Commands\SendSecurityReportNotificationCommand;
 use OzanKurt\Security\Listeners\CheckSuccessfulLogin;
 use Illuminate\Auth\Events\Authenticated as SuccessfulLogin;
 use Illuminate\Notifications\ChannelManager;
@@ -58,6 +59,7 @@ class SecurityServiceProvider extends ServiceProvider
         $this->registerListeners();
         $this->registerTranslations($langPath);
         $this->registerCommands();
+        $this->registerViews();
     }
 
     /**
@@ -108,20 +110,23 @@ class SecurityServiceProvider extends ServiceProvider
     public function registerTranslations($langPath)
     {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'security');
-
-        $this->loadTranslationsFrom($langPath, 'security');
     }
 
     public function registerCommands()
     {
         $this->commands(UnblockIpsCommand::class);
-        $this->commands(SendReportMailCommand::class);
+        $this->commands(SendSecurityReportNotificationCommand::class);
 
         if (config('security.cron.enabled')) {
             $this->app->booted(function () {
                 app(Schedule::class)->command('security:unblock-ips')->cron(config('security.cron.expression'));
             });
         }
+    }
+
+    public function registerViews()
+    {
+        View::addNamespace('security', __DIR__ . '/../resources/views');
     }
 
     public function getMigrationPathFor(string $modelKey): string

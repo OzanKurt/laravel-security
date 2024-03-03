@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Security\Events;
 
-class AttackDetected
+class AttackDetectedEvent
 {
     public $log;
 

@@ -2,12 +2,12 @@
 
 namespace OzanKurt\Security\Listeners;
 
-use OzanKurt\Security\Events\AttackDetected as Event;
-use OzanKurt\Security\Notifications\AttackDetected;
+use OzanKurt\Security\Events\AttackDetectedEvent;
+use OzanKurt\Security\Notifications\AttackDetectedNotification;
 use OzanKurt\Security\Notifications\Notifiable;
 use Throwable;
 
-class NotifyUsers
+class AttackDetectedListener
 {
     /**
      * Handle the event.
@@ -16,10 +16,10 @@ class NotifyUsers
      *
      * @return void
      */
-    public function handle(Event $event)
+    public function handle(AttackDetectedEvent $event)
     {
         try {
-            (new Notifiable)->notify(new AttackDetected($event->log));
+            (new Notifiable)->notify(new AttackDetectedNotification($event->log));
         } catch (Throwable $e) {
             report($e);
         }

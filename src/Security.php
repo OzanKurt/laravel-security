@@ -3,56 +3,19 @@
 namespace OzanKurt\Security;
 
 use Illuminate\Support\Facades\File;
+use OzanKurt\Security\Helpers\RecentlyModifiedFiles;
 use Symfony\Component\Finder\Finder;
 
 class Security
 {
-    public function checkProjectFiles()
+    public function getRecentlyModifiedFiles(int $time_range = 604800): array
     {
-        $paths = [
-//            'app',
-            'bootstrap',
-            'config',
-//            'database',
-//            'public',
-//            'resources',
-//            'routes',
-        ];
+        $rmf = new RecentlyModifiedFiles(base_path(), 20000, 250000, $time_range);
 
-        $files = [];
+        $rmf->run();
 
+        $mostRecentFiles = $rmf->mostRecentFiles(15);
 
-        foreach ($paths as $path) {
-            $directoryPath = base_path($path);
-
-            $files = $this->checkPath($directoryPath, $files);
-        }
-
-        dd($files);
-    }
-
-    public function checkPath(string $path, array $files = [])
-    {
-        try {
-            $pathFiles = File::files($path);
-            $directories = File::directories($path);
-
-            foreach ($pathFiles as $file) {
-                $files[] = [
-                    'path' => $file->getPathname(),
-                    'last_modified' => $file->getMTime(),
-                ];
-            }
-
-            foreach ($directories as $directoryPath) {
-                $directoryFiles = $this->checkPath($directoryPath, $files);
-
-                $files = array_merge($files, $directoryFiles);
-            }
-        } catch (\Exception $e) {
-            dump($e->getMessage());
-        }
-
-        return $files;
+        return $mostRecentFiles;
     }
 }

@@ -2,12 +2,12 @@
 
 namespace OzanKurt\Security\Listeners;
 
-use OzanKurt\Security\Events\AttackDetected;
+use OzanKurt\Security\Events\AttackDetectedEvent;
 use OzanKurt\Security\Models\Ip;
 use OzanKurt\Security\Models\Log;
 use Carbon\Carbon;
 
-class BlockIp
+class BlockIpListener
 {
     /**
      * Handle the event.
@@ -16,7 +16,7 @@ class BlockIp
      *
      * @return void
      */
-    public function handle(AttackDetected $event)
+    public function handle(AttackDetectedEvent $event)
     {
         $end = Carbon::now(config('app.timezone'));
         $start = $end->copy()->subSeconds(config('security.middleware.' . $event->log->middleware . '.auto_block.frequency'));

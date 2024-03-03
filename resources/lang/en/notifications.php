@@ -32,4 +32,14 @@ return [
         ],
     ],
 
+    'security_report' => [
+        'last_modified_files' => 'Last modified files',
+        'last_modification' => 'Last Modification',
+        'file' => 'File',
+        'mail' => [
+            'subject' => 'Security Report for :domain',
+            'message' => 'This email was sent by your :domain site and contains a security report for the period :start - :end.',
+        ],
+    ],
+
 ];

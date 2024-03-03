@@ -9,7 +9,7 @@ use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
 
-class SuccessfulLogin extends Notification implements ShouldQueue
+class SuccessfulLoginNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

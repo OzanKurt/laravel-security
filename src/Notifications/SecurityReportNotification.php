@@ -7,34 +7,30 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
+use Illuminate\Support\Carbon;
 use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
 use OzanKurt\Security\Notifications\Channels\Discord\DiscordMessage;
 
-class AttackDetected extends Notification implements ShouldQueue
+class SecurityReportNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     /**
-     * The log model.
-     *
-     * @var object
-     */
-    public $log;
-
-    /**
      * The notification config.
      */
-    public array $notifications;
+    public array $notifications = [];
 
     /**
      * Create a notification instance.
      *
      * @param  object  $log
      */
-    public function __construct($log)
+    public function __construct(
+        public $recentlyModifiedFiles = [],
+        public Carbon $start,
+        public Carbon $end,
+    )
     {
-        $this->log = $log;
-        $this->notifications = config('security.middleware.' . $log->middleware . '.notifications', config('security.notifications'));
     }
 
     /**
@@ -47,13 +43,14 @@ class AttackDetected extends Notification implements ShouldQueue
     {
         $channels = [];
 
-        foreach ($this->notifications as $channel => $settings) {
-            if (empty($settings['enabled'])) {
-                continue;
-            }
-
-            $channels[] = $this->getChannelClass($channel);
-        }
+//        foreach ($this->notifications as $channel => $settings) {
+//            if (empty($settings['enabled'])) {
+//                continue;
+//            }
+//
+//            $channels[] = $this->getChannelClass($channel);
+//        }
+        $channels = ['mail'];
 
         return $channels;
     }
@@ -77,23 +74,21 @@ class AttackDetected extends Notification implements ShouldQueue
      */
     public function toMail($notifiable)
     {
-        $domain = request()->getHttpHost();
-
-        $subject = trans('security::notifications.mail.subject', [
-            'domain' => $domain,
-        ]);
-
-        $message = trans('security::notifications.mail.message', [
-            'domain' => $domain,
-            'middleware' => ucfirst($this->log->middleware),
-            'ip' => $this->log->ip,
-            'url' => $this->log->url,
+        $domain = request()->getSchemeAndHttpHost();
+        $message = trans('security::notifications.security_report.mail.message', [
+            'domain' => "**[$domain]($domain)**",
+            'start' => "**{$this->start->format('d/m/Y')}**",
+            'end' => "**{$this->end->format('d/m/Y')}**",
         ]);
 
         return (new MailMessage)
-            ->from($this->notifications['mail']['from'], $this->notifications['mail']['name'])
-            ->subject($subject)
-            ->line($message);
+            ->theme('security::notifications.themes.default')
+            ->markdown('security::notifications.security-report-notification', [
+                'recentlyModifiedFiles' => $this->recentlyModifiedFiles,
+            ])
+//            ->from($this->notifications['mail']['from'], $this->notifications['mail']['name'])
+            ->subject($subject ?? '$subject')
+            ->line($message ?? '$message');
     }
 
     /**
