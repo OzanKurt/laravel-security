@@ -11,6 +11,10 @@ return [
         'slack' => [
             'message' => 'A possible attack on :domain has been detected.',
         ],
+
+        'discord' => [
+            'message' => 'A possible attack on :domain has been detected.',
+        ],
     ],
 
     'successful_login' => [
@@ -20,6 +24,10 @@ return [
         ],
 
         'slack' => [
+            'message' => 'New login on :domain',
+        ],
+
+        'discord' => [
             'message' => 'New login on :domain',
         ],
     ],

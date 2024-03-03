@@ -6,7 +6,7 @@ use OzanKurt\Security\Events\AttackDetected;
 use OzanKurt\Security\Traits\Helper;
 use Illuminate\Auth\Events\Failed as Event;
 
-class CheckLogin
+class CheckFailedLogin
 {
     use Helper;
 

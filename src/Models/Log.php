@@ -23,7 +23,7 @@ class Log extends Model
         }
 
         if (! isset($this->table)) {
-            $this->setTable(config('security.database.log.table'));
+            $this->setTable(config('security.database.table_prefix').config('security.database.log.table'));
         }
 
         parent::__construct($attributes);

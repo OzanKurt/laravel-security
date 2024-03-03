@@ -65,10 +65,7 @@ return [
 
         'discord' => [
             'enabled' => env('FIREWALL_DISCORD_ENABLED', false),
-            'emoji' => env('FIREWALL_DISCORD_EMOJI', ':fire:'),
-            'from' => env('FIREWALL_DISCORD_FROM', 'Laravel Security'),
-            'to' => env('FIREWALL_DISCORD_TO'), // webhook url
-            'channel' => env('FIREWALL_DISCORD_CHANNEL', null), // set null to use the default channel of webhook
+            'webhook_url' => env('FIREWALL_DISCORD_WEBHOOK_URL'),
             'queue' => env('FIREWALL_DISCORD_QUEUE', 'default'),
         ],
 

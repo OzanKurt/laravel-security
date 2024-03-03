@@ -49,9 +49,6 @@
             ]
         }
     },
-    "suggest": {
-        "laravel-notification-channels/discord": "Allows the usage of Discord Notification Channel"
-    },
     "scripts": {
         "test": "vendor/bin/phpunit"
     },

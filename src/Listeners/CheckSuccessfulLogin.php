@@ -5,7 +5,7 @@ namespace OzanKurt\Security\Listeners;
 use OzanKurt\Security\Traits\Helper;
 use Illuminate\Auth\Events\Failed as Event;
 
-class SuccessfulLogin
+class CheckSuccessfulLogin
 {
     use Helper;
 

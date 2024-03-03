@@ -20,7 +20,7 @@ class Notifiable
 
     public function routeNotificationForDiscord()
     {
-        return config('security.notifications.discord.channel');
+        return config('security.notifications.discord.webhook_url');
     }
 
     public function getKey()

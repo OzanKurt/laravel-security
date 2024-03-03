@@ -2,17 +2,21 @@
 
 namespace OzanKurt\Security;
 
-use OzanKurt\Security\Commands\UnblockIpsCommand;
-use OzanKurt\Security\Commands\SendReportMailCommand;
-use OzanKurt\Security\Events\AttackDetected;
-use OzanKurt\Security\Listeners\BlockIp;
-use OzanKurt\Security\Listeners\CheckLogin;
-use OzanKurt\Security\Listeners\NotifyUsers;
-use Illuminate\Auth\Events\Authenticated as LoginAuthenticated;
-use Illuminate\Auth\Events\Failed as LoginFailed;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
+use OzanKurt\Security\Listeners\BlockIp;
+use Illuminate\Console\Scheduling\Schedule;
+use OzanKurt\Security\Events\AttackDetected;
+use OzanKurt\Security\Listeners\NotifyUsers;
+use Illuminate\Auth\Events\Failed as FailedLogin;
+use OzanKurt\Security\Commands\UnblockIpsCommand;
+use OzanKurt\Security\Listeners\CheckFailedLogin;
+use OzanKurt\Security\Commands\SendReportMailCommand;
+use OzanKurt\Security\Listeners\CheckSuccessfulLogin;
+use Illuminate\Auth\Events\Authenticated as SuccessfulLogin;
+use Illuminate\Notifications\ChannelManager;
+use Illuminate\Support\Facades\Notification;
+use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
 
 class SecurityServiceProvider extends ServiceProvider
 {
@@ -92,8 +96,8 @@ class SecurityServiceProvider extends ServiceProvider
     {
         $this->app['events']->listen(AttackDetected::class, BlockIp::class);
         $this->app['events']->listen(AttackDetected::class, NotifyUsers::class);
-        $this->app['events']->listen(LoginAuthenticated::class, CheckLogin::class);
-        $this->app['events']->listen(LoginFailed::class, CheckLogin::class);
+        $this->app['events']->listen(LoginAuthenticated::class, CheckSuccessfulLogin::class);
+        $this->app['events']->listen(LoginFailed::class, CheckFailedLogin::class);
     }
 
     /**
@@ -134,5 +138,14 @@ class SecurityServiceProvider extends ServiceProvider
         $tableName = config("security.database.{$modelKey}.table", $modelKey);
 
         return $tablePrefix.$tableName;
+    }
+
+    protected function registerDiscordChannel()
+    {
+        Notification::resolved(function (ChannelManager $service) {
+            $service->extend(DiscordChannel::class, function ($app) {
+                return new DiscordChannel();
+            });
+        });
     }
 }

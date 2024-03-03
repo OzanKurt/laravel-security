@@ -3,12 +3,12 @@
 namespace OzanKurt\Security\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
-use NotificationChannels\Discord\DiscordChannel;
-use NotificationChannels\Discord\DiscordMessage;
+use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
+use OzanKurt\Security\Notifications\Channels\Discord\DiscordMessage;
 
 class AttackDetected extends Notification implements ShouldQueue
 {
@@ -52,10 +52,8 @@ class AttackDetected extends Notification implements ShouldQueue
                 continue;
             }
 
-            $channels[] = $channel;
+            $channels[] = $this->getChannelClass($channel);
         }
-
-        $channels[] = DiscordChannel::class;
 
         return $channels;
     }
@@ -64,10 +62,11 @@ class AttackDetected extends Notification implements ShouldQueue
      * Get the notification's queues.
      * @return array|string
      */
-
     public function viaQueues(): array
     {
-        return array_map(fn ($channel) => $channel['queue'] ?? 'default', $this->notifications);
+        return array_map(function ($channel) {
+            return $channel['queue'] ?? 'default';
+        }, $this->notifications);
     }
 
     /**
@@ -124,21 +123,40 @@ class AttackDetected extends Notification implements ShouldQueue
             });
     }
 
-    public function toDiscord($notifiable)
+    public function toDiscord()
     {
-        $message = trans('security::notifications.slack.message', [
+        $body = trans('security::notifications.discord.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
-        $string = 'string';
-        $array = [];
+        return (new DiscordMessage)
+            ->from('test', 'https://ozankurt.com/images/min/ozan_kurt.png')
+            ->url('https://ozankurt.com/images/min/ozan_kurt.png')
+            ->title('title')
+            ->description('description')
+            ->fields([
+                'label1' => 'test',
+                'label2' => 'test',
+                'label3' => 'test',
+            ], true)
+            ->fields([
+                'label4' => 'test',
+                'label5' => 'test',
+            ], true)
+            ->fields([
+                'label6' => 'test',
+            ], false)
+            ->timestamp(now()->addWeek())
+            ->footer('footer')
+            ->success()
+            ;
+    }
 
-        dd(123);
-
-        return DiscordMessage::create($message)
-            ->body($string)
-            ->embed($array)
-            ->components($array)
-        ;
+    public function getChannelClass(string $channel): string
+    {
+        return match ($channel) {
+            'discord' => DiscordChannel::class,
+            default => $channel,
+        };
     }
 }
