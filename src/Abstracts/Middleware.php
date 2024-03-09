@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Security\Abstracts;
 
-use OzanKurt\Security\Events\AttackDetected;
+use OzanKurt\Security\Events\AttackDetectedEvent;
 use OzanKurt\Security\Traits\Helper;
 use Closure;
 use Illuminate\Support\Facades\Redirect;
@@ -78,7 +78,7 @@ abstract class Middleware
 
             $log = $this->log();
 
-            event(new AttackDetected($log));
+            event(new AttackDetectedEvent($log));
 
             break;
         }

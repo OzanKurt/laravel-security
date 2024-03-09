@@ -34,7 +34,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     public function __construct($log)
     {
         $this->log = $log;
-        $this->notifications = config('security.middleware.' . $log->middleware . '.notifications', config('security.notifications'));
+        $this->notifications = config('security.notifications');
     }
 
     /**
@@ -129,27 +129,27 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
             'domain' => request()->getHttpHost(),
         ]);
 
-        return (new DiscordMessage)
-            ->from('test', 'https://ozankurt.com/images/min/ozan_kurt.png')
-            ->url('https://ozankurt.com/images/min/ozan_kurt.png')
-            ->title('title')
-            ->description('description')
-            ->fields([
-                'label1' => 'test',
-                'label2' => 'test',
-                'label3' => 'test',
-            ], true)
-            ->fields([
-                'label4' => 'test',
-                'label5' => 'test',
-            ], true)
-            ->fields([
-                'label6' => 'test',
-            ], false)
-            ->timestamp(now()->addWeek())
-            ->footer('footer')
-            ->success()
-            ;
+        try {
+
+            return (new DiscordMessage)
+                ->from(config('security.notifications.discord.from'), config('security.notifications.discord.from_img'))
+                ->url(config('security.notifications.discord.route'))
+                ->title(config('security.notifications.discord.title'))
+                ->description(config('security.notifications.discord.description'))
+                ->fields([
+                    'IP' => $this->log->ip,
+                    'Type' => ucfirst($this->log->middleware),
+                    'User ID' => $this->log->user_id === 0 ? 'Guest' : $this->log->user_id,
+                ], true)
+                ->fields([
+                    'URL' => $this->log->url,
+                ], false)
+                ->timestamp(now())
+                ->footer(config('security.notifications.discord.footer'), config('security.notifications.discord.footer_img'))
+                ->warning();
+        } catch (\Throwable $exception) {
+            dd($exception);
+        }
     }
 
     public function getChannelClass(string $channel): string

@@ -3,6 +3,7 @@
 namespace OzanKurt\Security\Middleware;
 
 use OzanKurt\Security\Abstracts\Middleware;
+use OzanKurt\Security\Events\AttackDetectedEvent;
 
 class Keyword extends Middleware
 {
@@ -18,7 +19,7 @@ class Keyword extends Middleware
 
             $log = $this->log();
 
-            event(new AttackDetected($log));
+            event(new AttackDetectedEvent($log));
 
             break;
         }

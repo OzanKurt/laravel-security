@@ -2,31 +2,28 @@
 
 namespace OzanKurt\Security;
 
-use Illuminate\Support\Facades\View;
-use Illuminate\Routing\Router;
-use Illuminate\Support\ServiceProvider;
-use OzanKurt\Security\Listeners\BlockIp;
 use Illuminate\Console\Scheduling\Schedule;
-use OzanKurt\Security\Events\AttackDetected;
-use OzanKurt\Security\Listeners\NotifyUsers;
-use Illuminate\Auth\Events\Failed as FailedLogin;
-use OzanKurt\Security\Commands\UnblockIpsCommand;
-use OzanKurt\Security\Listeners\CheckFailedLogin;
-use OzanKurt\Security\Commands\SendSecurityReportNotificationCommand;
-use OzanKurt\Security\Listeners\CheckSuccessfulLogin;
-use Illuminate\Auth\Events\Authenticated as SuccessfulLogin;
 use Illuminate\Notifications\ChannelManager;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
+use OzanKurt\Security\Commands\SendSecurityReportNotificationCommand;
+use OzanKurt\Security\Commands\UnblockIpsCommand;
+use OzanKurt\Security\Events\AttackDetectedEvent;
+use OzanKurt\Security\Listeners\AttackDetectedListener;
+use OzanKurt\Security\Listeners\BlockIpListener;
+use OzanKurt\Security\Listeners\FailedLoginListener;
+use OzanKurt\Security\Listeners\NotifyUsersListener;
+use OzanKurt\Security\Listeners\SuccessfulLoginListener;
 use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
 
 class SecurityServiceProvider extends ServiceProvider
 {
     /**
      * Register the application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/security.php', 'security');
 
@@ -35,12 +32,8 @@ class SecurityServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap the application services.
-     *
-     * @param Router $router
-     *
-     * @return void
      */
-    public function boot(Router $router)
+    public function boot(Router $router): void
     {
         $langPath = 'vendor/security';
 
@@ -62,57 +55,47 @@ class SecurityServiceProvider extends ServiceProvider
         $this->registerViews();
     }
 
-    /**
-     * Register middleware.
-     *
-     * @param Router $router
-     *
-     * @return void
-     */
-    public function registerMiddleware($router)
+    protected function registerMiddleware(Router $router): void
     {
         $router->middlewareGroup('firewall.all', config('security.all_middleware'));
-        $router->aliasMiddleware('firewall.agent', \OzanKurt\Security\Middleware\Agent::class);
-        $router->aliasMiddleware('firewall.bot', \OzanKurt\Security\Middleware\Bot::class);
-        $router->aliasMiddleware('firewall.ip', \OzanKurt\Security\Middleware\Ip::class);
-        $router->aliasMiddleware('firewall.geo', \OzanKurt\Security\Middleware\Geo::class);
-        $router->aliasMiddleware('firewall.lfi', \OzanKurt\Security\Middleware\Lfi::class);
-        $router->aliasMiddleware('firewall.php', \OzanKurt\Security\Middleware\Php::class);
-        $router->aliasMiddleware('firewall.referrer', \OzanKurt\Security\Middleware\Referrer::class);
-        $router->aliasMiddleware('firewall.rfi', \OzanKurt\Security\Middleware\Rfi::class);
-        $router->aliasMiddleware('firewall.session', \OzanKurt\Security\Middleware\Session::class);
-        $router->aliasMiddleware('firewall.sqli', \OzanKurt\Security\Middleware\Sqli::class);
-        $router->aliasMiddleware('firewall.swear', \OzanKurt\Security\Middleware\Swear::class);
-        $router->aliasMiddleware('firewall.url', \OzanKurt\Security\Middleware\Url::class);
-        $router->aliasMiddleware('firewall.whitelist', \OzanKurt\Security\Middleware\Whitelist::class);
-        $router->aliasMiddleware('firewall.xss', \OzanKurt\Security\Middleware\Xss::class);
-        $router->aliasMiddleware('firewall.keyword', \OzanKurt\Security\Middleware\Keyword::class);
+
+        $middlewares = [
+            'firewall.agent' => \OzanKurt\Security\Middleware\Agent::class,
+            'firewall.bot' => \OzanKurt\Security\Middleware\Bot::class,
+            'firewall.ip' => \OzanKurt\Security\Middleware\Ip::class,
+            'firewall.geo' => \OzanKurt\Security\Middleware\Geo::class,
+            'firewall.lfi' => \OzanKurt\Security\Middleware\Lfi::class,
+            'firewall.php' => \OzanKurt\Security\Middleware\Php::class,
+            'firewall.referrer' => \OzanKurt\Security\Middleware\Referrer::class,
+            'firewall.rfi' => \OzanKurt\Security\Middleware\Rfi::class,
+            'firewall.session' => \OzanKurt\Security\Middleware\Session::class,
+            'firewall.sqli' => \OzanKurt\Security\Middleware\Sqli::class,
+            'firewall.swear' => \OzanKurt\Security\Middleware\Swear::class,
+            'firewall.url' => \OzanKurt\Security\Middleware\Url::class,
+            'firewall.whitelist' => \OzanKurt\Security\Middleware\Whitelist::class,
+            'firewall.xss' => \OzanKurt\Security\Middleware\Xss::class,
+            'firewall.keyword' => \OzanKurt\Security\Middleware\Keyword::class,
+        ];
+
+        foreach ($middlewares as $name => $class) {
+            $router->aliasMiddleware($name, $class);
+        }
     }
 
-    /**
-     * Register listeners.
-     *
-     * @return void
-     */
-    public function registerListeners()
+    protected function registerListeners(): void
     {
-        $this->app['events']->listen(AttackDetected::class, BlockIp::class);
-        $this->app['events']->listen(AttackDetected::class, NotifyUsers::class);
-        $this->app['events']->listen(LoginAuthenticated::class, CheckSuccessfulLogin::class);
-        $this->app['events']->listen(LoginFailed::class, CheckFailedLogin::class);
+        $this->app['events']->listen(AttackDetectedEvent::class, BlockIpListener::class);
+        $this->app['events']->listen(AttackDetectedEvent::class, AttackDetectedListener::class);
+        $this->app['events']->listen(LoginAuthenticated::class, SuccessfulLoginListener::class);
+        $this->app['events']->listen(LoginFailed::class, FailedLoginListener::class);
     }
 
-    /**
-     * Register translations.
-     *
-     * @return void
-     */
-    public function registerTranslations($langPath)
+    protected function registerTranslations($langPath): void
     {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'security');
     }
 
-    public function registerCommands()
+    protected function registerCommands(): void
     {
         $this->commands(UnblockIpsCommand::class);
         $this->commands(SendSecurityReportNotificationCommand::class);
@@ -124,28 +107,28 @@ class SecurityServiceProvider extends ServiceProvider
         }
     }
 
-    public function registerViews()
+    protected function registerViews(): void
     {
         View::addNamespace('security', __DIR__ . '/../resources/views');
     }
 
-    public function getMigrationPathFor(string $modelKey): string
+    protected function getMigrationPathFor(string $modelKey): string
     {
-        $prefix = date('Y_m_d').'_000000';
+        $prefix = date('Y_m_d') . '_000000';
         $tableName = $this->getNameTable($modelKey);
 
         return database_path("migrations/{$prefix}_create_{$tableName}_table.php");
     }
 
-    public function getNameTable(string $modelKey): string
+    protected function getNameTable(string $modelKey): string
     {
-        $tablePrefix = config('security.database.table_prefix', 'sec_');
+        $tablePrefix = config('security.database.table_prefix', 'security_');
         $tableName = config("security.database.{$modelKey}.table", $modelKey);
 
-        return $tablePrefix.$tableName;
+        return $tablePrefix . $tableName;
     }
 
-    protected function registerDiscordChannel()
+    protected function registerDiscordChannel(): void
     {
         Notification::resolved(function (ChannelManager $service) {
             $service->extend(DiscordChannel::class, function ($app) {

@@ -16,7 +16,7 @@ class DiscordMessage
 
     protected string $title = '';
 
-    protected string $description = '';
+    protected ?string $description = '';
 
     protected array $fields = [];
 
@@ -24,9 +24,11 @@ class DiscordMessage
 
     protected ?string $footer = null;
 
+    protected ?string $footerUrl = null;
+
     protected ?string $color = null;
 
-    protected string $url = '';
+    protected ?string $url = '';
 
     public function from(string $username, string $avatarUrl = null): self
     {
@@ -39,7 +41,7 @@ class DiscordMessage
         return $this;
     }
 
-    public function url(string $url): self
+    public function url(?string $url): self
     {
         $this->url = $url;
 
@@ -53,7 +55,7 @@ class DiscordMessage
         return $this;
     }
 
-    public function description(string $description): self
+    public function description(?string $description): self
     {
         $this->description = $description;
 
@@ -67,9 +69,10 @@ class DiscordMessage
         return $this;
     }
 
-    public function footer(string $footer): self
+    public function footer(string $footer, ?string $footerUrl = null): self
     {
         $this->footer = $footer;
+        $this->footerUrl = $footerUrl;
 
         return $this;
     }
@@ -123,6 +126,7 @@ class DiscordMessage
                     'color' => hexdec($this->color),
                     'footer' => [
                         'text' => $this->footer ?? '',
+                        'icon_url' => $this->footerImg ?? '',
                     ],
                     'timestamp' => $this->timestamp ?? now(),
                 ],

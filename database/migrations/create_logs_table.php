@@ -20,7 +20,7 @@ return new class extends Migration
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->increments('id');
             $table->foreignId('user_id')->nullable()->index();
-            $table->string('middleware')->index();
+            $table->string('middleware')->nullable()->index();
             $table->string('level')->default(LogLevel::MEDIUM)->index();
             $table->string('ip')->index();
             $table->text('url')->nullable();
