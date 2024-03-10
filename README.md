@@ -163,6 +163,12 @@ Please review [our security policy](https://github.com/ozankurt/laravel-security
 - [ozankurt/laravel-security](https://github.com/ozankurt/laravel-security)
 - [All Contributors](../../contributors)
 
+## Todo
+
+- [ ] logs/ips datatable
+- [ ] ip by country breakdown -> datatable + chart
+- [ ] type of attack breakdown -> datatable + chart
+
 ## License
 
 The MIT License (MIT). Please see [LICENSE](LICENSE.md) for more information.

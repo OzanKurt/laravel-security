@@ -79,11 +79,11 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     {
         $domain = request()->getHttpHost();
 
-        $subject = trans('security::notifications.mail.subject', [
+        $subject = trans('security::notifications.attack_detected.mail.subject', [
             'domain' => $domain,
         ]);
 
-        $message = trans('security::notifications.mail.message', [
+        $message = trans('security::notifications.attack_detected.mail.message', [
             'domain' => $domain,
             'middleware' => ucfirst($this->log->middleware),
             'ip' => $this->log->ip,
@@ -104,7 +104,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
      */
     public function toSlack($notifiable)
     {
-        $message = trans('security::notifications.slack.message', [
+        $message = trans('security::notifications.attack_detected.slack.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
@@ -125,24 +125,26 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
 
     public function toDiscord()
     {
-        $body = trans('security::notifications.discord.message', [
+        $body = trans('security::notifications.attack_detected.discord.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
         try {
+            $url = $this->log->url;
+            $url = preg_replace('/^https?:\/\/[^\/]+/', '', $url);
 
             return (new DiscordMessage)
                 ->from(config('security.notifications.discord.from'), config('security.notifications.discord.from_img'))
                 ->url(config('security.notifications.discord.route'))
                 ->title(config('security.notifications.discord.title'))
-                ->description(config('security.notifications.discord.description'))
+                ->description($body)
                 ->fields([
                     'IP' => $this->log->ip,
                     'Type' => ucfirst($this->log->middleware),
                     'User ID' => $this->log->user_id === 0 ? 'Guest' : $this->log->user_id,
                 ], true)
                 ->fields([
-                    'URL' => $this->log->url,
+                    'URL' => $url,
                 ], false)
                 ->timestamp(now())
                 ->footer(config('security.notifications.discord.footer'), config('security.notifications.discord.footer_img'))

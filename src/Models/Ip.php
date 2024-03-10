@@ -27,9 +27,9 @@ class Ip extends Model
         }
 
         // add a scope to the model
-        $this->addGlobalScope('test', function ($builder) {
-            $builder->where('id', 0);
-        });
+//        $this->addGlobalScope('test', function ($builder) {
+//            $builder->where('id', 0);
+//        });
 
         parent::__construct($attributes);
     }

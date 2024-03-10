@@ -4,6 +4,16 @@ return [
 
     'enabled' => env('FIREWALL_ENABLED', true),
 
+    'dashboard' => [
+        'enabled' => env('FIREWALL_DASHBOARD_ENABLED', true),
+        'route_prefix' => env('FIREWALL_DASHBOARD_ROUTE_PREFIX', 'security'),
+        'route_name' => env('FIREWALL_DASHBOARD_ROUTE_NAME', 'security.'),
+        'middleware' => [
+            'auth',
+            OzanKurt\Security\Http\Middleware\SecurityDashboardMiddleware::class,
+        ],
+    ],
+
     'whitelist' => explode(',', env('FIREWALL_WHITELIST', '127.0.0.0/24')),
 
     'database' => [
@@ -429,6 +439,16 @@ return [
 
         'xss' => [
             'enabled' => env('FIREWALL_MIDDLEWARE_XSS_ENABLED', env('FIREWALL_ENABLED', true)),
+
+            'mode' => 'block', // 'block', 'clean'
+
+            'allow_blade_echoes' => false,
+
+            'blade_echo_tags' => [
+                ['{!!', '!!}'],
+                ['{{', '}}'],
+                ['{{{', '}}}'],
+            ],
 
             'methods' => ['post', 'put', 'patch'],
 

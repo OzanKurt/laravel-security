@@ -2,19 +2,24 @@
 
 namespace OzanKurt\Security;
 
+use OzanKurt\Security\Http\Controllers\IpsController;
+use OzanKurt\Security\Http\Controllers\SecurityController;
+use OzanKurt\Security\Http\Controllers\LogsController;
+use voku\helper\AntiXSS;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Events\Login as LoginAuthenticated;
+use Illuminate\Auth\Events\Failed as LoginFailed;
 use OzanKurt\Security\Commands\SendSecurityReportNotificationCommand;
 use OzanKurt\Security\Commands\UnblockIpsCommand;
 use OzanKurt\Security\Events\AttackDetectedEvent;
 use OzanKurt\Security\Listeners\AttackDetectedListener;
 use OzanKurt\Security\Listeners\BlockIpListener;
 use OzanKurt\Security\Listeners\FailedLoginListener;
-use OzanKurt\Security\Listeners\NotifyUsersListener;
 use OzanKurt\Security\Listeners\SuccessfulLoginListener;
 use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
 
@@ -28,6 +33,14 @@ class SecurityServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/security.php', 'security');
 
         $this->app->register(\Jenssegers\Agent\AgentServiceProvider::class);
+
+        $this->app->singleton(Security::class, function () {
+            $antiXss = new AntiXSS();
+
+            return new Security($antiXss);
+        });
+
+        $this->app->alias(Security::class, 'security');
     }
 
     /**
@@ -35,24 +48,36 @@ class SecurityServiceProvider extends ServiceProvider
      */
     public function boot(Router $router): void
     {
-        $langPath = 'vendor/security';
-
-        $langPath = (function_exists('lang_path'))
-            ? lang_path($langPath)
-            : resource_path('lang/' . $langPath);
-
-        $this->publishes([
-            __DIR__ . '/../config/security.php' => config_path('security.php'),
-            __DIR__ . '/../resources/lang' => $langPath,
-            __DIR__ . '/../database/migrations/create_ips_table.php' => $this->getMigrationPathFor('ip'),
-            __DIR__ . '/../database/migrations/create_logs_table.php' => $this->getMigrationPathFor('log'),
-        ], 'security');
+        $this->publishAssets();
 
         $this->registerMiddleware($router);
         $this->registerListeners();
-        $this->registerTranslations($langPath);
+        $this->registerTranslations();
         $this->registerCommands();
         $this->registerViews();
+        $this->registerRoutes($router);
+    }
+
+    protected function registerRoutes(Router $router): void
+    {
+        $router->group([
+            'namespace' => 'OzanKurt\Security\Http\Controllers',
+            'prefix' => config('security.dashboard.route_prefix', 'security'),
+            'middleware' => config('security.dashboard.route_middleware', []),
+        ], function ($router) {
+            $name = config('security.dashboard.route_name', 'security.');
+            $router->get('', [SecurityController::class, 'index'])->name($name.'dashboard.index');
+            $router->get('/logs', [LogsController::class, 'index'])->name($name.'logs.index');
+            $router->get('/ips', [IpsController::class, 'index'])->name($name.'ips.index');
+
+            $router->get('/whitelist', [SecurityController::class, 'whitelist'])->name($name.'whitelist');
+            $router->post('/whitelist', [SecurityController::class, 'whitelistStore'])->name($name.'whitelist.store');
+            $router->delete('/whitelist/{id}', [SecurityController::class, 'whitelistDestroy'])->name($name.'whitelist.destroy');
+
+            $router->get('/blacklist', [SecurityController::class, 'blacklist'])->name($name.'blacklist');
+            $router->post('/blacklist', [SecurityController::class, 'blacklistStore'])->name($name.'blacklist.store');
+            $router->delete('/blacklist/{id}', [SecurityController::class, 'blacklistDestroy'])->name($name.'blacklist.destroy');
+        });
     }
 
     protected function registerMiddleware(Router $router): void
@@ -90,7 +115,7 @@ class SecurityServiceProvider extends ServiceProvider
         $this->app['events']->listen(LoginFailed::class, FailedLoginListener::class);
     }
 
-    protected function registerTranslations($langPath): void
+    protected function registerTranslations(): void
     {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'security');
     }
@@ -126,6 +151,35 @@ class SecurityServiceProvider extends ServiceProvider
         $tableName = config("security.database.{$modelKey}.table", $modelKey);
 
         return $tablePrefix . $tableName;
+    }
+
+    public function publishAssets(): void
+    {
+        // config
+        $this->publishes([
+            __DIR__ . '/../config/security.php' => config_path('security.php'),
+        ], 'security-config');
+
+        // lang
+        $langPath = 'vendor/security';
+        $langPath = (function_exists('lang_path'))
+            ? lang_path($langPath)
+            : resource_path('lang/' . $langPath);
+
+        $this->publishes([
+            __DIR__ . '/../resources/lang' => $langPath,
+        ], 'security-lang');
+
+        // migrations
+        $this->publishes([
+            __DIR__ . '/../database/migrations/create_ips_table.php' => $this->getMigrationPathFor('ip'),
+            __DIR__ . '/../database/migrations/create_logs_table.php' => $this->getMigrationPathFor('log'),
+        ], 'security-migrations');
+
+        // public
+        $this->publishes([
+            __DIR__ . '/../public' => public_path('vendor/security'),
+        ], 'security-assets');
     }
 
     protected function registerDiscordChannel(): void

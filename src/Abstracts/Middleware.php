@@ -37,18 +37,30 @@ abstract class Middleware
         $this->prepare($request);
 
         if ($this->isDisabled()) {
+            if ($this->middleware == 'xss') {
+                dump('isDisabled');
+            }
             return true;
         }
 
         if ($this->isWhitelist()) {
+            if ($this->middleware == 'xss') {
+                dump('isWhitelist');
+            }
             return true;
         }
 
         if (! $this->isMethod()) {
+            if ($this->middleware == 'xss') {
+                dump('isMethod');
+            }
             return true;
         }
 
         if ($this->isRoute()) {
+            if ($this->middleware == 'xss') {
+                dump('isRoute');
+            }
             return true;
         }
 
