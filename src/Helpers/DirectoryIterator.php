@@ -2,51 +2,36 @@
 
 namespace OzanKurt\Security\Helpers;
 
-abstract class DirectoryIterator {
+abstract class DirectoryIterator
+{
+    abstract public function file(string $file): void;
 
-    abstract public function file($file);
+    protected string $directory;
+    protected int $directory_limit;
 
-    /**
-     * @var string
-     */
-    private $directory;
+    protected array $directories_entered = [];
+    protected array $directories_processed = [];
 
-    /**
-     * @var int
-     */
-    private $directory_limit;
+    protected $callback;
 
+    protected int $max_iterations;
+    protected int $iterations;
 
-    private $directories_entered = array();
-    private $directories_processed = array();
-
-    /**
-     * @var callback
-     */
-    private $callback;
-    /**
-     * @var int
-     */
-    private $max_iterations;
-    private $iterations;
-
-    /**
-     * @param string $directory
-     * @param int    $max_files_per_directory
-     * @param int    $max_iterations
-     */
-    public function __construct($directory = ABSPATH, $max_files_per_directory = 20000, $max_iterations = 1000000) {
+    public function __construct(string $directory = ABSPATH, int $max_files_per_directory = 20000, int $max_iterations = 1000000)
+    {
         $this->directory = $directory;
         $this->directory_limit = $max_files_per_directory;
         $this->max_iterations = $max_iterations;
     }
 
-    public function run() {
+    public function run(): void
+    {
         $this->iterations = 0;
         $this->scan($this->directory);
     }
 
-    protected function scan($dir) {
+    protected function scan(string $dir): bool
+    {
         $dir = rtrim($dir, DIRECTORY_SEPARATOR);
         $handle = opendir($dir);
         $file_count = 0;
@@ -58,9 +43,7 @@ abstract class DirectoryIterator {
             $real_path = realpath($file_path);
             if (isset($this->directories_processed[$real_path]) || isset($this->directories_entered[$real_path])) { //Already processed or being processed, possibly a recursive symlink
                 continue;
-            }
-
-            else if (is_dir($file_path)) {
+            } else if (is_dir($file_path)) {
                 $this->directories_entered[$real_path] = 1;
                 if ($this->scan($file_path) === false) {
                     closedir($handle);
@@ -68,8 +51,7 @@ abstract class DirectoryIterator {
                 }
                 $this->directories_processed[$real_path] = 1;
                 unset($this->directories_entered[$real_path]);
-            }
-            else {
+            } else {
                 if ($this->file($file_path) === false) {
                     closedir($handle);
                     return false;

@@ -2,10 +2,10 @@
 
 namespace OzanKurt\Security;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use OzanKurt\Security\Helpers\RecentlyModifiedFiles;
 use voku\helper\AntiXSS;
-use voku\helper\UTF8;
 
 class Security
 {
@@ -18,7 +18,7 @@ class Security
 
     public function route(string $route)
     {
-        return route(config('security.dashboard.route_name').$route);
+        return route(config('security.dashboard.route_name') . $route);
     }
 
     public function routeIsActive(string $route)
@@ -26,13 +26,23 @@ class Security
         return request()->route()->getName() === config('security.dashboard.route_name') . $route;
     }
 
-    public function getRecentlyModifiedFiles(int $time_range = 604800): array
+    public function getRecentlyModifiedFiles(int|Carbon $time_range = 604800, int $limit = 15, bool $resetCache = false): array
     {
-        $rmf = new RecentlyModifiedFiles(base_path(), 20000, 250000, $time_range);
+        if ($time_range instanceof Carbon) {
+            $time_range = $time_range->diffInSeconds(Carbon::now());
+        }
 
-        $rmf->run();
+        $cacheKey = 'recently_modified_files_' . $time_range . '_' . $limit;
 
-        $mostRecentFiles = $rmf->mostRecentFiles(15);
+        if ($resetCache) {
+            cache()->forget($cacheKey);
+        }
+
+        $mostRecentFiles = cache()->remember($cacheKey, now()->addMinutes(5), function () use ($time_range, $limit) {
+            $rmf = new RecentlyModifiedFiles(base_path(), $time_range);
+            $rmf->run();
+            return $rmf->mostRecentFiles($limit);
+        });
 
         return $mostRecentFiles;
     }

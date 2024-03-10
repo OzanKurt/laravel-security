@@ -25,11 +25,14 @@
     <style>
         html, body {
             font-family: Nunito, sans-serif;
+            background: url("{{ asset('vendor/security/images/cloud-bg.png') }}");
+        }
+        html[data-bs-theme="dark"], [data-bs-theme="dark"] body {
+            background: url("{{ asset('vendor/security/images/cloud-bg-dark.png') }}");
         }
 
-        .dtr-details {
-            width: 100%;
-        }
+        .dtr-details {width: 100%;}
+        .widget-icon {position: absolute; bottom: -1rem; right: 1rem; color: #e9e9e9;}
     </style>
 
     <!-- Head -->
@@ -40,13 +43,13 @@
     @include('security::layouts.bootstrap._navbar')
 
     <!-- Container -->
-    <div class="container">
+    <div class="container mb-5">
         <!-- Content -->
         @yield('content')
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('vendor/security/js/bootstrap.bundle.js') }}"></script>
+    <script src="{{ asset('vendor/security/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('vendor/security/plugins/DataTables/datatables.min.js') }}"></script>
 
     @stack('scripts')

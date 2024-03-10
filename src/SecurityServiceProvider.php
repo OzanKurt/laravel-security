@@ -3,7 +3,7 @@
 namespace OzanKurt\Security;
 
 use OzanKurt\Security\Http\Controllers\IpsController;
-use OzanKurt\Security\Http\Controllers\SecurityController;
+use OzanKurt\Security\Http\Controllers\DashboardController;
 use OzanKurt\Security\Http\Controllers\LogsController;
 use voku\helper\AntiXSS;
 use Illuminate\Console\Scheduling\Schedule;
@@ -66,17 +66,17 @@ class SecurityServiceProvider extends ServiceProvider
             'middleware' => config('security.dashboard.route_middleware', []),
         ], function ($router) {
             $name = config('security.dashboard.route_name', 'security.');
-            $router->get('', [SecurityController::class, 'index'])->name($name.'dashboard.index');
+            $router->get('', [DashboardController::class, 'index'])->name($name.'dashboard.index');
             $router->get('/logs', [LogsController::class, 'index'])->name($name.'logs.index');
             $router->get('/ips', [IpsController::class, 'index'])->name($name.'ips.index');
 
-            $router->get('/whitelist', [SecurityController::class, 'whitelist'])->name($name.'whitelist');
-            $router->post('/whitelist', [SecurityController::class, 'whitelistStore'])->name($name.'whitelist.store');
-            $router->delete('/whitelist/{id}', [SecurityController::class, 'whitelistDestroy'])->name($name.'whitelist.destroy');
+            $router->get('/whitelist', [DashboardController::class, 'whitelist'])->name($name.'whitelist');
+            $router->post('/whitelist', [DashboardController::class, 'whitelistStore'])->name($name.'whitelist.store');
+            $router->delete('/whitelist/{id}', [DashboardController::class, 'whitelistDestroy'])->name($name.'whitelist.destroy');
 
-            $router->get('/blacklist', [SecurityController::class, 'blacklist'])->name($name.'blacklist');
-            $router->post('/blacklist', [SecurityController::class, 'blacklistStore'])->name($name.'blacklist.store');
-            $router->delete('/blacklist/{id}', [SecurityController::class, 'blacklistDestroy'])->name($name.'blacklist.destroy');
+            $router->get('/blacklist', [DashboardController::class, 'blacklist'])->name($name.'blacklist');
+            $router->post('/blacklist', [DashboardController::class, 'blacklistStore'])->name($name.'blacklist.store');
+            $router->delete('/blacklist/{id}', [DashboardController::class, 'blacklistDestroy'])->name($name.'blacklist.destroy');
         });
     }
 

@@ -4,38 +4,41 @@
     <div class="mt-5">
         <div class="row mb-3">
             <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-body">
+                <div class="card shadow">
+                    <div class="card-body position-relative overflow-hidden">
                         <div>
-                            Attacks Detected
+                            @lang('security::dashboard.attacks_blocked')
                         </div>
-                        <div>
+                        <div class="fs-4">
                             {{ $attacksDetected }}
                         </div>
+                        <i class="far fa-7x fa-bug widget-icon"></i>
                     </div>
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-body">
+                <div class="card shadow">
+                    <div class="card-body position-relative overflow-hidden">
                         <div>
-                            IPs Blocked
+                            @lang('security::dashboard.ips_blocked')
                         </div>
-                        <div>
+                        <div class="fs-4">
                             {{ $ipsBlocked }}
                         </div>
+                        <i class="far fa-7x fa-project-diagram widget-icon"></i>
                     </div>
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-body">
+                <div class="card shadow">
+                    <div class="card-body position-relative overflow-hidden">
                         <div>
-                            Requests Blocked
+                            @lang('security::dashboard.requests_blocked')
                         </div>
-                        <div>
+                        <div class="fs-4">
                             {{ $requestsBlocked }}
                         </div>
+                        <i class="far fa-7x fa-shield-alt widget-icon"></i>
                     </div>
                 </div>
             </div>
@@ -43,15 +46,48 @@
 
         <div class="row">
             <div class="col-lg-12">
-                <div class="card">
+                <div class="card shadow">
                     <div class="card-header">
-                        Dashboard
+                        @lang('security::dashboard.recently_modified_files')
                     </div>
                     <div class="card-body">
-                        Welcome!
+                        <table id="recently_modified_files_table" class="table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @lang('security::dashboard.file')
+                                    </th>
+                                    <th>
+                                        @lang('security::dashboard.last_modification')
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($recentlyModifiedFiles as $file)
+                                    <tr>
+                                        <td>
+                                            {{ str_replace(base_path(), '', $file[0]) }}
+                                        </td>
+                                        <td data-order="{{ $file[1] }}">
+                                            {{ date(config('security.dashboard.date_format'), $file[1]) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $(function () {
+            $('#recently_modified_files_table').DataTable({
+                "order": [[ 1, "desc" ]]
+            });
+        });
+    </script>
+@endpush

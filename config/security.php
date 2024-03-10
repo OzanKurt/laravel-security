@@ -4,17 +4,18 @@ return [
 
     'enabled' => env('FIREWALL_ENABLED', true),
 
+    'whitelist' => explode(',', env('FIREWALL_WHITELIST', '127.0.0.0/24')),
+
     'dashboard' => [
         'enabled' => env('FIREWALL_DASHBOARD_ENABLED', true),
-        'route_prefix' => env('FIREWALL_DASHBOARD_ROUTE_PREFIX', 'security'),
-        'route_name' => env('FIREWALL_DASHBOARD_ROUTE_NAME', 'security.'),
+        'route_prefix' => 'security',
+        'route_name' => 'security.',
+        'date_format' => 'd/m/Y H:i:s',
         'middleware' => [
             'auth',
             OzanKurt\Security\Http\Middleware\SecurityDashboardMiddleware::class,
         ],
     ],
-
-    'whitelist' => explode(',', env('FIREWALL_WHITELIST', '127.0.0.0/24')),
 
     'database' => [
         'connection' => env('FIREWALL_DB_CONNECTION', env('DB_CONNECTION', 'mysql')),
@@ -45,10 +46,10 @@ return [
     'responses' => [
 
         'block' => [
-            'view' => env('FIREWALL_BLOCK_VIEW', null),
-            'redirect' => env('FIREWALL_BLOCK_REDIRECT', null),
-            'abort' => env('FIREWALL_BLOCK_ABORT', false),
-            'code' => env('FIREWALL_BLOCK_CODE', 403),
+            'view' => null,
+            'redirect' => null,
+            'abort' => false,
+            'code' => 403,
             //'exception' => \OzanKurt\Security\Exceptions\AccessDenied::class,
         ],
 

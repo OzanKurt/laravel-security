@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use OzanKurt\Security\Http\Middleware\SecurityDashboardMiddleware;
 use OzanKurt\Security\Models\Ip;
 use OzanKurt\Security\Models\Log;
+use OzanKurt\Security\Notifications\Notifiable;
+use OzanKurt\Security\Notifications\SecurityReportNotification;
 use OzanKurt\Security\Security;
 
-class SecurityController extends Controller
+class DashboardController extends Controller
 {
     public function index()
     {
@@ -16,10 +18,14 @@ class SecurityController extends Controller
         $ipsBlocked = Ip::blocked()->count();
         $requestsBlocked = Ip::blocked()->sum('request_count');
 
+        $recentlyModifiedFiles = app('security')->getRecentlyModifiedFiles(now()->subDays(7), 100);
+
         return view('security::dashboard.index')->with([
             'attacksDetected' => $attacksDetected,
             'ipsBlocked' => $ipsBlocked,
             'requestsBlocked' => $requestsBlocked,
+
+            'recentlyModifiedFiles' => $recentlyModifiedFiles,
         ]);
     }
 

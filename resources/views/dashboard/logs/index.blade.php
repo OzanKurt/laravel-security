@@ -4,15 +4,15 @@
     <div class="mt-5">
         <div class="row">
             <div class="col-lg-12">
-                <div class="card">
+                <div class="card shadow">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <div>
-                            Logs ({{ $logsCount }})
+                            @lang('security::dashboard.logs') ({{ $logsCount }})
                         </div>
                         <div>
-                            <a href="{{ app('security')->route('logs.index') }}" class="btn btn-sm btn-danger">
-                                Clear Logs
-                            </a>
+{{--                            <a href="{{ app('security')->route('logs.index') }}" class="btn btn-sm btn-danger">--}}
+{{--                                Clear Logs--}}
+{{--                            </a>--}}
                         </div>
                     </div>
                     <div class="card-body">
