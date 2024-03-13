@@ -23,8 +23,13 @@ class Ip extends Model
         }
 
         if (! isset($this->table)) {
-            $this->setTable(config('security.database.tables.firewall_logs'));
+            $this->setTable(config('security.database.table_prefix').config('security.database.ip.table'));
         }
+
+        // add a scope to the model
+//        $this->addGlobalScope('test', function ($builder) {
+//            $builder->where('id', 0);
+//        });
 
         parent::__construct($attributes);
     }

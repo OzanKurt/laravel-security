@@ -11,12 +11,12 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        $this->setUpDatabase();
-
         $this->setUpConfig();
 
+        $this->setUpDatabase();
+
         $this->artisan('vendor:publish', ['--tag' => 'security']);
-        $this->artisan('migrate:refresh', ['--database' => 'testbench']);
+        // $this->artisan('migrate:refresh', ['--database' => 'testbench']);
     }
 
     protected function tearDown(): void
@@ -33,20 +33,25 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUpDatabase()
     {
+        $create_logs_table = include __DIR__.'/../database/migrations/create_logs_table.php';
+        $create_logs_table->up();
+        $create_ips_table = include __DIR__.'/../database/migrations/create_ips_table.php';
+        $create_ips_table->up();
+    }
+
+    protected function setUpConfig()
+    {
         config(['database.default' => 'testbench']);
 
-        config(['database.connections.testbench' => [
+        config([
+            'database.connections.testbench' => [
                 'driver'   => 'sqlite',
                 'database' => ':memory:',
                 'prefix'   => '',
             ],
         ]);
-    }
 
-    protected function setUpConfig()
-    {
-        config(['security' => require __DIR__ . '/../config/security.php']);
-
+        config(['security' => include __DIR__.'/../config/security.php']);
         config(['security.database.connection' => 'testbench']);
 
         config(['security.notifications.mail.enabled' => false]);

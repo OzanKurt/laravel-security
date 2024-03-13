@@ -2,135 +2,192 @@
 
 namespace OzanKurt\Security;
 
-use OzanKurt\Security\Commands\UnblockIp;
-use OzanKurt\Security\Events\AttackDetected;
-use OzanKurt\Security\Listeners\BlockIp;
-use OzanKurt\Security\Listeners\CheckLogin;
-use OzanKurt\Security\Listeners\NotifyUsers;
-use Illuminate\Auth\Events\Authenticated as LoginAuthenticated;
-use Illuminate\Auth\Events\Failed as LoginFailed;
+use OzanKurt\Security\Http\Controllers\IpsController;
+use OzanKurt\Security\Http\Controllers\DashboardController;
+use OzanKurt\Security\Http\Controllers\LogsController;
+use voku\helper\AntiXSS;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Notifications\ChannelManager;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Auth\Events\Login as LoginAuthenticated;
+use Illuminate\Auth\Events\Failed as LoginFailed;
+use OzanKurt\Security\Commands\SendSecurityReportNotificationCommand;
+use OzanKurt\Security\Commands\UnblockIpsCommand;
+use OzanKurt\Security\Events\AttackDetectedEvent;
+use OzanKurt\Security\Listeners\AttackDetectedListener;
+use OzanKurt\Security\Listeners\BlockIpListener;
+use OzanKurt\Security\Listeners\FailedLoginListener;
+use OzanKurt\Security\Listeners\SuccessfulLoginListener;
+use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
 
 class SecurityServiceProvider extends ServiceProvider
 {
     /**
      * Register the application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/security.php', 'security');
 
         $this->app->register(\Jenssegers\Agent\AgentServiceProvider::class);
+
+        $this->app->singleton(Security::class, function () {
+            $antiXss = new AntiXSS();
+
+            return new Security($antiXss);
+        });
+
+        $this->app->alias(Security::class, 'security');
     }
 
     /**
      * Bootstrap the application services.
-     *
-     * @param Router $router
-     *
-     * @return void
      */
-    public function boot(Router $router)
+    public function boot(Router $router): void
     {
-        $langPath = 'vendor/security';
-
-        $langPath = (function_exists('lang_path'))
-            ? lang_path($langPath)
-            : resource_path('lang/' . $langPath);
-
-        $this->publishes([
-            __DIR__ . '/../config/security.php' => config_path('security.php'),
-            __DIR__ . '/../resources/lang' => $langPath,
-            __DIR__ . '/../database/migrations/create_ips_table.php' => $this->getMigrationPathFor('ip'),
-            __DIR__ . '/../database/migrations/create_logs_table.php' => $this->getMigrationPathFor('log'),
-        ], 'security');
+        $this->publishAssets();
 
         $this->registerMiddleware($router);
         $this->registerListeners();
-        $this->registerTranslations($langPath);
+        $this->registerTranslations();
         $this->registerCommands();
+        $this->registerViews();
+        $this->registerRoutes($router);
     }
 
-    /**
-     * Register middleware.
-     *
-     * @param Router $router
-     *
-     * @return void
-     */
-    public function registerMiddleware($router)
+    protected function registerRoutes(Router $router): void
+    {
+        $router->group([
+            'namespace' => 'OzanKurt\Security\Http\Controllers',
+            'prefix' => config('security.dashboard.route_prefix', 'security'),
+            'middleware' => config('security.dashboard.route_middleware', []),
+        ], function ($router) {
+            $name = config('security.dashboard.route_name', 'security.');
+            $router->get('', [DashboardController::class, 'index'])->name($name.'dashboard.index');
+            $router->get('/logs', [LogsController::class, 'index'])->name($name.'logs.index');
+            $router->get('/ips', [IpsController::class, 'index'])->name($name.'ips.index');
+
+            $router->get('/whitelist', [DashboardController::class, 'whitelist'])->name($name.'whitelist');
+            $router->post('/whitelist', [DashboardController::class, 'whitelistStore'])->name($name.'whitelist.store');
+            $router->delete('/whitelist/{id}', [DashboardController::class, 'whitelistDestroy'])->name($name.'whitelist.destroy');
+
+            $router->get('/blacklist', [DashboardController::class, 'blacklist'])->name($name.'blacklist');
+            $router->post('/blacklist', [DashboardController::class, 'blacklistStore'])->name($name.'blacklist.store');
+            $router->delete('/blacklist/{id}', [DashboardController::class, 'blacklistDestroy'])->name($name.'blacklist.destroy');
+        });
+    }
+
+    protected function registerMiddleware(Router $router): void
     {
         $router->middlewareGroup('firewall.all', config('security.all_middleware'));
-        $router->aliasMiddleware('firewall.agent', \OzanKurt\Security\Middleware\Agent::class);
-        $router->aliasMiddleware('firewall.bot', \OzanKurt\Security\Middleware\Bot::class);
-        $router->aliasMiddleware('firewall.ip', \OzanKurt\Security\Middleware\Ip::class);
-        $router->aliasMiddleware('firewall.geo', \OzanKurt\Security\Middleware\Geo::class);
-        $router->aliasMiddleware('firewall.lfi', \OzanKurt\Security\Middleware\Lfi::class);
-        $router->aliasMiddleware('firewall.php', \OzanKurt\Security\Middleware\Php::class);
-        $router->aliasMiddleware('firewall.referrer', \OzanKurt\Security\Middleware\Referrer::class);
-        $router->aliasMiddleware('firewall.rfi', \OzanKurt\Security\Middleware\Rfi::class);
-        $router->aliasMiddleware('firewall.session', \OzanKurt\Security\Middleware\Session::class);
-        $router->aliasMiddleware('firewall.sqli', \OzanKurt\Security\Middleware\Sqli::class);
-        $router->aliasMiddleware('firewall.swear', \OzanKurt\Security\Middleware\Swear::class);
-        $router->aliasMiddleware('firewall.url', \OzanKurt\Security\Middleware\Url::class);
-        $router->aliasMiddleware('firewall.whitelist', \OzanKurt\Security\Middleware\Whitelist::class);
-        $router->aliasMiddleware('firewall.xss', \OzanKurt\Security\Middleware\Xss::class);
-        $router->aliasMiddleware('firewall.keyword', \OzanKurt\Security\Middleware\Keyword::class);
+
+        $middlewares = [
+            'firewall.agent' => \OzanKurt\Security\Middleware\Agent::class,
+            'firewall.bot' => \OzanKurt\Security\Middleware\Bot::class,
+            'firewall.ip' => \OzanKurt\Security\Middleware\Ip::class,
+            'firewall.geo' => \OzanKurt\Security\Middleware\Geo::class,
+            'firewall.lfi' => \OzanKurt\Security\Middleware\Lfi::class,
+            'firewall.php' => \OzanKurt\Security\Middleware\Php::class,
+            'firewall.referrer' => \OzanKurt\Security\Middleware\Referrer::class,
+            'firewall.rfi' => \OzanKurt\Security\Middleware\Rfi::class,
+            'firewall.session' => \OzanKurt\Security\Middleware\Session::class,
+            'firewall.sqli' => \OzanKurt\Security\Middleware\Sqli::class,
+            'firewall.swear' => \OzanKurt\Security\Middleware\Swear::class,
+            'firewall.url' => \OzanKurt\Security\Middleware\Url::class,
+            'firewall.whitelist' => \OzanKurt\Security\Middleware\Whitelist::class,
+            'firewall.xss' => \OzanKurt\Security\Middleware\Xss::class,
+            'firewall.keyword' => \OzanKurt\Security\Middleware\Keyword::class,
+        ];
+
+        foreach ($middlewares as $name => $class) {
+            $router->aliasMiddleware($name, $class);
+        }
     }
 
-    /**
-     * Register listeners.
-     *
-     * @return void
-     */
-    public function registerListeners()
+    protected function registerListeners(): void
     {
-        $this->app['events']->listen(AttackDetected::class, BlockIp::class);
-        $this->app['events']->listen(AttackDetected::class, NotifyUsers::class);
-        $this->app['events']->listen(LoginAuthenticated::class, CheckLogin::class);
-        $this->app['events']->listen(LoginFailed::class, CheckLogin::class);
+        $this->app['events']->listen(AttackDetectedEvent::class, BlockIpListener::class);
+        $this->app['events']->listen(AttackDetectedEvent::class, AttackDetectedListener::class);
+        $this->app['events']->listen(LoginAuthenticated::class, SuccessfulLoginListener::class);
+        $this->app['events']->listen(LoginFailed::class, FailedLoginListener::class);
     }
 
-    /**
-     * Register translations.
-     *
-     * @return void
-     */
-    public function registerTranslations($langPath)
+    protected function registerTranslations(): void
     {
         $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'security');
-
-        $this->loadTranslationsFrom($langPath, 'security');
     }
 
-    public function registerCommands()
+    protected function registerCommands(): void
     {
-        $this->commands(UnblockIp::class);
+        $this->commands(UnblockIpsCommand::class);
+        $this->commands(SendSecurityReportNotificationCommand::class);
 
         if (config('security.cron.enabled')) {
             $this->app->booted(function () {
-                app(Schedule::class)->command('security:unblockip')->cron(config('security.cron.expression'));
+                app(Schedule::class)->command('security:unblock-ips')->cron(config('security.cron.expression'));
             });
         }
     }
 
-    public function getMigrationPathFor(string $modelKey): string
+    protected function registerViews(): void
     {
-        $prefix = date('Y_m_d').'_000000';
+        View::addNamespace('security', __DIR__ . '/../resources/views');
+    }
+
+    protected function getMigrationPathFor(string $modelKey): string
+    {
+        $prefix = date('Y_m_d') . '_000000';
         $tableName = $this->getNameTable($modelKey);
 
         return database_path("migrations/{$prefix}_create_{$tableName}_table.php");
     }
 
-    public function getNameTable(string $modelKey): string
+    protected function getNameTable(string $modelKey): string
     {
-        $tablePrefix = config('security.database.table_prefix', 'sec_');
+        $tablePrefix = config('security.database.table_prefix', 'security_');
         $tableName = config("security.database.{$modelKey}.table", $modelKey);
 
-        return $tablePrefix.$tableName;
+        return $tablePrefix . $tableName;
+    }
+
+    public function publishAssets(): void
+    {
+        // config
+        $this->publishes([
+            __DIR__ . '/../config/security.php' => config_path('security.php'),
+        ], 'security-config');
+
+        // lang
+        $langPath = 'vendor/security';
+        $langPath = (function_exists('lang_path'))
+            ? lang_path($langPath)
+            : resource_path('lang/' . $langPath);
+
+        $this->publishes([
+            __DIR__ . '/../resources/lang' => $langPath,
+        ], 'security-lang');
+
+        // migrations
+        $this->publishes([
+            __DIR__ . '/../database/migrations/create_ips_table.php' => $this->getMigrationPathFor('ip'),
+            __DIR__ . '/../database/migrations/create_logs_table.php' => $this->getMigrationPathFor('log'),
+        ], 'security-migrations');
+
+        // public
+        $this->publishes([
+            __DIR__ . '/../public' => public_path('vendor/security'),
+        ], 'security-assets');
+    }
+
+    protected function registerDiscordChannel(): void
+    {
+        Notification::resolved(function (ChannelManager $service) {
+            $service->extend(DiscordChannel::class, function ($app) {
+                return new DiscordChannel();
+            });
+        });
     }
 }

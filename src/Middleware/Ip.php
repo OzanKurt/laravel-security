@@ -15,7 +15,12 @@ class Ip extends Middleware
         try {
             $ip = config('security.database.ip.model', Model::class);
 
-            $isBlocked = $ip::blocked($this->ip())->exists();
+            $blockedIp = $ip::blocked($this->ip())->first();
+
+            if ($blockedIp) {
+                $blockedIp->increment('request_count');
+                $isBlocked = true;
+            }
         } catch (QueryException $e) {
             // Base table or view not found
             //$isBlocked = ($e->getCode() == '42S02') ? false : true;

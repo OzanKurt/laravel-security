@@ -3,31 +3,35 @@
 namespace OzanKurt\Security\Traits;
 
 use Illuminate\Http\Request;
-use OzanKurt\Security\Models\Log;
-use OzanKurt\Security\Enums\LogLevel;
-use Symfony\Component\HttpFoundation\IpUtils;
 use Jenssegers\Agent\Agent as Parser;
+use OzanKurt\Security\Enums\LogLevel;
+use OzanKurt\Security\Models\Log;
+use Symfony\Component\HttpFoundation\IpUtils;
 
 trait Helper
 {
     public Request|string|array|null $request = null;
-    public string|null $middleware = null;
-    public int|null $user_id = null;
+    public ?string $middleware = null;
+    public ?int $user_id = null;
 
     public function isEnabled($middleware = null)
     {
         $middleware = $middleware ?? $this->middleware;
 
-        return config('security.middleware.' . $middleware . '.enabled', config('security.enabled', false));
+        return config("security.middleware.{$middleware}.enabled", config('security.enabled', false));
     }
 
     public function isDisabled($middleware = null)
     {
-        return ! $this->isEnabled($middleware);
+        return !$this->isEnabled($middleware);
     }
 
     public function isWhitelist()
     {
+        if (request()->has('_debug')) {
+            return false;
+        }
+
         return IpUtils::checkIp($this->ip(), config('security.whitelist', []));
     }
 
@@ -35,7 +39,7 @@ trait Helper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (! $methods = config('security.middleware.' . $middleware . '.methods')) {
+        if (!$methods = config("security.middleware.{$middleware}.methods")) {
             return false;
         }
 
@@ -50,12 +54,12 @@ trait Helper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (! $routes = config('security.middleware.' . $middleware . '.routes')) {
+        if (!$routes = config("security.middleware.{$middleware}.routes")) {
             return false;
         }
 
         foreach ($routes['except'] as $ex) {
-            if (! $this->request->is($ex)) {
+            if (!$this->request->is($ex)) {
                 continue;
             }
 
@@ -77,20 +81,20 @@ trait Helper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (! $inputs = config('security.middleware.' . $middleware . '.inputs')) {
+        if (!$inputs = config("security.middleware.{$middleware}.inputs")) {
             return true;
         }
 
-        if (! empty($inputs['only']) && ! in_array((string) $name, (array) $inputs['only'])) {
+        if (!empty($inputs['only']) && !in_array((string)$name, (array)$inputs['only'])) {
             return false;
         }
 
-        return ! in_array((string) $name, (array) $inputs['except']);
+        return !in_array((string)$name, (array)$inputs['except']);
     }
 
     public function log(
-        ?string $middleware = null,
-        ?int $user_id = null,
+        ?string  $middleware = null,
+        ?int     $user_id = null,
         LogLevel $level = LogLevel::MEDIUM
     ): Log
     {

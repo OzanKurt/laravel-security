@@ -18,6 +18,11 @@ class Notifiable
         return config('security.notifications.slack.to');
     }
 
+    public function routeNotificationForDiscord()
+    {
+        return config('security.notifications.discord.webhook_url');
+    }
+
     public function getKey()
     {
         return 1;

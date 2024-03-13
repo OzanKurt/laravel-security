@@ -2,12 +2,12 @@
 
 namespace OzanKurt\Security\Listeners;
 
-use OzanKurt\Security\Events\AttackDetected;
+use OzanKurt\Security\Events\AttackDetectedEvent;
 use OzanKurt\Security\Models\Ip;
 use OzanKurt\Security\Models\Log;
 use Carbon\Carbon;
 
-class BlockIp
+class BlockIpListener
 {
     /**
      * Handle the event.
@@ -16,22 +16,25 @@ class BlockIp
      *
      * @return void
      */
-    public function handle(AttackDetected $event)
+    public function handle(AttackDetectedEvent $event)
     {
         $end = Carbon::now(config('app.timezone'));
-        $start = $end->copy()->subSeconds(config('security.middleware.' . $event->log->middleware . '.auto_block.frequency'));
+        $middleware = $event->log->middleware ?? 'default';
+
+        $start = $end->copy()->subSeconds(config("security.middleware.{$middleware}.auto_block.frequency"));
 
         $log = config('security.database.log.model', Log::class);
         $count = $log::where('ip', $event->log->ip)
-                    ->where('middleware', $event->log->middleware)
+                    ->where('middleware', $middleware)
                     ->whereBetween('created_at', [$start, $end])
                     ->count();
 
-        if ($count < config('security.middleware.' . $event->log->middleware . '.auto_block.attempts')) {
+        if ($count < config("security.middleware.{$middleware}.auto_block.attempts")) {
             return;
         }
 
         $ip = config('security.database.ip.model', Ip::class);
+
         $ip::create([
             'ip' => $event->log->ip,
             'log_id' => $event->log->id,

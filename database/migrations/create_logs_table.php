@@ -7,12 +7,20 @@ use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
+    protected string $tableName;
+
+    public function __construct()
+    {
+        $this->connection = config('security.database.connection');
+        $this->tableName = config('security.database.table_prefix') . config('security.database.log.table');
+    }
+
     public function up(): void
     {
-        Schema::connection(config('security.database.connection'))->create(config('security.database.log.table'), function (Blueprint $table) {
+        Schema::create($this->tableName, function (Blueprint $table) {
             $table->increments('id');
             $table->foreignId('user_id')->nullable()->index();
-            $table->string('middleware')->index();
+            $table->string('middleware')->nullable()->index();
             $table->string('level')->default(LogLevel::MEDIUM)->index();
             $table->string('ip')->index();
             $table->text('url')->nullable();
@@ -26,6 +34,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection(config('security.database.connection'))->drop(config('security.database.log.table'));
+        Schema::drop($this->tableName);
     }
 };

@@ -2,11 +2,11 @@
 
 namespace OzanKurt\Security\Listeners;
 
-use OzanKurt\Security\Events\AttackDetected;
+use OzanKurt\Security\Events\AttackDetectedEvent;
 use OzanKurt\Security\Traits\Helper;
 use Illuminate\Auth\Events\Failed as Event;
 
-class CheckLogin
+class FailedLoginListener
 {
     use Helper;
 
@@ -24,7 +24,7 @@ class CheckLogin
 
         $log = $this->log();
 
-        event(new AttackDetected($log));
+        event(new AttackDetectedEvent($log));
     }
 
     public function skip($event): bool

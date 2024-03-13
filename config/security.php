@@ -4,7 +4,18 @@ return [
 
     'enabled' => env('FIREWALL_ENABLED', true),
 
-    'whitelist' => explode(',', env('FIREWALL_WHITELIST', '')),
+    'whitelist' => explode(',', env('FIREWALL_WHITELIST', '127.0.0.0/24')),
+
+    'dashboard' => [
+        'enabled' => env('FIREWALL_DASHBOARD_ENABLED', true),
+        'route_prefix' => 'security',
+        'route_name' => 'security.',
+        'date_format' => 'd/m/Y H:i:s',
+        'middleware' => [
+            'auth',
+            OzanKurt\Security\Http\Middleware\SecurityDashboardMiddleware::class,
+        ],
+    ],
 
     'database' => [
         'connection' => env('FIREWALL_DB_CONNECTION', env('DB_CONNECTION', 'mysql')),
@@ -35,10 +46,10 @@ return [
     'responses' => [
 
         'block' => [
-            'view' => env('FIREWALL_BLOCK_VIEW', null),
-            'redirect' => env('FIREWALL_BLOCK_REDIRECT', null),
-            'abort' => env('FIREWALL_BLOCK_ABORT', false),
-            'code' => env('FIREWALL_BLOCK_CODE', 403),
+            'view' => null,
+            'redirect' => null,
+            'abort' => false,
+            'code' => 403,
             //'exception' => \OzanKurt\Security\Exceptions\AccessDenied::class,
         ],
 
@@ -61,6 +72,12 @@ return [
             'to' => env('FIREWALL_SLACK_TO'), // webhook url
             'channel' => env('FIREWALL_SLACK_CHANNEL', null), // set null to use the default channel of webhook
             'queue' => env('FIREWALL_SLACK_QUEUE', 'default'),
+        ],
+
+        'discord' => [
+            'enabled' => env('FIREWALL_DISCORD_ENABLED', false),
+            'webhook_url' => env('FIREWALL_DISCORD_WEBHOOK_URL'),
+            'queue' => env('FIREWALL_DISCORD_QUEUE', 'default'),
         ],
 
     ],
@@ -423,6 +440,16 @@ return [
 
         'xss' => [
             'enabled' => env('FIREWALL_MIDDLEWARE_XSS_ENABLED', env('FIREWALL_ENABLED', true)),
+
+            'mode' => 'block', // 'block', 'clean'
+
+            'allow_blade_echoes' => false,
+
+            'blade_echo_tags' => [
+                ['{!!', '!!}'],
+                ['{{', '}}'],
+                ['{{{', '}}}'],
+            ],
 
             'methods' => ['post', 'put', 'patch'],
 

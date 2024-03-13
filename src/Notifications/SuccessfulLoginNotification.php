@@ -3,21 +3,17 @@
 namespace OzanKurt\Security\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
 
-class AttackDetected extends Notification implements ShouldQueue
+class SuccessfulLoginNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * The log model.
-     *
-     * @var object
-     */
-    public $log;
+    public Authenticated $event;
 
     /**
      * The notification config.
@@ -26,12 +22,10 @@ class AttackDetected extends Notification implements ShouldQueue
 
     /**
      * Create a notification instance.
-     *
-     * @param  object  $log
      */
-    public function __construct($log)
+    public function __construct(Authenticated $event)
     {
-        $this->log = $log;
+        $this->event = $event;
         $this->notifications = config('security.middleware.' . $log->middleware . '.notifications', config('security.notifications'));
     }
 
@@ -60,7 +54,6 @@ class AttackDetected extends Notification implements ShouldQueue
      * Get the notification's queues.
      * @return array|string
      */
-
     public function viaQueues(): array
     {
         return array_map(fn ($channel) => $channel['queue'] ?? 'default', $this->notifications);

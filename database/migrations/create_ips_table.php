@@ -6,13 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    protected string $tableName;
+
+    public function __construct()
+    {
+        $this->connection = config('security.database.connection');
+        $this->tableName = config('security.database.table_prefix') . config('security.database.ip.table');
+    }
+
     public function up(): void
     {
-        Schema::connection(config('security.database.connection'))->create(config('security.database.ip.table'), function (Blueprint $table) {
+        Schema::create($this->tableName, function (Blueprint $table) {
             $table->id();
-            $table->string('ip')->index('ip');
+            $table->string('ip')->index();
             $table->foreignId('log_id')->nullable()->index();
+            $table->string('entry_type')->nullable();
             $table->boolean('is_blocked')->default(1);
+            $table->unsignedInteger('request_count')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -20,6 +30,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::connection(config('security.database.connection'))->drop(config('security.database.ip.table'));
+        Schema::drop($this->tableName);
     }
 };
