@@ -2,6 +2,8 @@
 
 namespace OzanKurt\Security\Firewall\Middleware;
 
+use Illuminate\Database\Eloquent\Builder;
+use OzanKurt\Security\Enums\IpEntryType;
 use OzanKurt\Security\Firewall\AbstractMiddleware;
 use OzanKurt\Security\Models\Ip as Model;
 use Illuminate\Database\QueryException;
@@ -10,22 +12,35 @@ class Ip extends AbstractMiddleware
 {
     public function check($patterns)
     {
-        $isBlocked = false;
+        // Check if the IP is whitelisted
+        $ip = $this->getQuery()
+            ->whereIn('entry_type', [IpEntryType::WHITELIST])
+            ->first();
 
-        try {
-            $ip = config('security.database.ip.model', Model::class);
+        if ($ip) {
+            $ip->increment('request_count');
 
-            $blockedIp = $ip::blocked($this->ip())->first();
-
-            if ($blockedIp) {
-                $blockedIp->increment('request_count');
-                $isBlocked = true;
-            }
-        } catch (QueryException $e) {
-            // Base table or view not found
-            //$isBlocked = ($e->getCode() == '42S02') ? false : true;
+            return true;
         }
 
-        return $isBlocked;
+        // Check if the IP is blacklisted or blocked
+        $ip = $this->getQuery()
+            ->whereIn('entry_type', [IpEntryType::BLACKLIST, IpEntryType::BLOCK])
+            ->first();
+
+        if ($ip) {
+            $ip->increment('request_count');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getQuery(): Builder
+    {
+        $model = config('security.database.ip.model');
+
+        return $model::query();
     }
 }
