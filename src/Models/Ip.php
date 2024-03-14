@@ -4,16 +4,17 @@ namespace OzanKurt\Security\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use OzanKurt\Security\Enums\IpEntryType;
 
 class Ip extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['ip', 'log_id', 'is_blocked'];
+    protected $fillable = ['ip', 'log_id', 'entry_type', 'request_count'];
 
     protected $casts = [
         'deleted_at' => 'datetime',
-        'is_blocked' => 'bool',
+        'entry_type' => IpEntryType::class,
     ];
 
     public function __construct(array $attributes = [])
@@ -42,16 +43,5 @@ class Ip extends Model
     public function logs()
     {
         return $this->hasMany(config('security.database.log.model'), 'ip', 'ip');
-    }
-
-    public function scopeBlocked($query, $ip = null)
-    {
-        $q = $query->where('is_blocked', 1);
-
-        if ($ip) {
-            $q = $query->where('ip', $ip);
-        }
-
-        return $q;
     }
 }

@@ -12,9 +12,11 @@ class Ip extends AbstractMiddleware
 {
     public function check($patterns)
     {
-        // Check if the IP is whitelisted
-        $ip = $this->getQuery()
-            ->whereIn('entry_type', [IpEntryType::WHITELIST])
+        // Check if the IP is blacklisted or blocked
+        $model = config('security.database.ip.model');
+
+        $ip = $model::query()
+            ->whereIn('entry_type', [IpEntryType::BLACKLIST, IpEntryType::BLOCK])
             ->first();
 
         if ($ip) {
@@ -23,24 +25,6 @@ class Ip extends AbstractMiddleware
             return true;
         }
 
-        // Check if the IP is blacklisted or blocked
-        $ip = $this->getQuery()
-            ->whereIn('entry_type', [IpEntryType::BLACKLIST, IpEntryType::BLOCK])
-            ->first();
-
-        if ($ip) {
-            $ip->increment('request_count');
-
-            return false;
-        }
-
-        return true;
-    }
-
-    public function getQuery(): Builder
-    {
-        $model = config('security.database.ip.model');
-
-        return $model::query();
+        return false;
     }
 }

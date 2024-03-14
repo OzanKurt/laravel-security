@@ -4,6 +4,7 @@ namespace OzanKurt\Security\DataTables;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use OzanKurt\Security\Enums\IpEntryType;
 use OzanKurt\Security\Models\Ip;
 use OzanKurt\Security\Models\Log;
 use Yajra\DataTables\Services\DataTable;
@@ -16,26 +17,55 @@ class IpsDataTable extends DataTable
         $builder = datatables()->eloquent($query);
 
         $builder->addColumn('actions', function (Ip $ip) {
-            $whitelistLink = app('security')->route('ips.action', [
-                'ip' => $ip,
-                'action' => 'whitelist',
-            ]);
-            $deleteLink = app('security')->route('ips.action', [
+            $links = [];
+
+            if ($ip->entry_type == IpEntryType::BLOCK || $ip->entry_type == IpEntryType::BLACKLIST) {
+                $whitelistRoute = app('security')->route('ips.action', [
+                    'ip' => $ip,
+                    'action' => 'whitelist',
+                ]);
+                $whitelistLink = <<<HTML
+                    <a href="{$whitelistRoute}" class="btn btn-sm btn-primary ajax-link" title="Whitelist"
+                        data-bs-toggle="tooltip" data-bs-title="Whitelist"
+                    >
+                        <i class="far fa-fw fa-check"></i>
+                    </a>
+                HTML;
+
+                $links[] = $whitelistLink;
+            }
+
+            if ($ip->entry_type == IpEntryType::WHITELIST) {
+                $blacklistRoute = app('security')->route('ips.action', [
+                    'ip' => $ip,
+                    'action' => 'blacklist',
+                ]);
+                $blacklistLink = <<<HTML
+                    <a href="{$blacklistRoute}" class="btn btn-sm btn-warning ajax-link" title="Blacklist"
+                        data-bs-toggle="tooltip" data-bs-title="Blacklist"
+                    >
+                        <i class="far fa-fw fa-times"></i>
+                    </a>
+                HTML;
+
+                $links[] = $blacklistLink;
+            }
+
+            $deleteRoute = app('security')->route('ips.action', [
                 'ip' => $ip,
                 'action' => 'delete',
             ]);
-            return <<<HTML
-                <a href="{$whitelistLink}" class="btn btn-sm btn-primary ajax-link" title="Whitelist"
-                    data-bs-toggle="tooltip" data-bs-title="Whitelist"
-                >
-                    <i class="far fa-fw fa-check"></i>
-                </a>
-                <a href="{$deleteLink}" class="btn btn-sm btn-danger ajax-link" title="Delete"
+            $deleteLink = <<<HTML
+                <a href="{$deleteRoute}" class="btn btn-sm btn-danger ajax-link" title="Delete"
                     data-bs-toggle="tooltip" data-bs-title="Delete"
                 >
                     <i class="far fa-fw fa-trash"></i>
                 </a>
             HTML;
+
+            $links[] = $deleteLink;
+
+            return implode(' ', $links);
         });
 
         $builder->editColumn('entry_type', function (Ip $ip) {
@@ -107,8 +137,7 @@ class IpsDataTable extends DataTable
             Column::make('ip')->class('all'),
             Column::make('log_id')->class('all'),
             Column::make('entry_type', 'entry_type')->class('all'),
-            Column::make('is_blocked')->class('all'),
-            Column::make('request_count')->class('none'),
+            Column::make('request_count')->class('all'),
             Column::make('created_at')->class('none'),
             Column::make('updated_at')->class('none'),
             Column::make('actions')->class('all text-center'),

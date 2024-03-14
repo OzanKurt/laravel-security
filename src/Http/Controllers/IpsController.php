@@ -31,7 +31,7 @@ class IpsController extends Controller
 
         if ($action === 'whitelist') {
             $ip->entry_type = IpEntryType::WHITELIST;
-            $ip->is_blocked = false;
+            $ip->request_count = 0;
             $ip->save();
 
             return response()->json([
@@ -42,6 +42,31 @@ class IpsController extends Controller
                             'type' => 'success',
                             'title' => trans('security::responses.ip.whitelisted.title'),
                             'message' => trans('security::responses.ip.whitelisted.message'),
+                        ],
+                    ],
+                    [
+                        'type' => 'reloadDataTable',
+                        'data' => [
+                            'dataTableId' => 'ipsDataTable',
+                        ],
+                    ],
+                ],
+            ]);
+        }
+
+        if ($action === 'blacklist') {
+            $ip->entry_type = IpEntryType::BLACKLIST;
+            $ip->request_count = 0;
+            $ip->save();
+
+            return response()->json([
+                'actions' => [
+                    [
+                        'type' => 'toastr',
+                        'data' => [
+                            'type' => 'success',
+                            'title' => trans('security::responses.ip.blacklisted.title'),
+                            'message' => trans('security::responses.ip.blacklisted.message'),
                         ],
                     ],
                     [

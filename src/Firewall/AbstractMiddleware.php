@@ -2,6 +2,7 @@
 
 namespace OzanKurt\Security\Firewall;
 
+use OzanKurt\Security\Enums\IpEntryType;
 use OzanKurt\Security\Events\AttackDetectedEvent;
 use OzanKurt\Security\Firewall\Traits\Helper;
 use Closure;
@@ -41,6 +42,10 @@ abstract class AbstractMiddleware
         }
 
         if ($this->isWhitelist()) {
+            return true;
+        }
+
+        if (app('security')->isIpWhitelistedInDatabase()) {
             return true;
         }
 

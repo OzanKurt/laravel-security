@@ -553,9 +553,9 @@ return [
         'block' => [
             'view' => null,
             'redirect' => null,
-            'abort' => false,
+            'abort' => true,
             'code' => 403,
-            //'exception' => \OzanKurt\Security\Exceptions\AccessDenied::class,
+            // 'exception' => \App\Exceptions\AccessDenied::class,
         ],
 
     ],

@@ -4,16 +4,40 @@ namespace OzanKurt\Security;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
+use OzanKurt\Security\Enums\IpEntryType;
 use OzanKurt\Security\Helpers\RecentlyModifiedFiles;
 use voku\helper\AntiXSS;
 
 class Security
 {
     public AntiXSS $antiXss;
+    public bool $ipWhitelistedInDatabase = false;
 
     public function __construct(AntiXSS $antiXss)
     {
         $this->antiXss = $antiXss;
+    }
+
+    public function isIpWhitelistedInDatabase()
+    {
+        if ($this->ipWhitelistedInDatabase) {
+            return $this->ipWhitelistedInDatabase;
+        }
+
+        $model = config('security.database.ip.model');
+
+        // Check if the IP is whitelisted
+        $ip = $model::query()
+            ->where('entry_type', IpEntryType::WHITELIST)
+            ->first();
+
+        if ($ip) {
+            $ip->increment('request_count');
+
+            return $this->ipWhitelistedInDatabase = true;
+        }
+
+        return $this->ipWhitelistedInDatabase = false;
     }
 
     public function route(string $route, array $parameters = [], bool $absolute = true)
