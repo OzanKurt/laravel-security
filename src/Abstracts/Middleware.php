@@ -44,7 +44,7 @@ abstract class Middleware
             return true;
         }
 
-        if (! $this->isMethod())
+        if (! $this->isMethod()) {
             return true;
         }
 
