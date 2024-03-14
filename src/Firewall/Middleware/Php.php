@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Middleware;
+namespace OzanKurt\Security\Firewall\Middleware;
 
-use OzanKurt\Security\Abstracts\Middleware;
+use OzanKurt\Security\Firewall\AbstractMiddleware;
 
-class Php extends Middleware
+class Php extends AbstractMiddleware
 {
     public function match($pattern, $input)
     {

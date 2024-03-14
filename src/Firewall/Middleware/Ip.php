@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\Middleware;
+namespace OzanKurt\Security\Firewall\Middleware;
 
-use OzanKurt\Security\Abstracts\Middleware;
+use OzanKurt\Security\Firewall\AbstractMiddleware;
 use OzanKurt\Security\Models\Ip as Model;
 use Illuminate\Database\QueryException;
 
-class Ip extends Middleware
+class Ip extends AbstractMiddleware
 {
     public function check($patterns)
     {

@@ -1,14 +1,14 @@
 <?php
 
-namespace OzanKurt\Security\Abstracts;
+namespace OzanKurt\Security\Firewall;
 
 use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Traits\Helper;
+use OzanKurt\Security\Firewall\Traits\Helper;
 use Closure;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 
-abstract class Middleware
+abstract class AbstractMiddleware
 {
     use Helper;
 

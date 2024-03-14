@@ -88,21 +88,21 @@ class SecurityServiceProvider extends ServiceProvider
         $router->middlewareGroup('firewall.all', config('security.all_middleware'));
 
         $middlewares = [
-            'firewall.agent' => \OzanKurt\Security\Middleware\Agent::class,
-            'firewall.bot' => \OzanKurt\Security\Middleware\Bot::class,
-            'firewall.ip' => \OzanKurt\Security\Middleware\Ip::class,
-            'firewall.geo' => \OzanKurt\Security\Middleware\Geo::class,
-            'firewall.lfi' => \OzanKurt\Security\Middleware\Lfi::class,
-            'firewall.php' => \OzanKurt\Security\Middleware\Php::class,
-            'firewall.referrer' => \OzanKurt\Security\Middleware\Referrer::class,
-            'firewall.rfi' => \OzanKurt\Security\Middleware\Rfi::class,
-            'firewall.session' => \OzanKurt\Security\Middleware\Session::class,
-            'firewall.sqli' => \OzanKurt\Security\Middleware\Sqli::class,
-            'firewall.swear' => \OzanKurt\Security\Middleware\Swear::class,
-            'firewall.url' => \OzanKurt\Security\Middleware\Url::class,
-            'firewall.whitelist' => \OzanKurt\Security\Middleware\Whitelist::class,
-            'firewall.xss' => \OzanKurt\Security\Middleware\Xss::class,
-            'firewall.keyword' => \OzanKurt\Security\Middleware\Keyword::class,
+            'firewall.agent' => \OzanKurt\Security\Firewall\Middleware\Agent::class,
+            'firewall.bot' => \OzanKurt\Security\Firewall\Middleware\Bot::class,
+            'firewall.ip' => \OzanKurt\Security\Firewall\Middleware\Ip::class,
+            'firewall.geo' => \OzanKurt\Security\Firewall\Middleware\Geo::class,
+            'firewall.lfi' => \OzanKurt\Security\Firewall\Middleware\Lfi::class,
+            'firewall.php' => \OzanKurt\Security\Firewall\Middleware\Php::class,
+            'firewall.referrer' => \OzanKurt\Security\Firewall\Middleware\Referrer::class,
+            'firewall.rfi' => \OzanKurt\Security\Firewall\Middleware\Rfi::class,
+            'firewall.session' => \OzanKurt\Security\Firewall\Middleware\Session::class,
+            'firewall.sqli' => \OzanKurt\Security\Firewall\Middleware\Sqli::class,
+            'firewall.swear' => \OzanKurt\Security\Firewall\Middleware\Swear::class,
+            'firewall.url' => \OzanKurt\Security\Firewall\Middleware\Url::class,
+            'firewall.whitelist' => \OzanKurt\Security\Firewall\Middleware\Whitelist::class,
+            'firewall.xss' => \OzanKurt\Security\Firewall\Middleware\Xss::class,
+            'firewall.keyword' => \OzanKurt\Security\Firewall\Middleware\Keyword::class,
         ];
 
         foreach ($middlewares as $name => $class) {

@@ -1,11 +1,11 @@
 <?php
 
-namespace OzanKurt\Security\Middleware;
+namespace OzanKurt\Security\Firewall\Middleware;
 
-use OzanKurt\Security\Abstracts\Middleware;
+use OzanKurt\Security\Firewall\AbstractMiddleware;
 use Illuminate\Support\Str;
 
-class Geo extends Middleware
+class Geo extends AbstractMiddleware
 {
     public function check($patterns)
     {

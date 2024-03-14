@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Traits;
+namespace OzanKurt\Security\Firewall\Traits;
 
 use Illuminate\Http\Request;
 use Jenssegers\Agent\Agent as Parser;
