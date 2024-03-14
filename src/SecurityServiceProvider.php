@@ -2,6 +2,7 @@
 
 namespace OzanKurt\Security;
 
+use Illuminate\Contracts\Foundation\Application;
 use OzanKurt\Security\Http\Controllers\IpsController;
 use OzanKurt\Security\Http\Controllers\DashboardController;
 use OzanKurt\Security\Http\Controllers\LogsController;
@@ -10,6 +11,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Auth\Access\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Events\Login as LoginAuthenticated;
@@ -57,29 +59,37 @@ class SecurityServiceProvider extends ServiceProvider
         $this->registerViews();
 
         if (config('security.dashboard.enabled')) {
-            $this->registerRoutes($router);
+            $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
+                $gate->define('viewSecurityDashboard', fn ($user = null) => false);
+            });
+
+            $this->callAfterResolving('router', function (Router $router, Application $app) {
+                $this->registerRoutes($router);
+            });
         }
     }
 
     protected function registerRoutes(Router $router): void
     {
+        $middleware = config('security.dashboard.middleware', []);
+
+        $name = config('security.dashboard.route_name', 'security.');
         $router->group([
             'namespace' => 'OzanKurt\Security\Http\Controllers',
             'prefix' => config('security.dashboard.route_prefix', 'security'),
-            'middleware' => config('security.dashboard.route_middleware', []),
+            'middleware' => [
+                'web',
+                ...$middleware,
+            ],
+            'as' => $name,
         ], function ($router) {
-            $name = config('security.dashboard.route_name', 'security.');
-            $router->get('', [DashboardController::class, 'index'])->name($name.'dashboard.index');
-            $router->get('/logs', [LogsController::class, 'index'])->name($name.'logs.index');
-            $router->get('/ips', [IpsController::class, 'index'])->name($name.'ips.index');
+            $router->get('', [DashboardController::class, 'index'])->name('dashboard.index');
 
-            $router->get('/whitelist', [DashboardController::class, 'whitelist'])->name($name.'whitelist');
-            $router->post('/whitelist', [DashboardController::class, 'whitelistStore'])->name($name.'whitelist.store');
-            $router->delete('/whitelist/{id}', [DashboardController::class, 'whitelistDestroy'])->name($name.'whitelist.destroy');
+            $router->get('ips', [IpsController::class, 'index'])->name('ips.index');
+            $router->post('ips/{ip:id}/action', [IpsController::class, 'postAction'])->name('ips.action');
 
-            $router->get('/blacklist', [DashboardController::class, 'blacklist'])->name($name.'blacklist');
-            $router->post('/blacklist', [DashboardController::class, 'blacklistStore'])->name($name.'blacklist.store');
-            $router->delete('/blacklist/{id}', [DashboardController::class, 'blacklistDestroy'])->name($name.'blacklist.destroy');
+            $router->get('logs', [LogsController::class, 'index'])->name('logs.index');
+            $router->post('logs/{log:id}/action', [LogsController::class, 'postAction'])->name('logs.action');
         });
     }
 

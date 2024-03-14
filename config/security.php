@@ -43,41 +43,60 @@ return [
         'expression' => env('FIREWALL_CRON_EXPRESSION', '* * * * *'),
     ],
 
-    'responses' => [
-
-        'block' => [
-            'view' => null,
-            'redirect' => null,
-            'abort' => false,
-            'code' => 403,
-            //'exception' => \OzanKurt\Security\Exceptions\AccessDenied::class,
+    'notifications' => [
+        'attack_detected' => [
+            'enabled' => env('FIREWALL_NOTIFICATIONS_ATTACK_DETECTED_ENABLED', false),
+            'channels' => [
+                'mail', 'slack', 'discord',
+            ],
         ],
 
+        'security_report' => [
+            'enabled' => env('FIREWALL_NOTIFICATIONS_SECURITY_REPORT_ENABLED', false),
+            'channels' => [
+                'mail', 'slack', 'discord',
+            ],
+        ],
+
+        'successful_login' => [
+            'enabled' => env('FIREWALL_NOTIFICATIONS_SUCCESSFUL_LOGIN_ENABLED', false),
+            'channels' => [
+                'mail', 'slack', 'discord',
+            ],
+        ],
     ],
 
-    'notifications' => [
+    'notification_channels' => [
 
         'mail' => [
-            'enabled' => env('FIREWALL_EMAIL_ENABLED', false),
-            'name' => env('FIREWALL_EMAIL_NAME', 'Laravel Security'),
-            'from' => env('FIREWALL_EMAIL_FROM', 'security@example.com'),
-            'to' => env('FIREWALL_EMAIL_TO', 'admin@example.com'),
-            'queue' => env('FIREWALL_EMAIL_QUEUE', 'default'),
+            'enabled' => env('FIREWALL_NOTIFICATION_CHANNELS_EMAIL_ENABLED', false),
+            'name' => env('FIREWALL_NOTIFICATION_CHANNELS_EMAIL_NAME', 'Laravel Security'),
+            'from' => env('FIREWALL_NOTIFICATION_CHANNELS_EMAIL_FROM', 'security@example.com'),
+            'to' => env('FIREWALL_NOTIFICATION_CHANNELS_EMAIL_TO', 'admin@example.com'),
+            'queue' => env('FIREWALL_NOTIFICATION_CHANNELS_EMAIL_QUEUE', 'default'),
         ],
 
         'slack' => [
-            'enabled' => env('FIREWALL_SLACK_ENABLED', false),
-            'emoji' => env('FIREWALL_SLACK_EMOJI', ':fire:'),
-            'from' => env('FIREWALL_SLACK_FROM', 'Laravel Security'),
-            'to' => env('FIREWALL_SLACK_TO'), // webhook url
-            'channel' => env('FIREWALL_SLACK_CHANNEL', null), // set null to use the default channel of webhook
-            'queue' => env('FIREWALL_SLACK_QUEUE', 'default'),
+            'enabled' => env('FIREWALL_NOTIFICATION_CHANNELS_SLACK_ENABLED', false),
+            'emoji' => env('FIREWALL_NOTIFICATION_CHANNELS_SLACK_EMOJI', ':fire:'),
+            'from' => env('FIREWALL_NOTIFICATION_CHANNELS_SLACK_FROM', 'Laravel Security'),
+            'to' => env('FIREWALL_NOTIFICATION_CHANNELS_SLACK_TO'), // webhook url
+            'channel' => env('FIREWALL_NOTIFICATION_CHANNELS_SLACK_CHANNEL', null), // set null to use the default channel of webhook
+            'queue' => env('FIREWALL_NOTIFICATION_CHANNELS_SLACK_QUEUE', 'default'),
         ],
 
         'discord' => [
-            'enabled' => env('FIREWALL_DISCORD_ENABLED', false),
-            'webhook_url' => env('FIREWALL_DISCORD_WEBHOOK_URL'),
-            'queue' => env('FIREWALL_DISCORD_QUEUE', 'default'),
+            'enabled' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_ENABLED', false),
+            'webhook_url' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_WEBHOOK_URL'),
+            'queue' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_QUEUE', 'default'),
+
+            // Embed Customizations
+            'from' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FROM', 'Laravel Security'),
+            'from_img' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FROM_IMG', 'https://ozankurt.com/laravel-security.png'),
+            'route' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_ROUTE'), # Route name to your security dashboard
+            'title' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_TITLE', 'Attack Detected'),
+            'footer' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FOOTER', 'Laravel Security'),
+            'footer_img' => env('FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FOOTER_IMG', 'https://ozankurt.com/laravel-security.png'),
         ],
 
     ],
@@ -525,6 +544,18 @@ return [
                 'frequency' => 5 * 60, // 5 minutes
                 'period' => 30 * 60, // 30 minutes
             ],
+        ],
+
+    ],
+
+    'responses' => [
+
+        'block' => [
+            'view' => null,
+            'redirect' => null,
+            'abort' => false,
+            'code' => 403,
+            //'exception' => \OzanKurt\Security\Exceptions\AccessDenied::class,
         ],
 
     ],

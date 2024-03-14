@@ -15,8 +15,31 @@ class IpsDataTable extends DataTable
     {
         $builder = datatables()->eloquent($query);
 
-        $builder->addColumn('action', function (Ip $ip) {
-            return 'actions';
+        $builder->addColumn('actions', function (Ip $ip) {
+            $whitelistLink = app('security')->route('ips.action', [
+                'ip' => $ip,
+                'action' => 'whitelist',
+            ]);
+            $deleteLink = app('security')->route('ips.action', [
+                'ip' => $ip,
+                'action' => 'delete',
+            ]);
+            return <<<HTML
+                <a href="{$whitelistLink}" class="btn btn-sm btn-primary ajax-link" title="Whitelist"
+                    data-bs-toggle="tooltip" data-bs-title="Whitelist"
+                >
+                    <i class="far fa-fw fa-check"></i>
+                </a>
+                <a href="{$deleteLink}" class="btn btn-sm btn-danger ajax-link" title="Delete"
+                    data-bs-toggle="tooltip" data-bs-title="Delete"
+                >
+                    <i class="far fa-fw fa-trash"></i>
+                </a>
+            HTML;
+        });
+
+        $builder->editColumn('entry_type', function (Ip $ip) {
+            return $ip->entry_type ?? 'n/a';
         });
 
         $builder->editColumn('created_at', function (Ip $ip) {
@@ -69,6 +92,9 @@ class IpsDataTable extends DataTable
                 'mode' => 'dataTable',
             ]))
             ->orderBy(1)
+            ->drawCallback('function() {
+                window.initTooltips();
+            }')
             ->responsive(true)
             ->autoWidth(true)
             ->setTemplate('security::datatables.template');
@@ -80,10 +106,12 @@ class IpsDataTable extends DataTable
             Column::make('id')->class('all dtr-control'),
             Column::make('ip')->class('all'),
             Column::make('log_id')->class('all'),
+            Column::make('entry_type', 'entry_type')->class('all'),
             Column::make('is_blocked')->class('all'),
             Column::make('request_count')->class('none'),
             Column::make('created_at')->class('none'),
             Column::make('updated_at')->class('none'),
+            Column::make('actions')->class('all text-center'),
         ];
     }
 }

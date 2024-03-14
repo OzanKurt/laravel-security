@@ -16,9 +16,9 @@ class Security
         $this->antiXss = $antiXss;
     }
 
-    public function route(string $route)
+    public function route(string $route, array $parameters = [], bool $absolute = true)
     {
-        return route(config('security.dashboard.route_name') . $route);
+        return route(config('security.dashboard.route_name') . $route, $parameters, $absolute);
     }
 
     public function routeIsActive(string $route)
