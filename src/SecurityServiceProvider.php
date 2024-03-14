@@ -55,7 +55,10 @@ class SecurityServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerCommands();
         $this->registerViews();
-        $this->registerRoutes($router);
+
+        if (config('security.dashboard.enabled')) {
+            $this->registerRoutes($router);
+        }
     }
 
     protected function registerRoutes(Router $router): void
