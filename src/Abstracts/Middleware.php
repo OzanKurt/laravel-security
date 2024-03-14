@@ -178,6 +178,6 @@ abstract class Middleware
             }
         }
 
-        return Response::make(trans('security::responses.block.message'), $response['code']);
+        return response(trans('security::responses.block.message'), (int) $response['code']);
     }
 }
