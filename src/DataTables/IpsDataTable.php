@@ -133,14 +133,30 @@ class IpsDataTable extends DataTable
     protected function getColumns(): array
     {
         return [
-            Column::make('id')->class('all dtr-control'),
-            Column::make('ip')->class('all'),
-            Column::make('log_id')->class('all'),
-            Column::make('entry_type', 'entry_type')->class('all'),
-            Column::make('request_count')->class('all'),
-            Column::make('created_at')->class('none'),
-            Column::make('updated_at')->class('none'),
-            Column::make('actions')->class('all text-center'),
+            Column::make('id')
+                ->title(trans('security::dashboard.columns.id'))
+                ->class('all dtr-control'),
+            Column::make('ip')
+                ->title(trans('security::dashboard.columns.ip'))
+                ->class('all'),
+            Column::make('log_id')
+                ->title(trans('security::dashboard.columns.log_id'))
+                ->class('all'),
+            Column::make('entry_type', 'entry_type')
+                ->title(trans('security::dashboard.columns.entry_type'))
+                ->class('all'),
+            Column::make('request_count')
+                ->title(trans('security::dashboard.columns.request_count'))
+                ->class('all'),
+            Column::make('created_at')
+                ->title(trans('security::dashboard.columns.created_at'))
+                ->class('none'),
+            Column::make('updated_at')
+                ->title(trans('security::dashboard.columns.updated_at'))
+                ->class('none'),
+            Column::make('actions')
+                ->title(trans('security::dashboard.columns.actions'))
+                ->class('all text-center'),
         ];
     }
 }

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\IpUtils;
 
 trait Helper
 {
+    public string $reason = 'access_denied';
     public Request|string|array|null $request = null;
     public ?string $middleware = null;
     public ?int $user_id = null;

@@ -12,6 +12,8 @@ class Ip extends AbstractMiddleware
 {
     public function check($patterns)
     {
+        $this->reason = 'ip_blocked';
+
         // Check if the IP is blacklisted or blocked
         $model = config('security.database.ip.model');
 

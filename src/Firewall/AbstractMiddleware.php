@@ -2,12 +2,12 @@
 
 namespace OzanKurt\Security\Firewall;
 
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Firewall\Traits\Helper;
 use Closure;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
+use OzanKurt\Security\Events\AttackDetectedEvent;
+use OzanKurt\Security\Firewall\Traits\Helper;
 
 abstract class AbstractMiddleware
 {
@@ -49,7 +49,7 @@ abstract class AbstractMiddleware
             return true;
         }
 
-        if (! $this->isMethod()) {
+        if (!$this->isMethod()) {
             return true;
         }
 
@@ -63,6 +63,7 @@ abstract class AbstractMiddleware
     public function prepare($request)
     {
         $this->request = $request;
+        $this->reason = 'access_denied';
         $this->middleware = strtolower((new \ReflectionClass($this))->getShortName());
         $this->user_id = auth()->id() ?: 0;
     }
@@ -77,7 +78,7 @@ abstract class AbstractMiddleware
         $log = null;
 
         foreach ($patterns as $pattern) {
-            if (! $match = $this->match($pattern, $this->request->input())) {
+            if (!$match = $this->match($pattern, $this->request->input())) {
                 continue;
             }
 
@@ -99,11 +100,11 @@ abstract class AbstractMiddleware
     {
         $result = false;
 
-        if (! is_array($input) && !is_string($input)) {
+        if (!is_array($input) && !is_string($input)) {
             return false;
         }
 
-        if (! is_array($input)) {
+        if (!is_array($input)) {
             $input = $this->prepareInput($input);
 
             return preg_match($pattern, $input);
@@ -122,13 +123,13 @@ abstract class AbstractMiddleware
                 break;
             }
 
-            if (! $this->isInput($key)) {
+            if (!$this->isInput($key)) {
                 continue;
             }
 
             $value = $this->prepareInput($value);
 
-            if (! $result = preg_match($pattern, $value)) {
+            if (!$result = preg_match($pattern, $value)) {
                 continue;
             }
 
@@ -153,16 +154,29 @@ abstract class AbstractMiddleware
             return Response::view($view, $data, $response['code']);
         }
 
+        if (Lang::has('security::responses.' . $this->reason . '.message')) {
+            $message = trans('security::responses.' . $this->reason . '.message');
+        } else {
+            $message = trans('security::responses.access_denied.message');
+        }
+
         if ($redirect = $response['redirect']) {
             if (($this->middleware == 'ip') && $this->request->is($redirect)) {
-                abort($response['code'], trans('security::responses.block.message'));
+                abort($response['code'], $message);
             }
 
             return Redirect::to($redirect);
         }
 
         if ($response['abort']) {
-            abort($response['code'], trans('security::responses.block.message'));
+            if ($this->request?->expectsJson()) {
+                return response()->json([
+                    'reason' => $this->reason,
+                    'message' => $message,
+                ], $response['code']);
+            }
+
+            abort($response['code'], $message);
         }
 
         if (array_key_exists('exception', $response)) {
@@ -171,6 +185,6 @@ abstract class AbstractMiddleware
             }
         }
 
-        return response(trans('security::responses.block.message'), (int) $response['code']);
+        return response($message, (int)$response['code']);
     }
 }

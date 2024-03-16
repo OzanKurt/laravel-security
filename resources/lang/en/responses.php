@@ -2,7 +2,11 @@
 
 return [
 
-    'block' => [
+    'ip_blocked' => [
+        'message' => 'IP Blocked',
+    ],
+
+    'access_denied' => [
         'message' => 'Access Denied',
     ],
 

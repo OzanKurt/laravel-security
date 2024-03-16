@@ -38,6 +38,14 @@
         td {
             vertical-align: middle;
         }
+
+        .keyword { color: #005cc5; } /* Dark Blue */
+        .json-key { color: #008000; } /* Dark Green */
+        .json-string { color: #A52A2A; } /* Dark Red */
+
+        html[data-bs-theme="dark"] .keyword { color: #F92672; } /* Dark Blue */
+        html[data-bs-theme="dark"] .json-key { color: #A6E22E; } /* Dark Green */
+        html[data-bs-theme="dark"] .json-string { color: #E6DB74; } /* Dark Red */
     </style>
 
     <!-- Head -->

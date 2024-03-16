@@ -15,6 +15,8 @@ return [
             'auth',
             OzanKurt\Security\Http\Middleware\SecurityDashboardMiddleware::class,
         ],
+        'user_name_field' => 'full_name',
+        'logo_target_route_name' => null,
     ],
 
     'database' => [
@@ -342,7 +344,8 @@ return [
             ],
 
             'patterns' => [
-                '#(http|ftp){1,1}(s){0,1}://.*#i',
+                '#(http|https){1,1}://.*\..{2,4}/.*\..{2,4}#i',
+                '#(ftp|sftp|ftps){1,1}://.*#i',
             ],
 
             'exceptions' => [],
