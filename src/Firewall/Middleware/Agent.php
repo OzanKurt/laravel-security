@@ -4,7 +4,7 @@ namespace OzanKurt\Security\Firewall\Middleware;
 
 use OzanKurt\Security\Firewall\AbstractMiddleware;
 use OzanKurt\Security\Events\AttackDetected;
-use Jenssegers\Agent\Agent as Parser;
+use OzanKurt\Agent\Agent as Parser;
 
 class Agent extends AbstractMiddleware
 {

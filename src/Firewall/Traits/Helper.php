@@ -3,7 +3,7 @@
 namespace OzanKurt\Security\Firewall\Traits;
 
 use Illuminate\Http\Request;
-use Jenssegers\Agent\Agent as Parser;
+use OzanKurt\Agent\Agent as Parser;
 use OzanKurt\Security\Enums\IpEntryType;
 use OzanKurt\Security\Enums\LogLevel;
 use OzanKurt\Security\Models\Log;

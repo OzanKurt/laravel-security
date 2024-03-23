@@ -4,7 +4,7 @@ namespace OzanKurt\Security\Firewall\Middleware;
 
 use OzanKurt\Security\Firewall\AbstractMiddleware;
 use OzanKurt\Security\Events\AttackDetected;
-use Jenssegers\Agent\Agent;
+use OzanKurt\Agent\Agent;
 
 class Bot extends AbstractMiddleware
 {
