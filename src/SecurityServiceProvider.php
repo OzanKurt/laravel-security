@@ -32,7 +32,7 @@ class SecurityServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/security.php', 'security');
 
-        $this->app->register(\Jenssegers\Agent\AgentServiceProvider::class);
+        $this->app->register(\OzanKurt\Agent\AgentServiceProvider::class);
 
         $this->app->singleton(Security::class, function () {
             $antiXss = new AntiXSS();
