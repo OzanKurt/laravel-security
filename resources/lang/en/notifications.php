@@ -33,13 +33,31 @@ return [
     ],
 
     'security_report' => [
-        'last_modified_files' => 'Last modified files',
-        'last_modification' => 'Last Modification',
-        'file' => 'File',
         'mail' => [
             'subject' => 'Security Report for :domain',
             'message' => 'This email was sent by your :domain site and contains a security report for the period :start - :end.',
         ],
+
+        // Section titles
+        'most_blocked_ips' => 'Most Blocked 10 IP Addresses',
+        'most_blocked_countries' => 'Most Blocked 10 Countries',
+        'most_failed_login_attempts' => 'Most Failed 10 Login Attempts',
+        'last_modified_files' => 'Last Modified 15 Files',
+
+        // Column titles
+        'blocked_attacks' => 'Blocked Attacks',
+        'ip' => 'Ip',
+        'country' => 'Country',
+        'total_blocks' => 'Total Blocks',
+        'blocked_attacks' => 'Blocked Attacks',
+        'country' => 'Country',
+        'total_blocked_ips' => 'Total Blocked Ips',
+        'total_blocks' => 'Total Blocks',
+        'user' => 'User',
+        'login_attempts' => 'Login Attempts',
+        'user_exists' => 'User Exists',
+        'last_modification' => 'Last Modification',
+        'file' => 'File',
     ],
 
 ];

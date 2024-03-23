@@ -1,11 +1,11 @@
 <?php
 
-namespace OzanKurt\Security\Middleware;
+namespace OzanKurt\Security\Firewall\Middleware;
 
-use OzanKurt\Security\Abstracts\Middleware;
+use OzanKurt\Security\Firewall\AbstractMiddleware;
 use OzanKurt\Security\Events\AttackDetected;
 
-class Referrer extends Middleware
+class Referrer extends AbstractMiddleware
 {
     public function check($patterns)
     {

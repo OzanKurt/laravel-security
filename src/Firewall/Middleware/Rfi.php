@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Middleware;
+namespace OzanKurt\Security\Firewall\Middleware;
 
-use OzanKurt\Security\Abstracts\Middleware;
+use OzanKurt\Security\Firewall\AbstractMiddleware;
 
-class Rfi extends Middleware
+class Rfi extends AbstractMiddleware
 {
     public function match($pattern, $input)
     {

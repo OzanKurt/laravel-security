@@ -2,6 +2,7 @@
 
 namespace OzanKurt\Security\Listeners;
 
+use OzanKurt\Security\Enums\IpEntryType;
 use OzanKurt\Security\Events\AttackDetectedEvent;
 use OzanKurt\Security\Models\Ip;
 use OzanKurt\Security\Models\Log;
@@ -38,6 +39,8 @@ class BlockIpListener
         $ip::create([
             'ip' => $event->log->ip,
             'log_id' => $event->log->id,
+            'entry_type' => IpEntryType::BLOCK,
+            'request_count' => 0,
         ]);
     }
 }

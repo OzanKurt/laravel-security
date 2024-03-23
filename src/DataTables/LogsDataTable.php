@@ -19,18 +19,27 @@ class LogsDataTable extends DataTable
             return 'actions';
         });
 
+        $nameField = config('security.dashboard.user_name_field');
+
+        $builder->editColumn('user_name', function (Log $log) use ($nameField) {
+            return $log->user?->{$nameField} ?? 'Guest';
+        });
+
+        $baseUrl = url('/');
+
+        $builder->editColumn('url', function (Log $log) use ($baseUrl) {
+            return str_replace($baseUrl, '', $log->url);
+        });
+
+        $builder->editColumn('request_data', function (Log $log) {
+            return app('security')->highlightJson($log->request_data);
+        });
+
         $builder->editColumn('created_at', function (Log $log) {
             return $log->created_at ? $log->created_at->format('Y-m-d H:i:s') : 'n/a';
         });
         $builder->editColumn('updated_at', function (Log $log) {
             return $log->updated_at ? $log->updated_at->format('Y-m-d H:i:s') : 'n/a';
-        });
-
-        $builder->editColumn('request_data', function (Log $log) {
-            $dataJson = json_encode($log->request_data, JSON_PRETTY_PRINT);
-            $dataJson = htmlspecialchars($dataJson, ENT_QUOTES, 'UTF-8');
-
-            return '<pre class="mb-0">' . $dataJson . '</pre>';
         });
 
         // https://yajrabox.com/docs/laravel-datatables/master/row-options
@@ -63,7 +72,10 @@ class LogsDataTable extends DataTable
     {
         $model = config('security.database.log.model', Ip::class);
 
-        $query = $model::query();
+        $tableName = config('security.database.table_prefix').config('security.database.log.table');
+        $query = $model::query()
+            ->select($tableName .'.*')
+            ->with('user');
 
         return $query;
     }
@@ -85,17 +97,39 @@ class LogsDataTable extends DataTable
     protected function getColumns(): array
     {
         return [
-            Column::make('id')->class('all dtr-control'),
-            Column::make('user_id')->class('all'),
-            Column::make('middleware')->class('all'),
-            Column::make('level')->class('all'),
-            Column::make('ip')->class('all'),
-            Column::make('url')->class('all'),
-            Column::make('user_agent')->class('none'),
-            Column::make('referrer')->class('none'),
-            Column::make('request_data')->class('none'),
-            Column::make('created_at')->class('none'),
-            Column::make('updated_at')->class('none'),
+            Column::make('id')
+                ->title(trans('security::dashboard.columns.id'))
+                ->class('all dtr-control'),
+            Column::make('user_name', 'user.'.config('security.dashboard.user_name_field'))
+                ->title(trans('security::dashboard.columns.user_name'))
+                ->class('all'),
+            Column::make('middleware')
+                ->title(trans('security::dashboard.columns.middleware'))
+                ->class('all'),
+            Column::make('level')
+                ->title(trans('security::dashboard.columns.level'))
+                ->class('all'),
+            Column::make('ip')
+                ->title(trans('security::dashboard.columns.ip'))
+                ->class('all'),
+            Column::make('url')
+                ->title(trans('security::dashboard.columns.url'))
+                ->class('all'),
+            Column::make('user_agent')
+                ->title(trans('security::dashboard.columns.user_agent'))
+                ->class('none'),
+            Column::make('referrer')
+                ->title(trans('security::dashboard.columns.referrer'))
+                ->class('none'),
+            Column::make('request_data')
+                ->title(trans('security::dashboard.columns.request_data'))
+                ->class('none'),
+            Column::make('created_at')
+                ->title(trans('security::dashboard.columns.created_at'))
+                ->class('none'),
+            Column::make('updated_at')
+                ->title(trans('security::dashboard.columns.updated_at'))
+                ->class('none'),
         ];
     }
 }

@@ -93,11 +93,34 @@ You may also define `routes` for each middleware in `config/security.php` and ap
 
 Firewall will send a notification as soon as an attack has been detected. Emails entered in `notifications.email.to` config must be valid Laravel users in order to send notifications. Check out the Notifications documentation of Laravel for further information.
 
+## Dashboard
+
+In order to view the dashboard, you must enable it in your `AppServiceProvider`:
+
+```php
+    use App\Models\User;
+    use Illuminate\Support\Facades\Gate;
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        Gate::define('viewSecurityDashboard', function (?User $user) {
+            return $user?->id === 1;
+        });
+
+        // ...
+    }
+```
+
 ## .env Variables
 
 ```sh
 FIREWALL_ENABLED=true
 FIREWALL_WHITELIST="127.0.0.0/24"
+
+FIREWALL_DASHBOARD_ENABLED=true
 
 FIREWALL_DB_CONNECTION="${DB_CONNECTION}"
 FIREWALL_DB_PREFIX=security_
@@ -105,28 +128,33 @@ FIREWALL_DB_PREFIX=security_
 FIREWALL_CRON_ENABLED=false
 FIREWALL_CRON_EXPRESSION="* * * * *"
 
-FIREWALL_BLOCK_VIEW=null
-FIREWALL_BLOCK_REDIRECT=null
-FIREWALL_BLOCK_ABORT=false
-FIREWALL_BLOCK_CODE=403
+FIREWALL_NOTIFICATIONS_ATTACK_DETECTED_ENABLED=false
+FIREWALL_NOTIFICATIONS_SECURITY_REPORT_ENABLED=false
+FIREWALL_NOTIFICATIONS_SUCCESSFUL_LOGIN_ENABLED=false
 
-FIREWALL_EMAIL_ENABLED=false
-FIREWALL_EMAIL_NAME="${MAIL_FROM_NAME}"
-FIREWALL_EMAIL_FROM="${MAIL_FROM_ADDRESS}"
-FIREWALL_EMAIL_TO="webmaster@example.com"
-FIREWALL_EMAIL_QUEUE=default
+FIREWALL_NOTIFICATION_CHANNELS_EMAIL_ENABLED=false
+FIREWALL_NOTIFICATION_CHANNELS_EMAIL_NAME="${MAIL_FROM_NAME}"
+FIREWALL_NOTIFICATION_CHANNELS_EMAIL_FROM="${MAIL_FROM_ADDRESS}"
+FIREWALL_NOTIFICATION_CHANNELS_EMAIL_TO="webmaster@example.com"
+FIREWALL_NOTIFICATION_CHANNELS_EMAIL_QUEUE=default
 
-FIREWALL_SLACK_ENABLED=false
-FIREWALL_SLACK_EMOJI=":fire:"
-FIREWALL_SLACK_FROM="Laravel Security"
-FIREWALL_SLACK_TO= # webhook url
-FIREWALL_SLACK_CHANNEL=null
-FIREWALL_SLACK_QUEUE=default
+FIREWALL_NOTIFICATION_CHANNELS_SLACK_ENABLED=false
+FIREWALL_NOTIFICATION_CHANNELS_SLACK_EMOJI=":fire:"
+FIREWALL_NOTIFICATION_CHANNELS_SLACK_FROM="Laravel Security"
+FIREWALL_NOTIFICATION_CHANNELS_SLACK_TO= # webhook url
+FIREWALL_NOTIFICATION_CHANNELS_SLACK_CHANNEL=null
+FIREWALL_NOTIFICATION_CHANNELS_SLACK_QUEUE=default
 
-FIREWALL_DISCORD_ENABLED=false
-FIREWALL_DISCORD_TO= # webhook url
-FIREWALL_DISCORD_CHANNEL=null
-FIREWALL_DISCORD_QUEUE=default
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_ENABLED=false
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_WEBHOOK_URL=
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_QUEUE=default
+
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FROM="Laravel Security"
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FROM_IMG=https://ozankurt.com/laravel-security.png
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_ROUTE=
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_TITLE="Attack Detected"
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FOOTER="Laravel Security"
+FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FOOTER_IMG=https://ozankurt.com/laravel-security.png
 
 FIREWALL_MIDDLEWARE_IP_ENABLED=true
 FIREWALL_MIDDLEWARE_AGENT_ENABLED=true
