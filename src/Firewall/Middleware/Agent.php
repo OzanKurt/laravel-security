@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\Middleware;
+namespace OzanKurt\Security\Firewall\Middleware;
 
-use OzanKurt\Security\Abstracts\Middleware;
+use OzanKurt\Security\Firewall\AbstractMiddleware;
 use OzanKurt\Security\Events\AttackDetected;
 use Jenssegers\Agent\Agent as Parser;
 
-class Agent extends Middleware
+class Agent extends AbstractMiddleware
 {
     protected $parser;
 

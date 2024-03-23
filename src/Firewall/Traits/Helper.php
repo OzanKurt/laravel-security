@@ -1,15 +1,17 @@
 <?php
 
-namespace OzanKurt\Security\Traits;
+namespace OzanKurt\Security\Firewall\Traits;
 
 use Illuminate\Http\Request;
 use Jenssegers\Agent\Agent as Parser;
+use OzanKurt\Security\Enums\IpEntryType;
 use OzanKurt\Security\Enums\LogLevel;
 use OzanKurt\Security\Models\Log;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 trait Helper
 {
+    public string $reason = 'access_denied';
     public Request|string|array|null $request = null;
     public ?string $middleware = null;
     public ?int $user_id = null;

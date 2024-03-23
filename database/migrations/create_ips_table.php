@@ -20,8 +20,7 @@ return new class extends Migration
             $table->id();
             $table->string('ip')->index();
             $table->foreignId('log_id')->nullable()->index();
-            $table->string('entry_type')->nullable();
-            $table->boolean('is_blocked')->default(1);
+            $table->string('entry_type')->nullable()->index();
             $table->unsignedInteger('request_count')->default(0);
             $table->timestamps();
             $table->softDeletes();

@@ -27,7 +27,9 @@
                     </a>
                 </li>
             </ul>
-            <a class="navbar-brand mx-auto p-0" href="{{ app('security')->route('dashboard.index') }}">
+            <a class="navbar-brand mx-auto p-0"
+               href="{{ app('security')->logoHref() }}"
+            >
                 <img src="{{ asset('vendor/security/images/laravel-security.png') }}" alt="Logo" style="height: 38px;">
             </a>
             <ul class="navbar-nav justify-content-end" style="width: 40%">

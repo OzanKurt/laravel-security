@@ -84,11 +84,12 @@ class SecurityReportNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->theme('security::notifications.themes.default')
             ->markdown('security::notifications.security-report-notification', [
+                'message' => $message,
                 'recentlyModifiedFiles' => $this->recentlyModifiedFiles,
             ])
 //            ->from($this->notifications['mail']['from'], $this->notifications['mail']['name'])
-            ->subject($subject ?? '$subject')
-            ->line($message ?? '$message');
+            ->subject($subject ?? 'Security Report')
+            ->action('View Security Dashboard', app('security')->route('dashboard.index'));
     }
 
     /**

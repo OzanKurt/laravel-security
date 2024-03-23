@@ -2,6 +2,7 @@
 
 namespace OzanKurt\Security;
 
+use Illuminate\Contracts\Foundation\Application;
 use OzanKurt\Security\Http\Controllers\IpsController;
 use OzanKurt\Security\Http\Controllers\DashboardController;
 use OzanKurt\Security\Http\Controllers\LogsController;
@@ -10,6 +11,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Auth\Access\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Events\Login as LoginAuthenticated;
@@ -55,28 +57,39 @@ class SecurityServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerCommands();
         $this->registerViews();
-        $this->registerRoutes($router);
+
+        if (config('security.dashboard.enabled')) {
+            $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
+                $gate->define('viewSecurityDashboard', fn ($user = null) => false);
+            });
+
+            $this->callAfterResolving('router', function (Router $router, Application $app) {
+                $this->registerRoutes($router);
+            });
+        }
     }
 
     protected function registerRoutes(Router $router): void
     {
+        $middleware = config('security.dashboard.middleware', []);
+
+        $name = config('security.dashboard.route_name', 'security.');
         $router->group([
             'namespace' => 'OzanKurt\Security\Http\Controllers',
             'prefix' => config('security.dashboard.route_prefix', 'security'),
-            'middleware' => config('security.dashboard.route_middleware', []),
+            'middleware' => [
+                'web',
+                ...$middleware,
+            ],
+            'as' => $name,
         ], function ($router) {
-            $name = config('security.dashboard.route_name', 'security.');
-            $router->get('', [DashboardController::class, 'index'])->name($name.'dashboard.index');
-            $router->get('/logs', [LogsController::class, 'index'])->name($name.'logs.index');
-            $router->get('/ips', [IpsController::class, 'index'])->name($name.'ips.index');
+            $router->get('', [DashboardController::class, 'index'])->name('dashboard.index');
 
-            $router->get('/whitelist', [DashboardController::class, 'whitelist'])->name($name.'whitelist');
-            $router->post('/whitelist', [DashboardController::class, 'whitelistStore'])->name($name.'whitelist.store');
-            $router->delete('/whitelist/{id}', [DashboardController::class, 'whitelistDestroy'])->name($name.'whitelist.destroy');
+            $router->get('ips', [IpsController::class, 'index'])->name('ips.index');
+            $router->post('ips/{ip:id}/action', [IpsController::class, 'postAction'])->name('ips.action');
 
-            $router->get('/blacklist', [DashboardController::class, 'blacklist'])->name($name.'blacklist');
-            $router->post('/blacklist', [DashboardController::class, 'blacklistStore'])->name($name.'blacklist.store');
-            $router->delete('/blacklist/{id}', [DashboardController::class, 'blacklistDestroy'])->name($name.'blacklist.destroy');
+            $router->get('logs', [LogsController::class, 'index'])->name('logs.index');
+            $router->post('logs/{log:id}/action', [LogsController::class, 'postAction'])->name('logs.action');
         });
     }
 
@@ -85,21 +98,21 @@ class SecurityServiceProvider extends ServiceProvider
         $router->middlewareGroup('firewall.all', config('security.all_middleware'));
 
         $middlewares = [
-            'firewall.agent' => \OzanKurt\Security\Middleware\Agent::class,
-            'firewall.bot' => \OzanKurt\Security\Middleware\Bot::class,
-            'firewall.ip' => \OzanKurt\Security\Middleware\Ip::class,
-            'firewall.geo' => \OzanKurt\Security\Middleware\Geo::class,
-            'firewall.lfi' => \OzanKurt\Security\Middleware\Lfi::class,
-            'firewall.php' => \OzanKurt\Security\Middleware\Php::class,
-            'firewall.referrer' => \OzanKurt\Security\Middleware\Referrer::class,
-            'firewall.rfi' => \OzanKurt\Security\Middleware\Rfi::class,
-            'firewall.session' => \OzanKurt\Security\Middleware\Session::class,
-            'firewall.sqli' => \OzanKurt\Security\Middleware\Sqli::class,
-            'firewall.swear' => \OzanKurt\Security\Middleware\Swear::class,
-            'firewall.url' => \OzanKurt\Security\Middleware\Url::class,
-            'firewall.whitelist' => \OzanKurt\Security\Middleware\Whitelist::class,
-            'firewall.xss' => \OzanKurt\Security\Middleware\Xss::class,
-            'firewall.keyword' => \OzanKurt\Security\Middleware\Keyword::class,
+            'firewall.agent' => \OzanKurt\Security\Firewall\Middleware\Agent::class,
+            'firewall.bot' => \OzanKurt\Security\Firewall\Middleware\Bot::class,
+            'firewall.ip' => \OzanKurt\Security\Firewall\Middleware\Ip::class,
+            'firewall.geo' => \OzanKurt\Security\Firewall\Middleware\Geo::class,
+            'firewall.lfi' => \OzanKurt\Security\Firewall\Middleware\Lfi::class,
+            'firewall.php' => \OzanKurt\Security\Firewall\Middleware\Php::class,
+            'firewall.referrer' => \OzanKurt\Security\Firewall\Middleware\Referrer::class,
+            'firewall.rfi' => \OzanKurt\Security\Firewall\Middleware\Rfi::class,
+            'firewall.session' => \OzanKurt\Security\Firewall\Middleware\Session::class,
+            'firewall.sqli' => \OzanKurt\Security\Firewall\Middleware\Sqli::class,
+            'firewall.swear' => \OzanKurt\Security\Firewall\Middleware\Swear::class,
+            'firewall.url' => \OzanKurt\Security\Firewall\Middleware\Url::class,
+            'firewall.whitelist' => \OzanKurt\Security\Firewall\Middleware\Whitelist::class,
+            'firewall.xss' => \OzanKurt\Security\Firewall\Middleware\Xss::class,
+            'firewall.keyword' => \OzanKurt\Security\Firewall\Middleware\Keyword::class,
         ];
 
         foreach ($middlewares as $name => $class) {
@@ -125,11 +138,19 @@ class SecurityServiceProvider extends ServiceProvider
         $this->commands(UnblockIpsCommand::class);
         $this->commands(SendSecurityReportNotificationCommand::class);
 
-        if (config('security.cron.enabled')) {
-            $this->app->booted(function () {
-                app(Schedule::class)->command('security:unblock-ips')->cron(config('security.cron.expression'));
-            });
-        }
+        $this->app->booted(function () {
+            if (config('security.crons.unblock_ips.enabled')) {
+                app(Schedule::class)
+                    ->command('security:unblock-ips')
+                    ->cron(config('security.crons.unblock_ips.cron_expression'));
+            }
+
+            if (config('security.notifications.security_report.enabled')) {
+                app(Schedule::class)
+                    ->command('security:send-security-report-notification')
+                    ->cron(config('security.crons.security_report.cron_expression'));
+            }
+        });
     }
 
     protected function registerViews(): void

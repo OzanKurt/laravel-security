@@ -1,16 +1,16 @@
 <?php
 
-namespace OzanKurt\Security\Middleware;
+namespace OzanKurt\Security\Firewall\Middleware;
 
 use Closure;
-use OzanKurt\Security\Abstracts\Middleware;
+use OzanKurt\Security\Firewall\AbstractMiddleware;
 use OzanKurt\Security\Events\AttackDetectedEvent;
 use OzanKurt\Security\Security;
 use OzanKurt\Security\Helpers\BladeEchoCleaner;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-class Xss extends Middleware
+class Xss extends AbstractMiddleware
 {
     public function __construct(
         protected Security $security,

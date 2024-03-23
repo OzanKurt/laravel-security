@@ -5,6 +5,7 @@ namespace OzanKurt\Security\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use OzanKurt\Security\Security;
+use Illuminate\Support\Facades\Gate;
 
 class SecurityDashboardMiddleware
 {
@@ -20,6 +21,10 @@ class SecurityDashboardMiddleware
 
         if ($isOutdated) {
             return view('security::layouts.bootstrap.outdated');
+        }
+
+        if (! Gate::allows('viewSecurityDashboard')) {
+            abort(403);
         }
 
         return $next($request);
