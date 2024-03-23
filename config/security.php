@@ -40,30 +40,39 @@ return [
         ],
     ],
 
-    'cron' => [
-        'enabled' => env('FIREWALL_CRON_ENABLED', true),
-        'expression' => env('FIREWALL_CRON_EXPRESSION', '* * * * *'),
+    'crons' => [
+        'unblock_ips' => [
+            'enabled' => env('FIREWALL_CRONS_UNBLOCK_IPS_ENABLED', true),
+            'cron_expression' => env('FIREWALL_CRONS_UNBLOCK_IPS_EXPRESSION', '* * * * *'),
+        ],
     ],
 
     'notifications' => [
         'attack_detected' => [
             'enabled' => env('FIREWALL_NOTIFICATIONS_ATTACK_DETECTED_ENABLED', false),
+            // Only "slack" and "discord" channels are supported for now
             'channels' => [
-                'mail', 'slack', 'discord',
+                'slack',
+                'discord',
             ],
         ],
 
         'security_report' => [
             'enabled' => env('FIREWALL_NOTIFICATIONS_SECURITY_REPORT_ENABLED', false),
+            // Only "mail" channel is supported for now
             'channels' => [
-                'mail', 'slack', 'discord',
+                'mail',
             ],
+            // Set to Monday 8:00 AM by default
+            'cron_expression' => env('FIREWALL_NOTIFICATIONS_SECURITY_REPORT_CRON_EXPRESSION', '0 8 * * 1'),
         ],
 
         'successful_login' => [
             'enabled' => env('FIREWALL_NOTIFICATIONS_SUCCESSFUL_LOGIN_ENABLED', false),
             'channels' => [
-                'mail', 'slack', 'discord',
+                'mail',
+                'slack',
+                'discord',
             ],
         ],
     ],

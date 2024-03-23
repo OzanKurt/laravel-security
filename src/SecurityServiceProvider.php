@@ -138,11 +138,19 @@ class SecurityServiceProvider extends ServiceProvider
         $this->commands(UnblockIpsCommand::class);
         $this->commands(SendSecurityReportNotificationCommand::class);
 
-        if (config('security.cron.enabled')) {
-            $this->app->booted(function () {
-                app(Schedule::class)->command('security:unblock-ips')->cron(config('security.cron.expression'));
-            });
-        }
+        $this->app->booted(function () {
+            if (config('security.crons.unblock_ips.enabled')) {
+                app(Schedule::class)
+                    ->command('security:unblock-ips')
+                    ->cron(config('security.crons.unblock_ips.cron_expression'));
+            }
+
+            if (config('security.notifications.security_report.enabled')) {
+                app(Schedule::class)
+                    ->command('security:send-security-report-notification')
+                    ->cron(config('security.crons.security_report.cron_expression'));
+            }
+        });
     }
 
     protected function registerViews(): void
