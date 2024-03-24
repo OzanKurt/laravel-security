@@ -5,11 +5,11 @@ namespace OzanKurt\Security\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Log extends Model
+class AuthLog extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['user_id', 'ip', 'level', 'middleware', 'url', 'referrer', 'request_data', 'meta_data', 'user_agent'];
+    protected $fillable = ['email', 'is_successful', 'user_id', 'ip', 'user_agent', 'referrer', 'request_data', 'meta_data'];
 
     protected $casts = [
         'request_data' => 'json',
@@ -24,7 +24,7 @@ class Log extends Model
         }
 
         if (! isset($this->table)) {
-            $this->setTable(config('security.database.table_prefix').config('security.database.log.table'));
+            $this->setTable(config('security.database.table_prefix').config('security.database.auth_log.table'));
         }
 
         parent::__construct($attributes);

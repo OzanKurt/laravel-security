@@ -24,14 +24,20 @@ return [
 
         'table_prefix' => env('FIREWALL_DB_PREFIX', 'security_'),
 
+        'max_request_data_size' => 2048,
+
         'user' => [
             'model' => \App\Models\User::class,
+        ],
+
+        'auth_log' => [
+            'model' => \OzanKurt\Security\Models\AuthLog::class,
+            'table' => 'auth_logs',
         ],
 
         'log' => [
             'model' => \OzanKurt\Security\Models\Log::class,
             'table' => 'logs',
-            'max_request_data_size' => 2048,
         ],
 
         'ip' => [
@@ -69,6 +75,15 @@ return [
 
         'successful_login' => [
             'enabled' => env('FIREWALL_NOTIFICATIONS_SUCCESSFUL_LOGIN_ENABLED', false),
+            'channels' => [
+                'mail',
+                'slack',
+                'discord',
+            ],
+        ],
+
+        'failed_login' => [
+            'enabled' => env('FIREWALL_NOTIFICATIONS_FAILED_LOGIN_ENABLED', false),
             'channels' => [
                 'mail',
                 'slack',
@@ -534,7 +549,6 @@ return [
                 '#\.tmp#i',
                 '#cgi#i',
                 '#etc/passwd#i',
-                '#gist#i',
                 '#license\.md#i',
                 '#license\.txt#i',
                 '#logs/#i',

@@ -2,41 +2,53 @@
 
 namespace OzanKurt\Security\Listeners;
 
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Traits\Helper;
 use Illuminate\Auth\Events\Failed as Event;
+use OzanKurt\Security\Notifications\Notifiable;
+use OzanKurt\Security\Listeners\Traits\ListenerHelper;
+use OzanKurt\Security\Notifications\FailedLoginNotification;
 
 class FailedLoginListener
 {
-    use Helper;
+    use ListenerHelper;
+
+    public ?string $notification = 'failed_login';
 
     public function handle(Event $event): void
     {
         $this->request = request();
-        $this->middleware = 'login';
-        $this->user_id = 0;
 
-        if ($this->skip($event)) {
+        if ($this->skip()) {
             return;
         }
 
         $this->request['password'] = '[redacted]';
 
-        $log = $this->log();
+        $authLog = $this->authLog(false);
 
-        event(new AttackDetectedEvent($log));
+        $shouldSend = false;
+        if (static::$shouldSendCallback) {
+            $shouldSend = call_user_func(static::$shouldSendCallback, $authLog);
+        }
+
+        if (! $shouldSend) {
+            return;
+        }
+
+        try {
+            (new Notifiable)->notify(new FailedLoginNotification($event));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
-    public function skip($event): bool
+    /**
+     * Set a callback that checks if the notification should be sent.
+     *
+     * @param  \Closure  $callback
+     * @return void
+     */
+    public static function shouldSendCallback($callback)
     {
-        if ($this->isDisabled()) {
-            return true;
-        }
-
-        if ($this->isWhitelist()) {
-            return true;
-        }
-
-        return false;
+        static::$shouldSendCallback = $callback;
     }
 }

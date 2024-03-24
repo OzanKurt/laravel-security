@@ -13,8 +13,8 @@ class Ip extends Model
     protected $fillable = ['ip', 'log_id', 'entry_type', 'request_count'];
 
     protected $casts = [
-        'deleted_at' => 'datetime',
         'entry_type' => IpEntryType::class,
+        'deleted_at' => 'datetime',
     ];
 
     public function __construct(array $attributes = [])

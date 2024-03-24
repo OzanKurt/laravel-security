@@ -3,17 +3,20 @@
 namespace OzanKurt\Security\Firewall\Traits;
 
 use Illuminate\Http\Request;
-use OzanKurt\Agent\Agent as Parser;
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Enums\LogLevel;
 use OzanKurt\Security\Models\Log;
+use OzanKurt\Agent\Agent as Parser;
+use OzanKurt\Security\Enums\LogLevel;
+use OzanKurt\Security\Helpers\Helper;
+use OzanKurt\Security\Enums\IpEntryType;
 use Symfony\Component\HttpFoundation\IpUtils;
 
-trait Helper
+trait MiddlewareHelper
 {
+    use Helper;
+
+    public ?string $middleware = null;
     public string $reason = 'access_denied';
     public Request|string|array|null $request = null;
-    public ?string $middleware = null;
     public ?int $user_id = null;
 
     public function isEnabled($middleware = null)
@@ -115,41 +118,5 @@ trait Helper
             'referrer' => substr($this->request->server('HTTP_REFERER'), 0, 191) ?: null,
             'request_data' => $this->getRequestData(),
         ]);
-    }
-
-    public function getUserAgent(): ?string
-    {
-        $parser = new Parser();
-
-        return $parser->getUserAgent();
-    }
-
-    public function getRequestData(): ?array
-    {
-        $requestData = $this->request->input();
-        $requestDataJson = json_encode($requestData);
-
-        $maxSize = config('security.database.log.max_request_data_size', 2048);
-        $size = mb_strlen($requestDataJson, '8bit');
-
-        if ($size > $maxSize) {
-            $requestData = [
-                'message' => 'Request data has been deleted.',
-                'size' => $size,
-            ];
-        }
-
-        return $requestData;
-    }
-
-    public function ip()
-    {
-        if ($cf_ip = $this->request->header('CF_CONNECTING_IP')) {
-            $ip = $cf_ip;
-        } else {
-            $ip = $this->request->ip();
-        }
-
-        return $ip;
     }
 }

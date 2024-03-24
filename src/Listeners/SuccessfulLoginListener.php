@@ -3,25 +3,44 @@
 namespace OzanKurt\Security\Listeners;
 
 use Illuminate\Auth\Events\Login as Event;
-use OzanKurt\Security\Firewall\Traits\Helper;
 use OzanKurt\Security\Notifications\Notifiable;
+use OzanKurt\Security\Listeners\Traits\ListenerHelper;
 use OzanKurt\Security\Notifications\SuccessfulLoginNotification;
 
 class SuccessfulLoginListener
 {
-    use Helper;
+    use ListenerHelper;
+
+    public ?string $notification = 'successful_login';
+
+    /**
+     * The callback that checks if the notification should be sent.
+     *
+     * @var \Closure|null
+     */
+    public static $shouldSendCallback;
 
     public function handle(Event $event): void
     {
         $this->request = request();
-        $this->middleware = 'successful_login';
-        $this->user_id = 0;
+        $this->user_id = auth()->id() ?: 0;
 
-        if ($this->skip($event)) {
+        if ($this->skip()) {
             return;
         }
 
         $this->request['password'] = '[redacted]';
+
+        $authLog = $this->authLog(true);
+
+        $shouldSend = false;
+        if (static::$shouldSendCallback) {
+            $shouldSend = call_user_func(static::$shouldSendCallback, $authLog);
+        }
+
+        if (! $shouldSend) {
+            return;
+        }
 
         try {
             (new Notifiable)->notify(new SuccessfulLoginNotification($event));
@@ -30,16 +49,14 @@ class SuccessfulLoginListener
         }
     }
 
-    public function skip($event): bool
+    /**
+     * Set a callback that checks if the notification should be sent.
+     *
+     * @param  \Closure  $callback
+     * @return void
+     */
+    public static function shouldSendCallback($callback)
     {
-        if ($this->isDisabled()) {
-            return true;
-        }
-
-        if ($this->isWhitelist()) {
-            return true;
-        }
-
-        return false;
+        static::$shouldSendCallback = $callback;
     }
 }

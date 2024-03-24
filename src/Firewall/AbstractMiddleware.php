@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Firewall\Traits\Helper;
+use OzanKurt\Security\Firewall\Traits\MiddlewareHelper;
 
 abstract class AbstractMiddleware
 {
-    use Helper;
+    use MiddlewareHelper;
 
     /**
      * Handle an incoming request.
