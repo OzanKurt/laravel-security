@@ -13,6 +13,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ app('security')->routeIsActive('auth-logs.index') ? 'active' : '' }}"
+                       href="{{ app('security')->route('auth-logs.index') }}"
+                    >
+                        @lang('security::dashboard.auth_logs')
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ app('security')->routeIsActive('logs.index') ? 'active' : '' }}"
                        href="{{ app('security')->route('logs.index') }}"
                     >

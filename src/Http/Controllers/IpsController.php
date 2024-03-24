@@ -13,7 +13,7 @@ class IpsController extends Controller
     {
         $dataTable = app(IpsDataTable::class);
 
-        if (request('mode') == 'dataTable' && request()->ajax()) {
+        if (request('mode') === 'dataTable' && request()->ajax()) {
             return $dataTable->ajax();
         }
 

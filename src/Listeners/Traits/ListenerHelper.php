@@ -37,7 +37,7 @@ trait ListenerHelper
     public function authLog(
         bool $isSuccessful,
         ?int $user_id = null,
-    ): Log
+    ): AuthLog
     {
         $user_id = $user_id ?? $this->user_id;
 

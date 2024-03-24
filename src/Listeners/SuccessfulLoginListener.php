@@ -11,27 +11,26 @@ class SuccessfulLoginListener
 {
     use ListenerHelper;
 
-    public ?string $notification = 'successful_login';
-
     /**
      * The callback that checks if the notification should be sent.
      *
      * @var \Closure|null
      */
-    public static $shouldSendCallback;
+    public static ?\Closure $shouldSendCallback;
 
     public function handle(Event $event): void
     {
+        $this->notification = 'successful_login';
         $this->request = request();
         $this->user_id = auth()->id() ?: 0;
-
-        if ($this->skip()) {
-            return;
-        }
 
         $this->request['password'] = '[redacted]';
 
         $authLog = $this->authLog(true);
+
+        if ($this->skip()) {
+            return;
+        }
 
         $shouldSend = false;
         if (static::$shouldSendCallback) {
@@ -43,7 +42,7 @@ class SuccessfulLoginListener
         }
 
         try {
-            (new Notifiable)->notify(new SuccessfulLoginNotification($event));
+            (new Notifiable)->notify(new SuccessfulLoginNotification($authLog));
         } catch (\Throwable $e) {
             report($e);
         }
@@ -52,10 +51,10 @@ class SuccessfulLoginListener
     /**
      * Set a callback that checks if the notification should be sent.
      *
-     * @param  \Closure  $callback
+     * @param \Closure $callback
      * @return void
      */
-    public static function shouldSendCallback($callback)
+    public static function setShouldSendCallback(\Closure $callback): void
     {
         static::$shouldSendCallback = $callback;
     }

@@ -10,41 +10,41 @@ use OzanKurt\Security\Models\Log;
 use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\Html\Column;
 
-class LogsDataTable extends DataTable
+class AuthLogsDataTable extends DataTable
 {
     public function dataTable($query)
     {
         $builder = datatables()->eloquent($query);
 
-        $builder->addColumn('action', function (Log $log) {
+        $builder->addColumn('action', function (AuthLog $authLog) {
             return 'actions';
         });
 
         $nameField = config('security.dashboard.user_name_field');
 
-        $builder->editColumn('user_name', function (Log $log) use ($nameField) {
+        $builder->editColumn('user_name', function (AuthLog $authLog) use ($nameField) {
             return $log->user?->{$nameField} ?? 'Guest';
         });
 
         $baseUrl = url('/');
 
-        $builder->editColumn('url', function (Log $log) use ($baseUrl) {
-            return str_replace($baseUrl, '', $log->url);
+        $builder->editColumn('url', function (AuthLog $authLog) use ($baseUrl) {
+            return str_replace($baseUrl, '', $authLog->url);
         });
 
-        $builder->editColumn('request_data', function (Log $log) {
-            return app('security')->highlightJson($log->request_data);
+        $builder->editColumn('request_data', function (AuthLog $authLog) {
+            return app('security')->highlightJson($authLog->request_data);
         });
 
-        $builder->editColumn('meta_data', function (Log $log) {
-            return app('security')->highlightJson($log->meta_data);
+        $builder->editColumn('meta_data', function (AuthLog $authLog) {
+            return app('security')->highlightJson($authLog->meta_data);
         });
 
-        $builder->editColumn('created_at', function (Log $log) {
-            return $log->created_at ? $log->created_at->format('Y-m-d H:i:s') : 'n/a';
+        $builder->editColumn('created_at', function (AuthLog $authLog) {
+            return $authLog->created_at ? $authLog->created_at->format('Y-m-d H:i:s') : 'n/a';
         });
-        $builder->editColumn('updated_at', function (Log $log) {
-            return $log->updated_at ? $log->updated_at->format('Y-m-d H:i:s') : 'n/a';
+        $builder->editColumn('updated_at', function (AuthLog $authLog) {
+            return $authLog->updated_at ? $authLog->updated_at->format('Y-m-d H:i:s') : 'n/a';
         });
 
         // https://yajrabox.com/docs/laravel-datatables/master/row-options
@@ -75,9 +75,9 @@ class LogsDataTable extends DataTable
 
     public function query(): Builder
     {
-        $model = config('security.database.log.model', Log::class);
+        $model = config('security.database.auth_log.model', AuthLog::class);
 
-        $tableName = config('security.database.table_prefix').config('security.database.log.table');
+        $tableName = config('security.database.table_prefix').config('security.database.auth_log.table');
         $query = $model::query()
             ->select($tableName .'.*')
             ->with('user');
@@ -88,9 +88,9 @@ class LogsDataTable extends DataTable
     public function html()
     {
         return $this->builder()
-            ->setTableId('logsDataTable')
+            ->setTableId('authLogsDataTable')
             ->columns($this->getColumns())
-            ->minifiedAjax(app('security')->route('logs.index', [
+            ->minifiedAjax(app('security')->route('auth-logs.index', [
                 'mode' => 'dataTable',
             ]))
             ->orderBy(1)
@@ -105,20 +105,20 @@ class LogsDataTable extends DataTable
             Column::make('id')
                 ->title(trans('security::dashboard.columns.id'))
                 ->class('all dtr-control'),
+            Column::make('email')
+                ->title(trans('security::dashboard.columns.email'))
+                ->class('all'),
+            Column::make('is_successful')
+                ->title(trans('security::dashboard.columns.is_successful'))
+                ->class('all'),
             Column::make('user_name', 'user.'.config('security.dashboard.user_name_field'))
                 ->title(trans('security::dashboard.columns.user_name'))
                 ->class('all'),
             Column::make('middleware')
                 ->title(trans('security::dashboard.columns.middleware'))
                 ->class('all'),
-            Column::make('level')
-                ->title(trans('security::dashboard.columns.level'))
-                ->class('all'),
             Column::make('ip')
                 ->title(trans('security::dashboard.columns.ip'))
-                ->class('all'),
-            Column::make('url')
-                ->title(trans('security::dashboard.columns.url'))
                 ->class('all'),
             Column::make('user_agent')
                 ->title(trans('security::dashboard.columns.user_agent'))

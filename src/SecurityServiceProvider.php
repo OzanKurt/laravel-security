@@ -3,6 +3,7 @@
 namespace OzanKurt\Security;
 
 use Illuminate\Contracts\Foundation\Application;
+use OzanKurt\Security\Http\Controllers\AuthLogsController;
 use OzanKurt\Security\Http\Controllers\IpsController;
 use OzanKurt\Security\Http\Controllers\DashboardController;
 use OzanKurt\Security\Http\Controllers\LogsController;
@@ -14,8 +15,8 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Auth\Access\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Auth\Events\Login as LoginAuthenticated;
-use Illuminate\Auth\Events\Failed as LoginFailed;
+use Illuminate\Auth\Events\Login as AuthLoginEvent;
+use Illuminate\Auth\Events\Failed as AuthFailedEvent;
 use OzanKurt\Security\Commands\SendSecurityReportNotificationCommand;
 use OzanKurt\Security\Commands\UnblockIpsCommand;
 use OzanKurt\Security\Events\AttackDetectedEvent;
@@ -90,6 +91,9 @@ class SecurityServiceProvider extends ServiceProvider
 
             $router->get('logs', [LogsController::class, 'index'])->name('logs.index');
             $router->post('logs/{log:id}/action', [LogsController::class, 'postAction'])->name('logs.action');
+
+            $router->get('auth-logs', [AuthLogsController::class, 'index'])->name('auth-logs.index');
+            $router->post('auth-logs/{authLog:id}/action', [AuthLogsController::class, 'postAction'])->name('auth-logs.action');
         });
     }
 
@@ -124,8 +128,8 @@ class SecurityServiceProvider extends ServiceProvider
     {
         $this->app['events']->listen(AttackDetectedEvent::class, BlockIpListener::class);
         $this->app['events']->listen(AttackDetectedEvent::class, AttackDetectedListener::class);
-        $this->app['events']->listen(LoginAuthenticated::class, SuccessfulLoginListener::class);
-        $this->app['events']->listen(LoginFailed::class, FailedLoginListener::class);
+        $this->app['events']->listen(AuthLoginEvent::class, SuccessfulLoginListener::class);
+        $this->app['events']->listen(AuthFailedEvent::class, FailedLoginListener::class);
     }
 
     protected function registerTranslations(): void
@@ -160,7 +164,7 @@ class SecurityServiceProvider extends ServiceProvider
 
     protected function getMigrationPathFor(string $modelKey): string
     {
-        $prefix = date('Y_m_d') . '_000000';
+        $prefix = '2024_01_01_000000';
         $tableName = $this->getNameTable($modelKey);
 
         return database_path("migrations/{$prefix}_create_{$tableName}_table.php");
@@ -193,6 +197,7 @@ class SecurityServiceProvider extends ServiceProvider
 
         // migrations
         $this->publishes([
+            __DIR__ . '/../database/migrations/create_auth_logs_table.php' => $this->getMigrationPathFor('auth_log'),
             __DIR__ . '/../database/migrations/create_ips_table.php' => $this->getMigrationPathFor('ip'),
             __DIR__ . '/../database/migrations/create_logs_table.php' => $this->getMigrationPathFor('log'),
         ], 'security-migrations');

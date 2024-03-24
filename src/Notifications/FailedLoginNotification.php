@@ -2,14 +2,13 @@
 
 namespace OzanKurt\Security\Notifications;
 
-use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use OzanKurt\Security\Models\AuthLog;
 
-class SuccessfulLoginNotification extends Notification implements ShouldQueue
+class FailedLoginNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

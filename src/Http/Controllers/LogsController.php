@@ -15,7 +15,7 @@ class LogsController extends Controller
     {
         $dataTable = app(LogsDataTable::class);
 
-        if (request('mode') == 'dataTable' || request()->ajax()) {
+        if (request('mode') === 'dataTable' || request()->ajax()) {
             return $dataTable->ajax();
         }
 
