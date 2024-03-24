@@ -2,8 +2,9 @@
 
 namespace OzanKurt\Security\Listeners;
 
-use OzanKurt\Security\Traits\Helper;
-use Illuminate\Auth\Events\Failed as Event;
+use Illuminate\Auth\Events\Login as Event;
+use OzanKurt\Security\Firewall\Traits\Helper;
+use OzanKurt\Security\Notifications\Notifiable;
 use OzanKurt\Security\Notifications\SuccessfulLoginNotification;
 
 class SuccessfulLoginListener
@@ -24,7 +25,7 @@ class SuccessfulLoginListener
 
         try {
             (new Notifiable)->notify(new SuccessfulLoginNotification($event));
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             report($e);
         }
     }
