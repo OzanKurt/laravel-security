@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use OzanKurt\Agent\Agent as Parser;
 use OzanKurt\Security\Helpers\Helper;
 use OzanKurt\Security\Models\AuthLog;
+use RuntimeException;
 
 trait ListenerHelper
 {
@@ -28,7 +29,7 @@ trait ListenerHelper
     public function isEnabled()
     {
         if (! $this->notification) {
-            throw new Exception("The notification [{$this->notification}] is not configured in the `config/security.php` file.");
+            throw new RuntimeException("The notification [{$this->notification}] is not configured in the `config/security.php` file.");
         }
 
         return config("security.notifications.{$this->notification}.enabled", false);

@@ -22,22 +22,20 @@ class AuthLogsDataTable extends DataTable
 
         $nameField = config('security.dashboard.user_name_field');
 
-        $builder->editColumn('user_name', function (AuthLog $authLog) use ($nameField) {
-            return $log->user?->{$nameField} ?? 'Guest';
+        $builder->editColumn('email', function (AuthLog $authLog) use ($nameField) {
+            return $authLog->email;
         });
 
-        $baseUrl = url('/');
-
-        $builder->editColumn('url', function (AuthLog $authLog) use ($baseUrl) {
-            return str_replace($baseUrl, '', $authLog->url);
+        $builder->editColumn('is_successful', function (AuthLog $authLog) use ($nameField) {
+            return $authLog->is_successful ? __('security::dashboard.yes') : __('security::dashboard.no');
         });
 
         $builder->editColumn('request_data', function (AuthLog $authLog) {
-            return app('security')->highlightJson($authLog->request_data);
+            return app('security')->highlightJson($authLog->request_data ?? []);
         });
 
         $builder->editColumn('meta_data', function (AuthLog $authLog) {
-            return app('security')->highlightJson($authLog->meta_data);
+            return app('security')->highlightJson($authLog->meta_data ?? []);
         });
 
         $builder->editColumn('created_at', function (AuthLog $authLog) {
@@ -53,6 +51,7 @@ class AuthLogsDataTable extends DataTable
 
         $builder->rawColumns([
             'request_data',
+            'meta_data',
             'actions',
         ]);
 
@@ -110,12 +109,6 @@ class AuthLogsDataTable extends DataTable
                 ->class('all'),
             Column::make('is_successful')
                 ->title(trans('security::dashboard.columns.is_successful'))
-                ->class('all'),
-            Column::make('user_name', 'user.'.config('security.dashboard.user_name_field'))
-                ->title(trans('security::dashboard.columns.user_name'))
-                ->class('all'),
-            Column::make('middleware')
-                ->title(trans('security::dashboard.columns.middleware'))
                 ->class('all'),
             Column::make('ip')
                 ->title(trans('security::dashboard.columns.ip'))

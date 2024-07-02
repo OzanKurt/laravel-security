@@ -3,8 +3,8 @@
 namespace OzanKurt\Security\Listeners;
 
 use Illuminate\Auth\Events\Login as Event;
-use OzanKurt\Security\Notifications\Notifiable;
 use OzanKurt\Security\Listeners\Traits\ListenerHelper;
+use OzanKurt\Security\Notifications\Notifiable;
 use OzanKurt\Security\Notifications\SuccessfulLoginNotification;
 
 class SuccessfulLoginListener
@@ -12,25 +12,37 @@ class SuccessfulLoginListener
     use ListenerHelper;
 
     /**
-     * The callback that checks if the notification should be sent.
-     *
-     * @var \Closure|null
+     * The callback that checks if the authLog should be recorded.
      */
-    public static ?\Closure $shouldSendCallback;
+    private static ?\Closure $shouldRecordCallback;
+
+    /**
+     * The callback that checks if the notification should be sent.
+     */
+    private static ?\Closure $shouldSendCallback;
 
     public function handle(Event $event): void
     {
         $this->notification = 'successful_login';
         $this->request = request();
-        $this->user_id = auth()->id() ?: 0;
+        $this->user_id = $event->user?->id;
 
         $this->request['password'] = '[redacted]';
-
-        $authLog = $this->authLog(true);
 
         if ($this->skip()) {
             return;
         }
+
+        $shouldRecord = false;
+        if (static::$shouldRecordCallback) {
+            $shouldRecord = call_user_func(static::$shouldRecordCallback, $event);
+        }
+
+        if (! $shouldRecord) {
+            return;
+        }
+
+        $authLog = $this->authLog(true);
 
         $shouldSend = false;
         if (static::$shouldSendCallback) {
@@ -43,16 +55,24 @@ class SuccessfulLoginListener
 
         try {
             (new Notifiable)->notify(new SuccessfulLoginNotification($authLog));
+
+            $authLog->is_notification_sent = true;
+            $authLog->save();
         } catch (\Throwable $e) {
             report($e);
         }
     }
 
     /**
+     * Set a callback that checks if the authLog should be recorded.
+     */
+    public static function setShouldRecordCallback(\Closure $callback): void
+    {
+        static::$shouldRecordCallback = $callback;
+    }
+
+    /**
      * Set a callback that checks if the notification should be sent.
-     *
-     * @param \Closure $callback
-     * @return void
      */
     public static function setShouldSendCallback(\Closure $callback): void
     {

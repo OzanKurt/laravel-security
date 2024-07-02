@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('referrer')->nullable();
             $table->json('request_data')->nullable();
             $table->json('meta_data')->nullable();
+            $table->boolean('is_notification_sent')->index()->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

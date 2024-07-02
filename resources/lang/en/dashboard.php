@@ -2,6 +2,7 @@
 
 return [
     'dashboard' => 'Dashboard',
+    'auth_logs' => 'Auth Logs',
     'attacks_blocked' => 'Attacks Blocked',
     'ips_blocked' => 'IPs Blocked',
     'requests_blocked' => 'Requests Blocked',
@@ -12,6 +13,12 @@ return [
     'recently_modified_files' => 'Recently Modified Files',
     'file' => 'File',
     'last_modification' => 'Last Modification',
+    'no' => 'No',
+    'yes' => 'Yes',
+    'outdated_notification' => [
+        'title' => 'Your Laravel Security package assets are out of date!',
+        'description' => 'You are using outdated versions of assets. Please re-publish the package assets by running the command:',
+    ],
     'columns' => [
         'id' => 'Id',
         'user_name' => 'User',
@@ -22,11 +29,14 @@ return [
         'user_agent' => 'User Agent',
         'referrer' => 'Referrer',
         'request_data' => 'Request Data',
+        'meta_data' => 'Meta Data',
         'created_at' => 'Created At',
         'updated_at' => 'Updated At',
         'log_id' => 'Log Id',
         'entry_type' => 'Entry Type',
         'request_count' => 'Request Count',
+        'email' => 'Email',
+        'is_successful' => 'Is Successful',
         'actions' => 'Actions',
     ],
 ];

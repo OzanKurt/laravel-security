@@ -3,6 +3,23 @@
 @section('content')
     <div class="mt-5">
         <div class="row mb-3">
+            @if(session('outdated'))
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        <div class="alert-heading fw-bold fs-5">
+                            @lang('security::dashboard.outdated_notification.title')
+                        </div>
+                        <div class="alert-content">
+                            @lang('security::dashboard.outdated_notification.description')<br>
+                            <br>
+                            <code>
+                                php artisan vendor:publish --provider="OzanKurt\Security\SecurityServiceProvider" --tag="security-assets"
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            <div class="col-12"></div>
             <div class="col-lg-4">
                 <div class="card shadow">
                     <div class="card-body position-relative overflow-hidden">

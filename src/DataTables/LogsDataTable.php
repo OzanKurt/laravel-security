@@ -53,6 +53,7 @@ class LogsDataTable extends DataTable
 
         $builder->rawColumns([
             'request_data',
+            'meta_data',
             'actions',
         ]);
 
