@@ -92,8 +92,12 @@ class Security
         return $this->antiXss->xss_clean($input);
     }
 
-    public function highlightJson(string|array $json): string
+    public function highlightJson(string|array|null $json): string
     {
+        if (is_null($json)) {
+            $json = [];
+        }
+
         if (is_string($json)) {
             $json = json_decode($json, true);
         }

@@ -150,7 +150,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
                 ->footer(config('security.notifications.discord.footer'), config('security.notifications.discord.footer_img'))
                 ->warning();
         } catch (\Throwable $exception) {
-            dd($exception);
+            report($exception);
         }
     }
 

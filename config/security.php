@@ -535,7 +535,6 @@ return [
 
             'patterns' => [
                 '#/etc/#i',
-                '#/vendor#i',
                 '#\.bak#i',
                 '#\.db#i',
                 '#\.env#i',

@@ -2,12 +2,12 @@
 
 namespace OzanKurt\Security\Commands;
 
-use Illuminate\Support\Carbon;
 use Cron\CronExpression;
 use Illuminate\Console\Command;
-use OzanKurt\Security\Notifications\AttackDetectedNotification;
+use Illuminate\Support\Carbon;
 use OzanKurt\Security\Notifications\Notifiable;
 use OzanKurt\Security\Notifications\SecurityReportNotification;
+use Throwable;
 
 class SendSecurityReportNotificationCommand extends Command
 {
@@ -19,6 +19,7 @@ class SendSecurityReportNotificationCommand extends Command
 
         if (CronExpression::isValidExpression($expression) === false) {
             $this->error('Invalid cron expression');
+
             return;
         }
 
@@ -35,7 +36,6 @@ class SendSecurityReportNotificationCommand extends Command
         try {
             (new Notifiable)->notify($notification);
         } catch (Throwable $e) {
-            dd($e);
             report($e);
         }
     }
