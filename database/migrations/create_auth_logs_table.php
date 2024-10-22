@@ -1,6 +1,5 @@
 <?php
 
-use OzanKurt\Security\Enums\LogLevel;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -28,6 +27,7 @@ return new class extends Migration
             $table->json('request_data')->nullable();
             $table->json('meta_data')->nullable();
             $table->boolean('is_notification_sent')->index()->default(0);
+            $table->timestamp('notification_sent_at')->index()->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

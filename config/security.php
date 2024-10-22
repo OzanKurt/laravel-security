@@ -284,8 +284,8 @@ return [
             ],
         ],
 
-        'login' => [
-            'enabled' => env('FIREWALL_MIDDLEWARE_LOGIN_ENABLED', env('FIREWALL_ENABLED', true)),
+        'failed_login' => [
+            'enabled' => env('FIREWALL_MIDDLEWARE_FAILED_LOGIN_ENABLED', env('FIREWALL_ENABLED', true)),
 
             'auto_block' => [
                 'attempts' => 5,

@@ -24,6 +24,7 @@ class SuccessfulLoginListener
     public function handle(Event $event): void
     {
         $this->notification = 'successful_login';
+        $this->middleware = 'successful_login';
         $this->request = request();
         $this->user_id = $event->user?->id;
 
@@ -33,8 +34,8 @@ class SuccessfulLoginListener
             return;
         }
 
-        $shouldRecord = false;
-        if (static::$shouldRecordCallback) {
+        $shouldRecord = true;
+        if (isset(static::$shouldRecordCallback)) {
             $shouldRecord = call_user_func(static::$shouldRecordCallback, $event);
         }
 
@@ -44,8 +45,8 @@ class SuccessfulLoginListener
 
         $authLog = $this->authLog(true);
 
-        $shouldSend = false;
-        if (static::$shouldSendCallback) {
+        $shouldSend = true;
+        if (isset(static::$shouldSendCallback)) {
             $shouldSend = call_user_func(static::$shouldSendCallback, $authLog);
         }
 
@@ -53,10 +54,15 @@ class SuccessfulLoginListener
             return;
         }
 
+        if (! $this->isNotificationEnabled()) {
+            return;
+        }
+
         try {
             (new Notifiable)->notify(new SuccessfulLoginNotification($authLog));
 
             $authLog->is_notification_sent = true;
+            $authLog->notification_sent_at = now();
             $authLog->save();
         } catch (\Throwable $e) {
             report($e);

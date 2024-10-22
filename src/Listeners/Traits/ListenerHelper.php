@@ -3,7 +3,6 @@
 namespace OzanKurt\Security\Listeners\Traits;
 
 use Illuminate\Http\Request;
-use OzanKurt\Agent\Agent as Parser;
 use OzanKurt\Security\Helpers\Helper;
 use OzanKurt\Security\Models\AuthLog;
 use RuntimeException;
@@ -13,6 +12,7 @@ trait ListenerHelper
     use Helper;
 
     public ?string $notification = null;
+    public ?string $middleware = null;
     public Request|string|array|null $request = null;
     public ?int $user_id = null;
     public ?array $meta = null;
@@ -27,6 +27,11 @@ trait ListenerHelper
     }
 
     public function isEnabled()
+    {
+        return config("security.middleware.{$this->middleware}.enabled", false);
+    }
+
+    public function isNotificationEnabled()
     {
         if (! $this->notification) {
             throw new RuntimeException("The notification [{$this->notification}] is not configured in the `config/security.php` file.");

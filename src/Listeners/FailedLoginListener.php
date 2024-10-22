@@ -24,6 +24,7 @@ class FailedLoginListener
     public function handle(Event $event): void
     {
         $this->notification = 'failed_login';
+        $this->middleware = 'failed_login';
         $this->request = request();
         $this->user_id = $event->user?->id;
 
@@ -33,8 +34,8 @@ class FailedLoginListener
             return;
         }
 
-        $shouldRecord = false;
-        if (static::$shouldRecordCallback) {
+        $shouldRecord = true;
+        if (isset(static::$shouldRecordCallback)) {
             $shouldRecord = call_user_func(static::$shouldRecordCallback, $event);
         }
 
@@ -44,18 +45,24 @@ class FailedLoginListener
 
         $authLog = $this->authLog(false);
 
-        $shouldSend = false;
-        if (static::$shouldSendCallback) {
+        $shouldSend = true;
+        if (isset(static::$shouldSendCallback)) {
             $shouldSend = call_user_func(static::$shouldSendCallback, $authLog);
         }
 
         if (! $shouldSend) {
             return;
         }
+
+        if (! $this->isNotificationEnabled()) {
+            return;
+        }
+
         try {
             (new Notifiable)->notify(new FailedLoginNotification($authLog));
 
             $authLog->is_notification_sent = true;
+            $authLog->notification_sent_at = now();
             $authLog->save();
         } catch (\Throwable $e) {
             report($e);
