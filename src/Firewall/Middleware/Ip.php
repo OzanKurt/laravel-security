@@ -2,11 +2,9 @@
 
 namespace OzanKurt\Security\Firewall\Middleware;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use OzanKurt\Security\Enums\IpEntryType;
 use OzanKurt\Security\Firewall\AbstractMiddleware;
-use OzanKurt\Security\Models\Ip as Model;
-use Illuminate\Database\QueryException;
 
 class Ip extends AbstractMiddleware
 {
@@ -14,16 +12,17 @@ class Ip extends AbstractMiddleware
     {
         $this->reason = 'ip_blocked';
 
-        // Check if the IP is blacklisted or blocked
         $model = config('security.database.ip.model');
 
+        $clientIp = request()->ip();
+
         $ip = $model::query()
+            ->where('ip', $clientIp)
             ->whereIn('entry_type', [IpEntryType::BLACKLIST, IpEntryType::BLOCK])
             ->first();
 
         if ($ip) {
             $ip->increment('request_count');
-
             return true;
         }
 
