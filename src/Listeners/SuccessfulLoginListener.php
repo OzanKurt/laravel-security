@@ -45,6 +45,10 @@ class SuccessfulLoginListener
 
         $authLog = $this->authLog(true);
 
+        if (! $authLog) {
+            return;
+        }
+
         $shouldSend = true;
         if (isset(static::$shouldSendCallback)) {
             $shouldSend = call_user_func(static::$shouldSendCallback, $authLog);

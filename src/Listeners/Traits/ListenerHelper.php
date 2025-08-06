@@ -43,11 +43,17 @@ trait ListenerHelper
     public function authLog(
         bool $isSuccessful,
         ?int $user_id = null,
-    ): AuthLog
+    ): ?AuthLog
     {
         $user_id = $user_id ?? $this->user_id;
 
         $model = config('security.database.auth_log.model', AuthLog::class);
+
+        $email = $this->request->input('email');
+
+        if (! $email) {
+            return null;
+        }
 
         return $model::create([
             'email' => $this->request->input('email'),

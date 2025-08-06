@@ -22,7 +22,9 @@ class RecentlyModifiedFiles extends DirectoryIterator
     )
     {
         parent::__construct($directory, $max_files_per_directory, $max_iterations);
+
         $this->time_range = $time_range;
+
         $excluded_directories = [
             '.idea',
             '.git',
@@ -34,7 +36,9 @@ class RecentlyModifiedFiles extends DirectoryIterator
             'storage/framework',
             'storage/debugbar',
         ];
+
         $this->excluded_directories = [];
+
         foreach ($excluded_directories as $index => $path) {
             if (($dir = realpath($directory . '/' . $path)) !== false) {
                 $this->excluded_directories[$dir] = 1;
@@ -47,12 +51,14 @@ class RecentlyModifiedFiles extends DirectoryIterator
         if (!array_key_exists(realpath($dir), $this->excluded_directories)) {
             return parent::scan($dir);
         }
+
         return true;
     }
 
     public function file(string $file): void
     {
         $mtime = filemtime($file);
+
         if (time() - $mtime < $this->time_range) {
             $this->files[] = array($file, $mtime);
         }
@@ -76,9 +82,11 @@ class RecentlyModifiedFiles extends DirectoryIterator
         if ($a[1] > $b[1]) {
             return -1;
         }
+
         if ($a[1] < $b[1]) {
             return 1;
         }
+
         return 0;
     }
 
