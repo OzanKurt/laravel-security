@@ -616,6 +616,84 @@ return [
         ],
     ],
 
+    'headers' => [
+        'enabled' => env('LS_HEADERS_ENABLED', true),
+        'hsts' => [
+            'enabled' => env('LS_HSTS_ENABLED', false),
+            'max_age' => 31536000,
+            'include_subdomains' => true,
+            'preload' => false,
+        ],
+        'csp' => [
+            'enabled' => env('LS_CSP_ENABLED', false),
+            'policy' => "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'",
+            'use_nonce' => true,
+            'report_only' => false,
+            'report_uri' => null,
+        ],
+        'x_frame_options' => [
+            'enabled' => true,
+            'value' => 'SAMEORIGIN',
+        ],
+        'x_content_type_options' => true,
+        'referrer_policy' => 'strict-origin-when-cross-origin',
+        'permissions_policy' => 'camera=(), microphone=(), geolocation=()',
+    ],
+
+    'honeypot' => [
+        'enabled' => env('LS_HONEYPOT_ENABLED', false),
+        'paths' => [
+            'wp-admin', 'wp-login.php', 'wp-config.php', '.env', '.env.bak',
+            'phpmyadmin', 'pma', 'wordpress', '.git/config', 'xmlrpc.php',
+        ],
+        'block_duration' => 86400,
+    ],
+
+    'redaction' => [
+        'keys' => [
+            'password', 'password_confirmation', 'old_password', 'new_password',
+            'token', '*_token', 'api_key', '*_key',
+            'secret', '*_secret', 'authorization', 'cookie',
+            'credit_card', 'card_number', 'cvv', 'cvc',
+            'ssn', 'social_security_number',
+        ],
+        'placeholder' => '[redacted]',
+        'use_regex' => true,
+    ],
+
+    'https' => [
+        'enforce' => env('LS_ENFORCE_HTTPS', false),
+        'production_only' => true,
+    ],
+
+    'disabled_routes' => [
+        'enabled' => env('LS_DISABLED_ROUTES_ENABLED', false),
+        'patterns' => [
+            'install.php',
+            '_ignition/*',
+            'wp-config.php',
+        ],
+    ],
+
+    'scoring' => [
+        'enabled' => env('LS_SCORING_ENABLED', false),
+        'threshold' => env('LS_SCORING_THRESHOLD', 100),
+        'window' => env('LS_SCORING_WINDOW', 3600),
+        'block_duration' => env('LS_SCORING_BLOCK_DURATION', 1800),
+    ],
+
+    'rate_limiters' => [
+        'login' => ['enabled' => true, 'attempts' => 5, 'decay' => 60, 'by' => 'ip|email'],
+        'password_reset' => ['enabled' => true, 'attempts' => 3, 'decay' => 60, 'by' => 'ip|email'],
+        'api' => ['enabled' => false, 'attempts' => 60, 'decay' => 60, 'by' => 'user|ip'],
+        'signup' => ['enabled' => true, 'attempts' => 3, 'decay' => 600, 'by' => 'ip'],
+    ],
+
+    'trusted_proxies' => [
+        'cloudflare' => env('LS_TRUST_CLOUDFLARE', false),
+        'extra' => [],
+    ],
+
     'live_traffic' => [
         'enabled' => env('LS_LIVE_TRAFFIC_ENABLED', true),
         'sample_rate' => env('LS_LIVE_TRAFFIC_SAMPLE_RATE', 0.1),

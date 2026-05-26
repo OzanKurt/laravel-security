@@ -48,6 +48,11 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->alias(Shield::class, 'shield');
 
         $this->app->singleton(\OzanKurt\Shield\Support\CorrelationId::class);
+        $this->app->singleton(\OzanKurt\Shield\Support\CspNonce::class);
+        $this->app->singleton(\OzanKurt\Shield\Support\RequestDataRedactor::class);
+        $this->app->singleton(\OzanKurt\Shield\Services\Scoring\SuspicionScorer::class);
+        $this->app->singleton(\OzanKurt\Shield\Services\Audit\EnvAuditor::class);
+        $this->app->singleton(\OzanKurt\Shield\Services\Network\TrustedProxiesService::class);
 
         $this->app->singleton(\OzanKurt\Shield\Services\Lookups\LookupResolver::class);
 
@@ -89,6 +94,9 @@ class ShieldServiceProvider extends ServiceProvider
         $this->registerViews();
 
         $this->registerSpatieMediaLibraryIntegration();
+        $this->registerCspNonceBladeDirective();
+        $this->registerHoneypotRoutes($router);
+        $this->registerPreconfiguredRateLimiters();
 
         if (config('shield.dashboard.enabled')) {
             $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
@@ -158,6 +166,9 @@ class ShieldServiceProvider extends ServiceProvider
         $router->aliasMiddleware('firewall.acl', \OzanKurt\Shield\Firewall\Middleware\Acl::class);
         $router->aliasMiddleware('firewall.live_traffic', \OzanKurt\Shield\Http\Middleware\LiveTrafficCapture::class);
         $router->aliasMiddleware('firewall.av_uploads', \OzanKurt\Shield\Firewall\Middleware\AvUploads::class);
+        $router->aliasMiddleware('firewall.headers', \OzanKurt\Shield\Firewall\Middleware\SecurityHeaders::class);
+        $router->aliasMiddleware('firewall.https', \OzanKurt\Shield\Firewall\Middleware\EnforceHttps::class);
+        $router->aliasMiddleware('firewall.disabled_routes', \OzanKurt\Shield\Firewall\Middleware\DisabledRoutes::class);
 
         // firewall.all group: correlation → bypass → acl → live_traffic (terminable) → configured middlewares
         // bypass must come BEFORE acl so the acl short-circuit can fire on bypassed requests
@@ -252,6 +263,62 @@ class ShieldServiceProvider extends ServiceProvider
     protected function registerViews(): void
     {
         View::addNamespace('shield', __DIR__ . '/../resources/views');
+    }
+
+    /**
+     * Register the @cspNonce Blade directive that emits the per-request CSP nonce.
+     */
+    protected function registerCspNonceBladeDirective(): void
+    {
+        \Illuminate\Support\Facades\Blade::directive('cspNonce', function () {
+            return "<?php echo app(\\OzanKurt\\Shield\\Support\\CspNonce::class)->get(); ?>";
+        });
+    }
+
+    /**
+     * Register honeypot routes that auto-block on hit. Catches scanner probes
+     * like /wp-admin, /.env, /phpmyadmin etc.
+     */
+    protected function registerHoneypotRoutes(Router $router): void
+    {
+        if (! config('shield.honeypot.enabled', false)) {
+            return;
+        }
+
+        $paths = (array) config('shield.honeypot.paths', []);
+
+        foreach ($paths as $path) {
+            $router->any('/' . ltrim($path, '/'), [\OzanKurt\Shield\Http\Controllers\HoneypotController::class, 'trap'])
+                ->where('any', '.*');
+        }
+    }
+
+    /**
+     * Register Laravel-native rate limiters with sensible defaults for common
+     * sensitive routes. Users apply via `throttle:shield_login` etc.
+     */
+    protected function registerPreconfiguredRateLimiters(): void
+    {
+        $limiters = (array) config('shield.rate_limiters', []);
+        if (empty($limiters)) return;
+
+        foreach ($limiters as $name => $cfg) {
+            if (empty($cfg['enabled'])) continue;
+
+            \Illuminate\Support\Facades\RateLimiter::for('shield_' . $name, function ($request) use ($cfg) {
+                $by = $cfg['by'] ?? 'ip';
+                $key = match ($by) {
+                    'user' => optional($request->user())->id ?: $request->ip(),
+                    'user|ip' => optional($request->user())->id ?: $request->ip(),
+                    'ip|email' => ($request->input('email') ?: '') . '|' . $request->ip(),
+                    default => $request->ip(),
+                };
+                return \Illuminate\Cache\RateLimiting\Limit::perMinutes(
+                    (int) ($cfg['decay'] ?? 60) / 60,
+                    (int) ($cfg['attempts'] ?? 60),
+                )->by($key);
+            });
+        }
     }
 
     /**
