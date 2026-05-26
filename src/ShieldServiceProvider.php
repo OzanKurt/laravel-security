@@ -194,6 +194,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\BypassListCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\InstallCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\AuditDriftCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\SignaturesSyncCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
@@ -213,6 +214,10 @@ class ShieldServiceProvider extends ServiceProvider
                     ->command('shield:audit-drift')
                     ->cron(config('shield.audit.drift.cron', '0 4 * * *'));
             }
+
+            app(Schedule::class)
+                ->command('shield:signatures-sync')
+                ->cron(config('shield.scanner.signatures.sync_cron', '0 5 * * *'));
         });
     }
 
