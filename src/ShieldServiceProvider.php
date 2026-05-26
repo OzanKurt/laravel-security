@@ -168,6 +168,9 @@ class ShieldServiceProvider extends ServiceProvider
     {
         $this->commands(UnblockIpsCommand::class);
         $this->commands(SendSecurityReportNotificationCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\BypassAddCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\BypassRemoveCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\BypassListCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
