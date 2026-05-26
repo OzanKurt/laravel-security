@@ -6,6 +6,16 @@ use OzanKurt\Shield\Firewall\AbstractMiddleware;
 
 class Php extends AbstractMiddleware
 {
+    public function getPatterns()
+    {
+        /** @var \OzanKurt\Shield\Services\Waf\WafRuleResolver $resolver */
+        $resolver = app(\OzanKurt\Shield\Services\Waf\WafRuleResolver::class);
+
+        return $resolver->forCategory('php_protocols')
+            ->pluck('pattern')
+            ->all();
+    }
+
     public function match($pattern, $input)
     {
         $result = false;

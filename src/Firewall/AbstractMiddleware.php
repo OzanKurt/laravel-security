@@ -70,7 +70,12 @@ abstract class AbstractMiddleware
 
     public function getPatterns()
     {
-        return config('shield.middleware.' . $this->middleware . '.patterns', []);
+        /** @var \OzanKurt\Shield\Services\Waf\WafRuleResolver $resolver */
+        $resolver = app(\OzanKurt\Shield\Services\Waf\WafRuleResolver::class);
+
+        return $resolver->forCategory($this->middleware)
+            ->pluck('pattern')
+            ->all();
     }
 
     public function check($patterns)
