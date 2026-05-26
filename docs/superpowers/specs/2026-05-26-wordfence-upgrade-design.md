@@ -10,7 +10,7 @@
 
 ## 1. Document Purpose
 
-This is the **master design spec** for upgrading `ozankurt/laravel-security` from its current 0.x state into a Wordfence-equivalent Laravel security suite. Every architectural decision and data model belongs here.
+This is the **master design spec** for upgrading `ozankurt/laravel-shield` from its current 0.x state into a Wordfence-equivalent Laravel security suite. Every architectural decision and data model belongs here.
 
 Downstream documents (created later):
 - Phase-by-phase implementation specs: `docs/superpowers/specs/phases/2026-MM-DD-phase-N-<topic>.md` — one per beta release
@@ -22,17 +22,17 @@ This master spec is the **single source of truth** when decisions conflict. Impl
 
 ## 2. Executive Summary
 
-`ozankurt/laravel-security` becomes a **WAF / analyze / log / scan / alert** suite for Laravel apps, modelled on Wordfence's free + premium feature surface. The plugin's job is observability and defense at the request boundary; it does NOT own authentication, user management, or MFA — apps handle those.
+`ozankurt/laravel-shield` becomes a **WAF / analyze / log / scan / alert** suite for Laravel apps, modelled on Wordfence's free + premium feature surface. The plugin's job is observability and defense at the request boundary; it does NOT own authentication, user management, or MFA — apps handle those.
 
 Two composer packages will ship:
-- **`ozankurt/laravel-security`** (Packagist, MIT) — single package containing all features (free + premium-gated); premium features activate at runtime via `LS_PREMIUM_LICENSE_KEY`
-- **`ozankurt/laravel-security-filament`** (Packagist, MIT, later) — Filament dashboard adapter (v1.x for Filament 3+4, v2.x for Filament 5+)
+- **`ozankurt/laravel-shield`** (Packagist, MIT) — single package containing all features (free + premium-gated); premium features activate at runtime via `LS_PREMIUM_LICENSE_KEY`
+- **`ozankurt/laravel-shield-filament`** (Packagist, MIT, later) — Filament dashboard adapter (v1.x for Filament 3+4, v2.x for Filament 5+)
 
 The brand domain `laravel-shield.ozankurt.com` hosts the marketing/sales site, license-check API, customer accounts, and (later) the SIEM-aggregator dashboard that consumes webhook events from many plugin instances.
 
 Wordfence (current version 8.2.2) is MIT-licensed; this package is MIT. Free Wordfence source can be ported 1:1 with attribution. Premium Wordfence features are re-implemented from behavioral description only.
 
-A future separate Laravel app (out of scope here) will aggregate data from many `laravel-security` instances — like a Sentry for WAF — via the webhook notification channel.
+A future separate Laravel app (out of scope here) will aggregate data from many `laravel-shield` instances — like a Sentry for WAF — via the webhook notification channel.
 
 ---
 
@@ -65,7 +65,7 @@ A future separate Laravel app (out of scope here) will aggregate data from many 
 
 ### Package license
 
-`ozankurt/laravel-security` stays **MIT**. Wordfence 8.2.2 is also MIT (confirmed in `wordfence/wordfence.php:14`, `wordfence/readme.txt:8`, `wordfence/license.txt`). Both projects are MIT — port free Wordfence code 1:1 with attribution. No license switch required.
+`ozankurt/laravel-shield` stays **MIT**. Wordfence 8.2.2 is also MIT (confirmed in `wordfence/wordfence.php:14`, `wordfence/readme.txt:8`, `wordfence/license.txt`). Both projects are MIT — port free Wordfence code 1:1 with attribution. No license switch required.
 
 ### Wordfence author permission
 
@@ -79,7 +79,7 @@ Ozan has verbal permission from the Wordfence author to reuse the free source. M
 
 ### Premium package license
 
-Premium features ship inside the same `ozankurt/laravel-security` package under the **same MIT license** as the rest of the code. The license **key** (sold via the Laravel Shield site) is what controls feature activation at runtime — not a code-distribution license. Anyone can read/copy the premium code; without a valid runtime license key (and the API-gated services it unlocks), the premium feature value is incomplete. See §29 for the honest threat model.
+Premium features ship inside the same `ozankurt/laravel-shield` package under the **same MIT license** as the rest of the code. The license **key** (sold via the Laravel Shield site) is what controls feature activation at runtime — not a code-distribution license. Anyone can read/copy the premium code; without a valid runtime license key (and the API-gated services it unlocks), the premium feature value is incomplete. See §29 for the honest threat model.
 
 ---
 
@@ -121,7 +121,7 @@ Total: ~8–10 weeks of focused engineering to v1.0.
 
 ### Central app (separate project)
 
-A future standalone Laravel app — like Sentry for WAF data — aggregates events from many `laravel-security` installations via the generic webhook notification channel. **Not part of this plugin.** This plugin's design ensures the webhook channel emits a stable, versioned payload that the Central app will consume.
+A future standalone Laravel app — like Sentry for WAF data — aggregates events from many `laravel-shield` installations via the generic webhook notification channel. **Not part of this plugin.** This plugin's design ensures the webhook channel emits a stable, versioned payload that the Central app will consume.
 
 ---
 
@@ -129,7 +129,7 @@ A future standalone Laravel app — like Sentry for WAF data — aggregates even
 
 **Two packages. One on Packagist for everything. One adapter.**
 
-### `ozankurt/laravel-security` (single package, free on Packagist)
+### `ozankurt/laravel-shield` (single package, free on Packagist)
 
 - Packagist, MIT
 - **Contains ALL features — both free-tier and premium-tier code lives in this same package**
@@ -139,7 +139,7 @@ A future standalone Laravel app — like Sentry for WAF data — aggregates even
 
 **Why single-package:** Same enforcement level as a separate package (local checks are patchable either way; real moat is server-side API gating). Drops Satis, drops Composer auth, drops separate-repo sync overhead. This is the standard model for ACF, Yoast, Wordfence, and most successful "free+premium" PHP plugins.
 
-### `ozankurt/laravel-security-filament` (free, later, separate)
+### `ozankurt/laravel-shield-filament` (free, later, separate)
 
 - Packagist, MIT
 - Filament panel adapter
@@ -149,14 +149,14 @@ A future standalone Laravel app — like Sentry for WAF data — aggregates even
 
 ### Future split (if ever needed)
 
-If we someday have code we genuinely don't want public (proprietary detection algorithms, ML models, etc.), we can spin out `ozankurt/laravel-security-premium` then — with private repo + Composer auth. The `Security::isPremium()` API is designed to be agnostic of where the premium code lives.
+If we someday have code we genuinely don't want public (proprietary detection algorithms, ML models, etc.), we can spin out `ozankurt/laravel-shield-premium` then — with private repo + Composer auth. The `Security::isPremium()` API is designed to be agnostic of where the premium code lives.
 
 For v1.0–v2.0: no split needed. All premium features are gated runtime checks within the single package.
 
 ### Service contracts (in the single package, free + premium implementations side by side)
 
 ```php
-namespace OzanKurt\Security\Contracts;
+namespace OzanKurt\Shield\Contracts;
 
 interface ThreatFeedProvider     { public function sync(): SyncResult; }
 interface IpBlocklistProvider    { public function pull(): Collection; }
@@ -167,7 +167,7 @@ interface NotificationChannel    { public function send(Notification $notificati
 interface SuspicionScorer        { public function score(string $ip): int; public function bump(string $ip, int $by): void; }
 ```
 
-Default implementations live in `OzanKurt\Security\Services\` (free behavior). Premium implementations live in `OzanKurt\Security\Premium\` (premium behavior). The `SecurityServiceProvider` binds the premium implementation when `Security::isPremium()` is true, otherwise the free one — runtime decision per service.
+Default implementations live in `OzanKurt\Shield\Services\` (free behavior). Premium implementations live in `OzanKurt\Shield\Premium\` (premium behavior). The `SecurityServiceProvider` binds the premium implementation when `Security::isPremium()` is true, otherwise the free one — runtime decision per service.
 
 ```php
 // In SecurityServiceProvider::register()
@@ -277,7 +277,7 @@ Every "type" / "kind" / "status" / "category" field becomes:
 - Per HTTP request: earliest middleware generates UUID7, stored in request attributes + container singleton
 - Per queue job: generated in `handle()` start
 - Per CLI command: generated in command `handle()` start
-- Helper `app('security')->correlationId(): string` returns current id (defensive: generates if missing)
+- Helper `app('shield')->correlationId(): string` returns current id (defensive: generates if missing)
 - Every event listener / observer / scanner pulls this and persists alongside the event
 
 ---
@@ -356,14 +356,14 @@ ls_live_traffic
 
 7-day default retention. Sampling configurable; attacks/blocks always 100%.
 
-**Real-time streaming (v1.0 option):** When `live_traffic.real_time.enabled` is true, the capture pipeline fires `LiveTrafficCapturedEvent implements ShouldBroadcast` on the Laravel broadcasting bus. Dashboard subscribes via Laravel Echo to `private-security.live-traffic`. Works with any broadcast driver (Reverb, Pusher, Ably, Soketi). Default behavior is **polling (5–10s DataTable refresh)** — real-time is opt-in to avoid forcing broadcast infra on users.
+**Real-time streaming (v1.0 option):** When `live_traffic.real_time.enabled` is true, the capture pipeline fires `LiveTrafficCapturedEvent implements ShouldBroadcast` on the Laravel broadcasting bus. Dashboard subscribes via Laravel Echo to `private-shield.live-traffic`. Works with any broadcast driver (Reverb, Pusher, Ably, Soketi). Default behavior is **polling (5–10s DataTable refresh)** — real-time is opt-in to avoid forcing broadcast infra on users.
 
 ```php
 'live_traffic' => [
     'real_time' => [
         'enabled' => false,
         'broadcast_driver' => null,            // null = Laravel default
-        'channel' => 'private-security.live-traffic',
+        'channel' => 'private-shield.live-traffic',
         'authorize_via' => 'viewSecurityDashboard',  // existing gate
         'rate_limit_per_minute' => 600,        // protects clients from event flood
     ],
@@ -630,7 +630,7 @@ On Nth attack from same IP within `frequency` seconds:
 
 ### DB-backed
 
-Rules live in `ls_waf_rules` (see §11.4). Admin panel manages enabled/disabled, custom rules, syncs from feeds. Built-in patterns from current `config/security.php` are extracted into a migration seeder.
+Rules live in `ls_waf_rules` (see §11.4). Admin panel manages enabled/disabled, custom rules, syncs from feeds. Built-in patterns from current `config/shield.php` are extracted into a migration seeder.
 
 ### Sources
 
@@ -638,14 +638,14 @@ Rules live in `ls_waf_rules` (see §11.4). Admin panel manages enabled/disabled,
 |---|---|
 | `builtin` | Seeded by package migrations, read-only display, can be disabled |
 | `user` | Created via dashboard, fully editable |
-| `wf_free` | Synced from `ozankurt/laravel-security-signatures` (Wordfence-free regex patterns) |
+| `wf_free` | Synced from `ozankurt/laravel-shield-signatures` (Wordfence-free regex patterns) |
 | `owasp_crs` | Synced from OWASP ModSecurity Core Rule Set (subset) |
 | `custom_feed` | User-configured third-party feed |
 
 ### Sync command
 
 ```bash
-php artisan security:rules-sync [--source=wf_free]
+php artisan shield:rules-sync [--source=wf_free]
 ```
 
 - Pulls latest from configured remote
@@ -760,13 +760,13 @@ See §11.1, `ls_audit_log`.
 
 - **HMAC chain**: each record stores `prev_hash` = previous record's HMAC. Mutating or deleting any record breaks the chain.
 - Secret: `LS_AUDIT_HMAC_SECRET` env (separate from `APP_KEY` so leaked DB ≠ forgable).
-- `php artisan security:audit-verify` walks chain, reports first broken link.
-- Rotation: `php artisan security:audit-rotate-secret` re-HMACs the chain with a new secret (audit-logged).
+- `php artisan shield:audit-verify` walks chain, reports first broken link.
+- Rotation: `php artisan shield:audit-rotate-secret` re-HMACs the chain with a new secret (audit-logged).
 
 ### Optional remote sinks (v1.0)
 
 `AuditSink` contract. Multiple sinks can run in parallel:
-- File append: `storage/security/audit/audit.log.YYYY-MM-DD` (rotated daily)
+- File append: `storage/shield/audit/audit.log.YYYY-MM-DD` (rotated daily)
 - Push to S3 / R2 / generic webhook
 - Syslog (UDP/TCP)
 - Logtail / Datadog / generic HTTP+JSON
@@ -775,7 +775,7 @@ Configurable via:
 ```php
 'audit_log' => [
     'sinks' => [
-        'file' => ['enabled' => true, 'path' => 'storage/security/audit', 'rotation' => 'daily'],
+        'file' => ['enabled' => true, 'path' => 'storage/shield/audit', 'rotation' => 'daily'],
         'webhook' => ['enabled' => false, 'url' => env('LS_AUDIT_WEBHOOK_URL'), 'headers' => [...]],
         's3' => ['enabled' => false, 'bucket' => env('LS_AUDIT_S3_BUCKET'), 'prefix' => 'audit/'],
         'syslog' => ['enabled' => false, 'host' => env('LS_AUDIT_SYSLOG_HOST')],
@@ -823,42 +823,42 @@ Findings deduplicated by `(file_path, signature_ref)` when multiple backends mat
 | `db_content` | off | log-only |
 | `unknown_files` (in `public/`) | off | **move + stub** |
 
-Each policy overridable in `config/security.php`. Paranoid users can set "log-only everywhere"; aggressive users can set "move everywhere."
+Each policy overridable in `config/shield.php`. Paranoid users can set "log-only everywhere"; aggressive users can set "move everywhere."
 
 ### Upload scanning (3 layers, all use same `Scanner::scanFile()` core)
 
 1. **`firewall.av_uploads` middleware** — scans `$request->allFiles()` recursively. Opt-in per route. Default: reject 415 + audit + notify.
 2. **Spatie Media Library auto-integration** — detected via `class_exists(\Spatie\MediaLibrary\Models\Media::class)`. Hooks Media Library events so files are rejected before save. Zero-config when Spatie present.
-3. **On-demand API** — `app('security')->scanUploadedFile($uploadedFile): ScanResult` for any code path.
+3. **On-demand API** — `app('shield')->scanUploadedFile($uploadedFile): ScanResult` for any code path.
 
 ### Signatures (hosting + sync)
 
-- Hosted in GitHub repo: **`ozankurt/laravel-security-signatures`**
+- Hosted in GitHub repo: **`ozankurt/laravel-shield-signatures`**
 - Each release is a tagged signature bundle: `signatures.json` + `checksum.sha256`
-- `php artisan security:signatures-sync` does: GitHub API → download latest → verify checksum → upsert into `ls_signatures` by `(source, source_ref)` → bump `version` on change → audit log
-- Pin via `config('security.scanner.signatures.pin' => 'v2026.05')` or always-latest
+- `php artisan shield:signatures-sync` does: GitHub API → download latest → verify checksum → upsert into `ls_signatures` by `(source, source_ref)` → bump `version` on change → audit log
+- Pin via `config('shield.scanner.signatures.pin' => 'v2026.05')` or always-latest
 - Scheduled daily
 
 ### ClamAV operations
 
 ```bash
-php artisan security:clamav-update    # wraps freshclam if available
-php artisan security:clamav-status    # daemon + signature DB info (also shown in dashboard)
+php artisan shield:clamav-update    # wraps freshclam if available
+php artisan shield:clamav-status    # daemon + signature DB info (also shown in dashboard)
 ```
 
 Dashboard shows daemon running/version + signature DB last-update timestamp.
 
 ### Scan triggers
 
-1. **Manual** — `php artisan security:scan [--target=...] [--backend=...]` + dashboard "Start scan"
+1. **Manual** — `php artisan shield:scan [--target=...] [--backend=...]` + dashboard "Start scan"
 2. **Scheduled** — quick scan (recently-modified + signatures) daily; full scan weekly
 3. **File-change watcher** (`security:watch`) — long-running command using `spatie/file-system-watcher`, requires `chokidar` npm pkg at runtime, falls back to polling if unavailable. Composer suggest. Watches `app/`, `routes/`, `config/`, `.env` + user extras. On change → audit log + optional focused scan. Supervisor/systemd unit examples in docs.
 
 ### Quarantine
 
 - Move-and-stub by default for `public_uploads` and `unknown_files`
-- File moved to `storage/security/quarantine/<finding_uuid>.bin`, original replaced with empty stub
-- `php artisan security:quarantine-restore <finding_uuid>` + dashboard button to restore
+- File moved to `storage/shield/quarantine/<finding_uuid>.bin`, original replaced with empty stub
+- `php artisan shield:quarantine-restore <finding_uuid>` + dashboard button to restore
 - All quarantine operations audit-logged
 - Per-target policy override in config
 
@@ -891,7 +891,7 @@ Generic webhook payload contract (versioned for future Central):
   "ts": "2026-05-26T14:32:11Z",
   "summary": "Auto-blocked IP 1.2.3.4 after 3 SQLi attempts",
   "links": {
-    "dashboard": "https://app.example.com/security/logs?correlation_id=..."
+    "dashboard": "https://app.example.com/shield/logs?correlation_id=..."
   },
   "data": { /* event-specific payload */ }
 }
@@ -979,7 +979,7 @@ Each toggleable + configurable top-N limit:
 ### Page IA
 
 ```
-/security/
+/shield/
 ├── /                       Dashboard (stats + recent activity + system health)
 ├── /acl                    Unified ACL list (kind filter)
 ├── /logs                   Attack hits
@@ -1007,7 +1007,7 @@ Every page tested at 360px viewport. DataTables responsive mode handles column h
 
 ### Cache dashboard (Laravel Debugbar-inspired)
 
-Page `/security/cache` shows:
+Page `/shield/cache` shows:
 - All cache keys with prefix `ls.*`
 - Per key: TTL, last refresh, approximate size, hit/miss counters
 - "Clear" button per key + "Clear all `ls.*`" button
@@ -1015,7 +1015,7 @@ Page `/security/cache` shows:
 
 ### ClamAV dashboard surface
 
-Inside `/security/scanner`:
+Inside `/shield/scanner`:
 - Daemon status card (running? version? socket reachable?)
 - Signature DB last `freshclam` update
 - "Start scan" button (target picker + backend toggles)
@@ -1038,7 +1038,7 @@ Building a security system means you can lock yourself out. Three independent me
 
 ### 2. Config IP whitelist (always-on, immutable from UI)
 
-- `config('security.bypass.ips')` from `LS_BYPASS_IPS` env (comma-separated)
+- `config('shield.bypass.ips')` from `LS_BYPASS_IPS` env (comma-separated)
 - Listed IPs/CIDRs always bypass everything
 - Can never be auto-blocked
 - Removal requires `.env` edit (no UI path)
@@ -1047,9 +1047,9 @@ Building a security system means you can lock yourself out. Three independent me
 ### 3. Recovery Artisan command
 
 ```bash
-php artisan security:bypass-add <ip>    # adds ACL entry kind=ip, action=allow, source=bypass
-php artisan security:bypass-remove <ip> # removes it
-php artisan security:bypass-list        # lists active bypass entries
+php artisan shield:bypass-add <ip>    # adds ACL entry kind=ip, action=allow, source=bypass
+php artisan shield:bypass-remove <ip> # removes it
+php artisan shield:bypass-list        # lists active bypass entries
 ```
 
 Requires shell access. For one-off "stuck, let me in" without editing `.env`.
@@ -1198,7 +1198,7 @@ Extends Cloudflare-aware IP handling. Auto-include known proxy ranges:
 ### Pluggable contract
 
 ```php
-namespace OzanKurt\Security\Contracts;
+namespace OzanKurt\Shield\Contracts;
 
 interface ThreatFeedProvider
 {
@@ -1219,7 +1219,7 @@ Users register custom providers via service container.
 ### Sync schedule
 
 ```bash
-php artisan security:feed-sync [--source=spamhaus]
+php artisan shield:feed-sync [--source=spamhaus]
 ```
 
 - Daily by default for free providers
@@ -1240,7 +1240,7 @@ Wraps `composer audit --format=json`:
 
 ## 23. Diagnostics Page (1.2)
 
-`/security/diagnostics` shows:
+`/shield/diagnostics` shows:
 - PHP version + extensions
 - Laravel version
 - Memory limit + max execution time
@@ -1261,7 +1261,7 @@ Wraps `composer audit --format=json`:
 
 ## 24. Configurability
 
-Every parameter that affects behavior is a config key in `config/security.php`. Hard-coded values are a bug.
+Every parameter that affects behavior is a config key in `config/shield.php`. Hard-coded values are a bug.
 
 ### Top-level structure (final shape)
 
@@ -1337,24 +1337,72 @@ return [
 
 - Old tables (`security_logs`, `security_ips`, `security_auth_logs`) get **dropped** in fresh migrations. No data migration logic.
 - New schema with `ls_` prefix is the only schema.
-- Old config keys are not honored — users re-publish `config/security.php`.
+- Old config keys are not honored — users re-publish `config/shield.php`.
+- Package rename: `ozankurt/laravel-security` → `ozankurt/laravel-shield`. Composer.json's `replace` clause prevents conflicts during the transition; old package gets `abandoned: ozankurt/laravel-shield` on Packagist once v1.0 is stable.
 
-### Upgrade command
+### Install + upgrade commands
+
+Two commands cover the install lifecycle:
+
+#### `php artisan shield:install` (fresh first-time setup)
+
+The canonical first-run experience. Idempotent — safe to run repeatedly.
+
+1. **Publish config** — copies `config/shield.php` to the app's config directory (if not already present); diffs existing if present
+2. **Publish migrations + assets** — `php artisan vendor:publish --tag=shield-migrations --tag=shield-assets --tag=shield-lang`
+3. **Run migrations** — `php artisan migrate` (only the shield migrations)
+4. **Generate secrets** if missing (writes to `.env`):
+   - `LS_AUDIT_HMAC_SECRET` — 64-char random string for audit log tamper-evidence chain
+   - `LS_BYPASS_KEY` — 32-char random string for header-based bypass mechanism
+5. **Seed lookup tables** — all the `ls_*_kinds`, `ls_*_actions`, `ls_*_levels`, `ls_*_statuses` etc. (idempotent — uses `updateOrCreate` on unique `name`)
+6. **Seed initial WAF rules** — ~50 rules extracted from the historical `config/security.php` patterns, tagged `source=builtin`
+7. **Seed initial signatures** — bundled starter signature set (~200 entries) tagged `source=builtin_native`
+8. **Prompt for first-block ACL bootstrap** (interactive) — "Add the current IP to whitelist so you don't lock yourself out? [Y/n]" → adds entry `kind=ip, value=<request ip or detect>, action=allow, source=install, reason='Self-bootstrap during install'`. Skippable with `--no-interaction`.
+9. **Print next-steps** — pointing to dashboard route, scanner setup, ClamAV install instructions (if applicable), notification setup, premium license entry
 
 ```bash
-php artisan security:upgrade
+php artisan shield:install [--no-interaction] [--force]
 ```
 
-Wraps:
-1. `vendor:publish` for new config (renamed from `security.php` to `security.php` — same name, new content)
-2. `migrate` for new tables
-3. Seeds for lookup tables + builtin rules + builtin signatures
-4. Sets `LS_AUDIT_HMAC_SECRET` if missing (generates one and writes to `.env`)
-5. Shows post-install instructions
+Output template:
+
+```
+Laravel Shield installed successfully.
+
+✓ Config published to config/shield.php
+✓ Migrations executed
+✓ LS_AUDIT_HMAC_SECRET generated (64 chars)
+✓ LS_BYPASS_KEY generated (32 chars)
+✓ Lookup tables seeded
+✓ 47 builtin WAF rules seeded
+✓ 218 starter malware signatures seeded
+✓ Whitelisted your current IP (203.0.113.5) — remove from /shield/acl when done
+
+Next steps:
+  1. Visit https://your-app.test/shield/   ← grant viewSecurityDashboard gate first
+  2. (Optional) Install ClamAV: composer require xenolope/quahog && apt install clamav clamav-daemon
+  3. (Optional) Enable scheduled scans: add `$schedule->command('shield:scan --target=app_files');` to App\Console\Kernel
+  4. (Optional) Buy a premium license at https://laravel-shield.ozankurt.com to unlock real-time threat feed
+```
+
+#### `php artisan shield:upgrade` (existing installs picking up new versions)
+
+After `composer update` bumps the shield package — runs new migrations, adds new config sections, regenerates secrets only if missing.
+
+1. `migrate` (idempotent — new migrations only)
+2. Compares published `config/shield.php` with shipped version; offers to merge new keys
+3. Seeds any new lookup table values added in this version
+4. Bumps WAF rule + signature versions where upstream changed
+5. Prints CHANGELOG diff for this version range
+6. Does NOT regenerate secrets that already exist (preserves bypass key, HMAC secret)
+
+```bash
+php artisan shield:upgrade [--from=0.x] [--no-interaction] [--dry-run]
+```
 
 ### `UPGRADING.md`
 
-Documented step-by-step for users moving from 0.x. Explicit list of what changed.
+Step-by-step guide for users moving from 0.x — explicit list of: dropped tables, renamed config keys, namespace change (`OzanKurt\Security` → `OzanKurt\Shield`), package rename. Includes the exact `composer update` invocation.
 
 ---
 
@@ -1474,18 +1522,18 @@ Configurable queue connection + name.
 
 ---
 
-## 29. Premium Features (in the single `ozankurt/laravel-security` package)
+## 29. Premium Features (in the single `ozankurt/laravel-shield` package)
 
 Premium features live in the same package as free features, gated at runtime by `Security::isPremium()` / `Security::isFeatureAvailable($feature)`. No separate package, no Satis, no Composer auth — just Packagist + a license key.
 
 ### Distribution: Packagist + runtime license key
 
-Both free-tier and premium-tier code ships in the same `ozankurt/laravel-security` package on Packagist. Anyone can `composer require` it. **Premium features stay dormant until a valid `LS_PREMIUM_LICENSE_KEY` is present and validated by the license-check API.** No license key → free behavior, identical to a free-only install.
+Both free-tier and premium-tier code ships in the same `ozankurt/laravel-shield` package on Packagist. Anyone can `composer require` it. **Premium features stay dormant until a valid `LS_PREMIUM_LICENSE_KEY` is present and validated by the license-check API.** No license key → free behavior, identical to a free-only install.
 
 ### Buyer flow (much simpler than two-package design)
 
 1. Buyer pays via the Laravel Shield site → receives license key string (e.g. `ls-prem-xxxxxxxxxxxx`)
-2. Buyer already has the package installed (`composer require ozankurt/laravel-security` — or already had it from when they were a free user)
+2. Buyer already has the package installed (`composer require ozankurt/laravel-shield` — or already had it from when they were a free user)
 3. Buyer adds `LS_PREMIUM_LICENSE_KEY=ls-prem-xxxxxxxxxxxx` to `.env`
 4. Premium features activate on next request (after license check call, cached 24h)
 
@@ -1493,10 +1541,10 @@ No `auth.json`, no extra repositories in `composer.json`, no private repo SSH ke
 
 ### License-check API contract
 
-Hosted by Ozan at `https://api.ozankurt.com/laravel-security/license/check` (or equivalent):
+Hosted by Ozan at `https://laravel-shield.ozankurt.com/api/license/check` (or equivalent):
 
 ```
-POST /laravel-security/license/check
+POST /api/license/check
 Content-Type: application/json
 
 {
@@ -1538,10 +1586,10 @@ Wordfence's actual model:
 
 We mirror this exactly, just with our own API endpoint.
 
-### `LicenseChecker` service (in the same single package, under `OzanKurt\Security\Premium\`)
+### `LicenseChecker` service (in the same single package, under `OzanKurt\Shield\Premium\`)
 
 ```php
-namespace OzanKurt\Security\Premium;
+namespace OzanKurt\Shield\Premium;
 
 final class LicenseChecker
 {
@@ -1597,10 +1645,10 @@ The dashboard's "License" page is always present (premium UI code is in the pack
 
 ```php
 // Example binding pattern
-$this->app->bind(\OzanKurt\Security\Contracts\ThreatFeedProvider::class, function ($app) {
-    return $app->make(\OzanKurt\Security\Facades\Security::class)->isFeatureAvailable('realtime_feed')
-        ? new \OzanKurt\Security\Premium\RealtimeThreatFeedProvider()
-        : new \OzanKurt\Security\Services\DailyThreatFeedProvider();
+$this->app->bind(\OzanKurt\Shield\Contracts\ThreatFeedProvider::class, function ($app) {
+    return $app->make(\OzanKurt\Shield\Facades\Security::class)->isFeatureAvailable('realtime_feed')
+        ? new \OzanKurt\Shield\Premium\RealtimeThreatFeedProvider()
+        : new \OzanKurt\Shield\Services\DailyThreatFeedProvider();
 });
 ```
 
@@ -1611,7 +1659,7 @@ Both implementations live in the same package's `src/` tree — no separate pack
 ```json
 {
     "require": {
-        "ozankurt/laravel-security": "^1.0"
+        "ozankurt/laravel-shield": "^1.0"
     }
 }
 ```
@@ -1629,7 +1677,7 @@ That's it. No extra repositories, no auth files. Premium features just activate 
 
 ### Honest threat model (read this before designing premium features)
 
-The runtime license check is **soft enforcement, not hard DRM.** Any determined buyer can open `vendor/ozankurt/laravel-security/src/Premium/LicenseChecker.php` and patch `isFeatureAvailable()` to always return true. Same for every open-source-distributed premium plugin (Wordfence, Yoast, ACF Pro, etc.). Don't ship this expecting it to defeat crackers — it's not designed to.
+The runtime license check is **soft enforcement, not hard DRM.** Any determined buyer can open `vendor/ozankurt/laravel-shield/src/Premium/LicenseChecker.php` and patch `isFeatureAvailable()` to always return true. Same for every open-source-distributed premium plugin (Wordfence, Yoast, ACF Pro, etc.). Don't ship this expecting it to defeat crackers — it's not designed to.
 
 **What the license check IS for:**
 - Clean "license expired, please renew" UI signal for honest buyers
@@ -1663,14 +1711,14 @@ These are arms-race tactics that buy 30 seconds of cracker time and a lot of buy
 
 ---
 
-## 30. Filament Adapter (`ozankurt/laravel-security-filament`)
+## 30. Filament Adapter (`ozankurt/laravel-shield-filament`)
 
 Ships later (post-1.0). Mirrors the Bootstrap dashboard as Filament resources. Filament has different major versions (3, 4, 5) with breaking API changes — we ship the adapter as two parallel packages by version:
 
 | Package version | Filament versions supported |
 |---|---|
-| `ozankurt/laravel-security-filament` **v1.x** | Filament 3 and 4 |
-| `ozankurt/laravel-security-filament` **v2.x** | Filament 5+ |
+| `ozankurt/laravel-shield-filament` **v1.x** | Filament 3 and 4 |
+| `ozankurt/laravel-shield-filament` **v2.x** | Filament 5+ |
 
 Same convention as `livewire/livewire` major-version splits. Users pin the major version matching their Filament.
 
@@ -1678,7 +1726,7 @@ Same convention as `livewire/livewire` major-version splits. Users pin the major
 // v1.x composer.json
 {
   "require": {
-    "ozankurt/laravel-security": "^1.0",
+    "ozankurt/laravel-shield": "^1.0",
     "filament/filament": "^3.0|^4.0"
   }
 }
@@ -1688,7 +1736,7 @@ Same convention as `livewire/livewire` major-version splits. Users pin the major
 // v2.x composer.json
 {
   "require": {
-    "ozankurt/laravel-security": "^1.0",
+    "ozankurt/laravel-shield": "^1.0",
     "filament/filament": "^5.0"
   }
 }
@@ -1702,7 +1750,7 @@ Out of scope for v1.0 design; gets its own spec when started. When we start v2.x
 
 These don't block v1.0 but should be revisited:
 
-1. **Package rename** — `ozankurt/laravel-security` → `ozankurt/laravel-shield`? Deferred. Revisit after v1.0 lands.
+1. **Package rename** — `ozankurt/laravel-shield` → `ozankurt/laravel-shield`? Deferred. Revisit after v1.0 lands.
 2. **Wordfence Central analogue** — Separate Laravel app, separate brainstorm. Plugin emits webhook events on the stable contract from §17 to enable it.
 3. **Compliance frameworks** — Audit log retention tuning, encryption-at-rest, signature-based audit verification, framework-specific certifications. Patterns documented; specific HIPAA/PCI/GDPR/SOC2 certifications NOT built into v1. Default 365-day retention + HMAC chain + per-kind retention overrides cover ~95% of users; regulated industries extend on top.
 
@@ -1722,7 +1770,7 @@ Explicitly NOT deferred (rejected from scope):
     "predis/predis": "^2.0 — Redis cache + queue (strongly recommended)",
     "spatie/laravel-medialibrary": "* — auto-integration for media library upload scanning",
     "laravel/reverb": "^1.0 — self-hosted broadcasting for live traffic real-time mode",
-    "filament/filament": "^3.0|^4.0|^5.0 — install ozankurt/laravel-security-filament for Filament panel (match Filament version to the adapter package major version)"
+    "filament/filament": "^3.0|^4.0|^5.0 — install ozankurt/laravel-shield-filament for Filament panel (match Filament version to the adapter package major version)"
   }
 }
 ```
@@ -1742,14 +1790,14 @@ LS_DB_PREFIX=ls_
 # Storage strategy
 LS_STORAGE_DRIVER=sync  # sync | queue | redis_batch
 LS_QUEUE_CONNECTION=default
-LS_QUEUE_NAME=security
+LS_QUEUE_NAME=shield
 
 # Cache
 LS_CACHE_STORE=redis  # redis | file | array
 
 # Dashboard
 LS_DASHBOARD_ENABLED=true
-LS_DASHBOARD_ROUTE_PREFIX=security
+LS_DASHBOARD_ROUTE_PREFIX=shield
 
 # Bypass mechanism (CRITICAL)
 LS_BYPASS_KEY=                          # 32+ char random string
@@ -1788,14 +1836,14 @@ LS_NOTIFY_WEBHOOK_SITE_ID=              # for Central aggregator identification
 LS_GEO_ENABLED=false
 LS_ASN_ENABLED=false
 LS_MAXMIND_LICENSE_KEY=
-LS_GEO_DB_PATH=storage/security/geo/GeoLite2-Country.mmdb
+LS_GEO_DB_PATH=storage/shield/geo/GeoLite2-Country.mmdb
 
 # Threat feeds (1.1)
 LS_ABUSEIPDB_KEY=
 LS_SPAMHAUS_ENABLED=true
 LS_OWASP_CRS_ENABLED=true
 
-# Premium tier (activates premium-gated features in the single ozankurt/laravel-security package)
+# Premium tier (activates premium-gated features in the single ozankurt/laravel-shield package)
 LS_PREMIUM_LICENSE_KEY=                       # license key purchased at laravel-shield.ozankurt.com
 LS_PREMIUM_LICENSE_CHECK_URL=https://laravel-shield.ozankurt.com/api/license/check  # default
 LS_PREMIUM_LICENSE_CACHE_TTL=86400            # 24h
@@ -1808,55 +1856,55 @@ LS_PREMIUM_LICENSE_GRACE_DAYS=7               # grace period if check API unreac
 
 ```bash
 # Lifecycle
-php artisan security:upgrade            # Run after composer update — migrate, seed, publish
-php artisan security:install            # First-time setup helper
+php artisan shield:upgrade            # Run after composer update — migrate, seed, publish
+php artisan shield:install            # First-time setup helper
 
 # ACL
-php artisan security:acl-prune          # Sweep expired entries (auto-scheduled)
-php artisan security:acl-list           # CLI list of current entries
-php artisan security:acl-add <kind> <value> <action> [--reason=] [--expires=]
-php artisan security:acl-remove <id>
+php artisan shield:acl-prune          # Sweep expired entries (auto-scheduled)
+php artisan shield:acl-list           # CLI list of current entries
+php artisan shield:acl-add <kind> <value> <action> [--reason=] [--expires=]
+php artisan shield:acl-remove <id>
 
 # Bypass (recovery)
-php artisan security:bypass-add <ip>
-php artisan security:bypass-remove <ip>
-php artisan security:bypass-list
+php artisan shield:bypass-add <ip>
+php artisan shield:bypass-remove <ip>
+php artisan shield:bypass-list
 
 # Scanner
-php artisan security:scan [--target=] [--backend=]
-php artisan security:scan-status <run-id>
-php artisan security:scan-cancel <run-id>
-php artisan security:signatures-sync    # Pull latest signatures (auto-scheduled daily)
-php artisan security:quarantine-list
-php artisan security:quarantine-restore <finding-uuid>
-php artisan security:watch              # Long-running file watcher (supervisor)
+php artisan shield:scan [--target=] [--backend=]
+php artisan shield:scan-status <run-id>
+php artisan shield:scan-cancel <run-id>
+php artisan shield:signatures-sync    # Pull latest signatures (auto-scheduled daily)
+php artisan shield:quarantine-list
+php artisan shield:quarantine-restore <finding-uuid>
+php artisan shield:watch              # Long-running file watcher (supervisor)
 
 # ClamAV
-php artisan security:clamav-update      # Wraps freshclam
-php artisan security:clamav-status
+php artisan shield:clamav-update      # Wraps freshclam
+php artisan shield:clamav-status
 
 # Audit log
-php artisan security:audit-verify       # Walk HMAC chain
-php artisan security:audit-prune        # Remove records past retention
-php artisan security:audit-rotate-secret
+php artisan shield:audit-verify       # Walk HMAC chain
+php artisan shield:audit-prune        # Remove records past retention
+php artisan shield:audit-rotate-secret
 
 # Threat feeds (1.1)
-php artisan security:feed-sync [--source=]
+php artisan shield:feed-sync [--source=]
 
 # Reports
-php artisan security:report-send <cadence>  # daily-digest | 3-day | 7-day | 14-day | 30-day
-php artisan security:report-test            # Render report HTML for inspection
+php artisan shield:report-send <cadence>  # daily-digest | 3-day | 7-day | 14-day | 30-day
+php artisan shield:report-test            # Render report HTML for inspection
 
 # Diagnostics
-php artisan security:diag               # Print sysinfo to stdout
-php artisan security:audit-env          # Check .env for security issues
+php artisan shield:diag               # Print sysinfo to stdout
+php artisan shield:audit-env          # Check .env for security issues
 
 # Cache
-php artisan security:cache-clear [--key=]
-php artisan security:cache-warm
+php artisan shield:cache-clear [--key=]
+php artisan shield:cache-warm
 
 # Composer vuln (1.2)
-php artisan security:composer-audit
+php artisan shield:composer-audit
 ```
 
 ---
