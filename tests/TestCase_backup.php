@@ -3,7 +3,7 @@
 namespace OzanKurt\Shield\Tests;
 
 use Illuminate\Contracts\Config\Repository;
-use OzanKurt\Shield\SecurityServiceProvider;
+use OzanKurt\Shield\ShieldServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -69,7 +69,7 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            SecurityServiceProvider::class,
+            ShieldServiceProvider::class,
         ];
     }
 

@@ -26,7 +26,7 @@ use OzanKurt\Shield\Listeners\FailedLoginListener;
 use OzanKurt\Shield\Listeners\SuccessfulLoginListener;
 use OzanKurt\Shield\Notifications\Channels\Discord\DiscordChannel;
 
-class SecurityServiceProvider extends ServiceProvider
+class ShieldServiceProvider extends ServiceProvider
 {
     /**
      * Register the application services.

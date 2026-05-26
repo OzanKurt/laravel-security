@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Tests;
 
-use OzanKurt\Shield\SecurityServiceProvider;
+use OzanKurt\Shield\ShieldServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -27,7 +27,7 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageProviders($app)
     {
         return [
-            SecurityServiceProvider::class,
+            ShieldServiceProvider::class,
         ];
     }
 
