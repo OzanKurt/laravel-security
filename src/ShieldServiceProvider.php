@@ -234,6 +234,8 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineRestoreCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ClamavStatusCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ClamavUpdateCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ReportSendCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ReportTestCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
@@ -257,6 +259,13 @@ class ShieldServiceProvider extends ServiceProvider
             app(Schedule::class)
                 ->command('shield:signatures-sync')
                 ->cron(config('shield.scanner.signatures.sync_cron', '0 5 * * *'));
+
+            foreach ((array) config('shield.reports', []) as $cadence => $cfg) {
+                if (! ($cfg['enabled'] ?? false)) continue;
+                app(Schedule::class)
+                    ->command("shield:report-send {$cadence}")
+                    ->cron($cfg['cron_expression'] ?? '0 8 * * 1');
+            }
         });
     }
 
