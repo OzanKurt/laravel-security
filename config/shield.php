@@ -689,6 +689,46 @@ return [
         'signup' => ['enabled' => true, 'attempts' => 3, 'decay' => 600, 'by' => 'ip'],
     ],
 
+    'reports' => [
+        'daily_digest' => [
+            'enabled' => env('LS_REPORT_DAILY', false),
+            'cron_expression' => '0 8 * * *',
+            'channels' => ['mail'],
+            'include_severities' => ['low', 'medium'],
+            'group_by' => 'kind',
+            'top_n' => 10,
+        ],
+        '3_day' => ['enabled' => env('LS_REPORT_3DAY', false), 'cron_expression' => '0 8 */3 * *', 'channels' => ['mail'], 'top_n' => 10],
+        '7_day' => ['enabled' => env('LS_REPORT_7DAY', true),  'cron_expression' => '0 8 * * 1', 'channels' => ['mail'], 'top_n' => 10],
+        '14_day' => ['enabled' => env('LS_REPORT_14DAY', false), 'cron_expression' => '0 8 1,15 * *', 'channels' => ['mail'], 'top_n' => 10],
+        '30_day' => ['enabled' => env('LS_REPORT_30DAY', false), 'cron_expression' => '0 8 1 * *', 'channels' => ['mail'], 'top_n' => 10],
+    ],
+
+    'threat_feed' => [
+        'providers' => [
+            \OzanKurt\Shield\Services\ThreatFeed\Providers\SpamhausProvider::class,
+            \OzanKurt\Shield\Services\ThreatFeed\Providers\AbuseIpDbProvider::class,
+            \OzanKurt\Shield\Services\ThreatFeed\Providers\OwaspCrsProvider::class,
+            \OzanKurt\Shield\Services\ThreatFeed\Providers\MaxMindGeoLite2Provider::class,
+        ],
+        'sync_cron' => '0 3 * * *',
+        'spamhaus' => [
+            'enabled' => env('LS_SPAMHAUS_ENABLED', true),
+        ],
+        'abuseipdb' => [
+            'enabled' => env('LS_ABUSEIPDB_ENABLED', false),
+            'key' => env('LS_ABUSEIPDB_KEY'),
+            'confidence_minimum' => env('LS_ABUSEIPDB_CONFIDENCE_MINIMUM', 90),
+        ],
+        'owasp_crs' => [
+            'enabled' => env('LS_OWASP_CRS_ENABLED', true),
+        ],
+        'maxmind' => [
+            'enabled' => env('LS_MAXMIND_ENABLED', false),
+            'license_key' => env('LS_MAXMIND_LICENSE_KEY'),
+        ],
+    ],
+
     'trusted_proxies' => [
         'cloudflare' => env('LS_TRUST_CLOUDFLARE', false),
         'extra' => [],

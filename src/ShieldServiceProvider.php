@@ -54,6 +54,19 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->singleton(\OzanKurt\Shield\Services\Audit\EnvAuditor::class);
         $this->app->singleton(\OzanKurt\Shield\Services\Network\TrustedProxiesService::class);
 
+        $this->app->singleton(\OzanKurt\Shield\Services\ThreatFeed\FeedRunner::class, function ($app) {
+            $providers = [];
+            foreach ((array) config('shield.threat_feed.providers', []) as $providerClass) {
+                if (class_exists($providerClass)) {
+                    $providers[] = $app->make($providerClass);
+                }
+            }
+            return new \OzanKurt\Shield\Services\ThreatFeed\FeedRunner(
+                $providers,
+                $app->make(\OzanKurt\Shield\Services\Audit\AuditLogger::class),
+            );
+        });
+
         $this->app->singleton(\OzanKurt\Shield\Services\Lookups\LookupResolver::class);
 
         $this->app->singleton(\OzanKurt\Shield\Services\Acl\AclEvaluator::class);
@@ -156,6 +169,14 @@ class ShieldServiceProvider extends ServiceProvider
             $router->get('scanner/findings', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'findings'])->name('scanner.findings');
             $router->get('scanner/signatures', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'signatures'])->name('scanner.signatures');
             $router->post('scanner/run', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'startScan'])->name('scanner.run');
+
+            // Threat feed
+            $router->get('threat-feed', function () {
+                return app(\OzanKurt\Shield\Http\Controllers\ThreatFeedController::class)->index(
+                    array_map(fn ($c) => app($c), (array) config('shield.threat_feed.providers', [])),
+                    app(\OzanKurt\Shield\Services\Lookups\LookupResolver::class),
+                );
+            })->name('threat-feed.index');
         });
     }
 
@@ -236,6 +257,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\ClamavUpdateCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ReportSendCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ReportTestCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\FeedSyncCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
@@ -259,6 +281,10 @@ class ShieldServiceProvider extends ServiceProvider
             app(Schedule::class)
                 ->command('shield:signatures-sync')
                 ->cron(config('shield.scanner.signatures.sync_cron', '0 5 * * *'));
+
+            app(Schedule::class)
+                ->command('shield:feed-sync')
+                ->cron(config('shield.threat_feed.sync_cron', '0 3 * * *'));
 
             foreach ((array) config('shield.reports', []) as $cadence => $cfg) {
                 if (! ($cfg['enabled'] ?? false)) continue;
