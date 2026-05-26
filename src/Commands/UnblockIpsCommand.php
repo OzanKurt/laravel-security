@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class UnblockIpsCommand extends Command
 {
-    protected $signature = 'security:unblock-ips';
+    protected $signature = 'shield:unblock-ips';
 
     protected $description = 'Unblock ips based on their block period';
 

@@ -11,7 +11,7 @@ use Throwable;
 
 class SendSecurityReportNotificationCommand extends Command
 {
-    protected $signature = 'security:send-security-report-notification';
+    protected $signature = 'shield:send-security-report-notification';
 
     public function handle()
     {

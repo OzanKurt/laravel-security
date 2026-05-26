@@ -145,13 +145,13 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
                 app(Schedule::class)
-                    ->command('security:unblock-ips')
+                    ->command('shield:unblock-ips')
                     ->cron(config('shield.crons.unblock_ips.cron_expression'));
             }
 
             if (config('shield.notifications.security_report.enabled')) {
                 app(Schedule::class)
-                    ->command('security:send-security-report-notification')
+                    ->command('shield:send-security-report-notification')
                     ->cron(config('shield.crons.security_report.cron_expression'));
             }
         });
