@@ -11,7 +11,7 @@ class Referrer extends AbstractMiddleware
     {
         $status = false;
 
-        if (! $blocked = config('security.middleware.' . $this->middleware . '.blocked')) {
+        if (! $blocked = config('shield.middleware.' . $this->middleware . '.blocked')) {
             return $status;
         }
 

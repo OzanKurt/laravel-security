@@ -12,7 +12,7 @@ class Ip extends AbstractMiddleware
     {
         $this->reason = 'ip_blocked';
 
-        $model = config('security.database.ip.model');
+        $model = config('shield.database.ip.model');
 
         $clientIp = request()->ip();
 

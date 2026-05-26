@@ -23,7 +23,7 @@ trait MiddlewareHelper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        return config("security.middleware.{$middleware}.enabled", config('security.enabled', false));
+        return config("shield.middleware.{$middleware}.enabled", config('shield.enabled', false));
     }
 
     public function isDisabled($middleware = null)
@@ -37,14 +37,14 @@ trait MiddlewareHelper
             return false;
         }
 
-        return IpUtils::checkIp($this->ip(), config('security.whitelist', []));
+        return IpUtils::checkIp($this->ip(), config('shield.whitelist', []));
     }
 
     public function isMethod($middleware = null)
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (!$methods = config("security.middleware.{$middleware}.methods")) {
+        if (!$methods = config("shield.middleware.{$middleware}.methods")) {
             return false;
         }
 
@@ -59,7 +59,7 @@ trait MiddlewareHelper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (!$routes = config("security.middleware.{$middleware}.routes")) {
+        if (!$routes = config("shield.middleware.{$middleware}.routes")) {
             return false;
         }
 
@@ -86,7 +86,7 @@ trait MiddlewareHelper
     {
         $middleware = $middleware ?? $this->middleware;
 
-        if (!$inputs = config("security.middleware.{$middleware}.inputs")) {
+        if (!$inputs = config("shield.middleware.{$middleware}.inputs")) {
             return true;
         }
 
@@ -106,7 +106,7 @@ trait MiddlewareHelper
         $middleware = $middleware ?? $this->middleware;
         $user_id = $user_id ?? $this->user_id;
 
-        $model = config('security.database.log.model', Log::class);
+        $model = config('shield.database.log.model', Log::class);
 
         return $model::create([
             'user_id' => $user_id,

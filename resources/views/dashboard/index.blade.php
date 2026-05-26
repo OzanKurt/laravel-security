@@ -86,7 +86,7 @@
                                             {{ str_replace(base_path(), '', $file[0]) }}
                                         </td>
                                         <td data-order="{{ $file[1] }}">
-                                            {{ date(config('security.dashboard.date_format'), $file[1]) }}
+                                            {{ date(config('shield.dashboard.date_format'), $file[1]) }}
                                         </td>
                                     </tr>
                                 @endforeach

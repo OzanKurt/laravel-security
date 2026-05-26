@@ -28,7 +28,7 @@ trait ListenerHelper
 
     public function isEnabled()
     {
-        return config("security.middleware.{$this->middleware}.enabled", false);
+        return config("shield.middleware.{$this->middleware}.enabled", false);
     }
 
     public function isNotificationEnabled()
@@ -37,7 +37,7 @@ trait ListenerHelper
             throw new RuntimeException("The notification [{$this->notification}] is not configured in the `config/security.php` file.");
         }
 
-        return config("security.notifications.{$this->notification}.enabled", false);
+        return config("shield.notifications.{$this->notification}.enabled", false);
     }
 
     public function authLog(
@@ -47,7 +47,7 @@ trait ListenerHelper
     {
         $user_id = $user_id ?? $this->user_id;
 
-        $model = config('security.database.auth_log.model', AuthLog::class);
+        $model = config('shield.database.auth_log.model', AuthLog::class);
 
         $email = $this->request->input('email');
 

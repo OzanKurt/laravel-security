@@ -27,7 +27,7 @@ abstract class AbstractMiddleware
         }
 
         if ($this->check($this->getPatterns())) {
-            return $this->respond(config('security.responses.block'));
+            return $this->respond(config('shield.responses.block'));
         }
 
         return $next($request);
@@ -70,7 +70,7 @@ abstract class AbstractMiddleware
 
     public function getPatterns()
     {
-        return config('security.middleware.' . $this->middleware . '.patterns', []);
+        return config('shield.middleware.' . $this->middleware . '.patterns', []);
     }
 
     public function check($patterns)

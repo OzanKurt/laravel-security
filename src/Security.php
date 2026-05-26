@@ -24,7 +24,7 @@ class Security
             return $this->ipWhitelistedInDatabase;
         }
 
-        $model = config('security.database.ip.model');
+        $model = config('shield.database.ip.model');
 
         // Check if the IP is whitelisted
         $ip = $model::query()
@@ -42,12 +42,12 @@ class Security
 
     public function route(string $route, array $parameters = [], bool $absolute = true)
     {
-        return route(config('security.dashboard.route_name') . $route, $parameters, $absolute);
+        return route(config('shield.dashboard.route_name') . $route, $parameters, $absolute);
     }
 
     public function routeIsActive(string $route)
     {
-        return request()->route()->getName() === config('security.dashboard.route_name') . $route;
+        return request()->route()->getName() === config('shield.dashboard.route_name') . $route;
     }
 
     public function getRecentlyModifiedFiles(int|Carbon $time_range = 604800, int $limit = 15, bool $resetCache = false): array
@@ -125,8 +125,8 @@ class Security
 
     public function logoHref()
     {
-        return config('security.dashboard.logo_target_route_name')
-            ? route(config('security.dashboard.logo_target_route_name'))
+        return config('shield.dashboard.logo_target_route_name')
+            ? route(config('shield.dashboard.logo_target_route_name'))
             : app('security')->route('dashboard.index');
     }
 }

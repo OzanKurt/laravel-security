@@ -15,7 +15,7 @@ class SendSecurityReportNotificationCommand extends Command
 
     public function handle()
     {
-        $expression = config('security.notifications.security_report.cron_expression', '');
+        $expression = config('shield.notifications.security_report.cron_expression', '');
 
         if (CronExpression::isValidExpression($expression) === false) {
             $this->error('Invalid cron expression');

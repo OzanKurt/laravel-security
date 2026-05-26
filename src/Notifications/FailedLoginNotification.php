@@ -18,7 +18,7 @@ class FailedLoginNotification extends Notification implements ShouldQueue
         public AuthLog $authLog
     )
     {
-        $this->config = config('security.notifications.successful_login');
+        $this->config = config('shield.notifications.successful_login');
     }
 
     /**

@@ -30,13 +30,13 @@ class Xss extends AbstractMiddleware
             return $next($request);
         }
 
-        $mode = config('security.middleware.xss.mode', 'block');
+        $mode = config('shield.middleware.xss.mode', 'block');
 
         $this->clean($request);
 
         if ($mode === 'block') {
             if ($this->check($this->getPatterns())) {
-                return $this->respond(config('security.responses.block'));
+                return $this->respond(config('shield.responses.block'));
             }
         }
 
@@ -143,7 +143,7 @@ class Xss extends AbstractMiddleware
     {
         $output = $this->security->cleanInput((string) $value);
 
-        if (! config('security.middleware.xss.allow_blade_echoes')) {
+        if (! config('shield.middleware.xss.allow_blade_echoes')) {
             $output = $this->bladeEchoCleaner->clean((string) $output);
         }
 
@@ -151,7 +151,7 @@ class Xss extends AbstractMiddleware
             return $output;
         }
 
-        $mode = config('security.middleware.xss.mode', 'block');
+        $mode = config('shield.middleware.xss.mode', 'block');
 
         return $mode === 'clean' ? null : $value;
     }

@@ -59,7 +59,7 @@ class SecurityServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->registerViews();
 
-        if (config('security.dashboard.enabled')) {
+        if (config('shield.dashboard.enabled')) {
             $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
                 $gate->define('viewSecurityDashboard', fn ($user = null) => false);
             });
@@ -72,12 +72,12 @@ class SecurityServiceProvider extends ServiceProvider
 
     protected function registerRoutes(Router $router): void
     {
-        $middleware = config('security.dashboard.middleware', []);
+        $middleware = config('shield.dashboard.middleware', []);
 
-        $name = config('security.dashboard.route_name', 'security.');
+        $name = config('shield.dashboard.route_name', 'security.');
         $router->group([
             'namespace' => 'OzanKurt\Shield\Http\Controllers',
-            'prefix' => config('security.dashboard.route_prefix', 'security'),
+            'prefix' => config('shield.dashboard.route_prefix', 'security'),
             'middleware' => [
                 'web',
                 ...$middleware,
@@ -99,7 +99,7 @@ class SecurityServiceProvider extends ServiceProvider
 
     protected function registerMiddleware(Router $router): void
     {
-        $router->middlewareGroup('firewall.all', config('security.all_middleware'));
+        $router->middlewareGroup('firewall.all', config('shield.all_middleware'));
 
         $middlewares = [
             'firewall.agent' => \OzanKurt\Shield\Firewall\Middleware\Agent::class,
@@ -143,16 +143,16 @@ class SecurityServiceProvider extends ServiceProvider
         $this->commands(SendSecurityReportNotificationCommand::class);
 
         $this->app->booted(function () {
-            if (config('security.crons.unblock_ips.enabled')) {
+            if (config('shield.crons.unblock_ips.enabled')) {
                 app(Schedule::class)
                     ->command('security:unblock-ips')
-                    ->cron(config('security.crons.unblock_ips.cron_expression'));
+                    ->cron(config('shield.crons.unblock_ips.cron_expression'));
             }
 
-            if (config('security.notifications.security_report.enabled')) {
+            if (config('shield.notifications.security_report.enabled')) {
                 app(Schedule::class)
                     ->command('security:send-security-report-notification')
-                    ->cron(config('security.crons.security_report.cron_expression'));
+                    ->cron(config('shield.crons.security_report.cron_expression'));
             }
         });
     }
@@ -172,8 +172,8 @@ class SecurityServiceProvider extends ServiceProvider
 
     protected function getNameTable(string $modelKey): string
     {
-        $tablePrefix = config('security.database.table_prefix', 'security_');
-        $tableName = config("security.database.{$modelKey}.table", $modelKey);
+        $tablePrefix = config('shield.database.table_prefix', 'security_');
+        $tableName = config("shield.database.{$modelKey}.table", $modelKey);
 
         return $tablePrefix . $tableName;
     }

@@ -16,7 +16,7 @@ class Bot extends AbstractMiddleware
             return false;
         }
 
-        if (! $crawlers = config('security.middleware.' . $this->middleware . '.crawlers')) {
+        if (! $crawlers = config('shield.middleware.' . $this->middleware . '.crawlers')) {
             return false;
         }
 

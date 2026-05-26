@@ -106,7 +106,7 @@ class IpsDataTable extends DataTable
 
     public function query(): Builder
     {
-        $model = config('security.database.ip.model', Ip::class);
+        $model = config('shield.database.ip.model', Ip::class);
 
         $query = $model::query();
 

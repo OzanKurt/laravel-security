@@ -23,7 +23,7 @@ trait Helper
         $requestData = $this->request->input();
         $requestDataJson = json_encode($requestData);
 
-        $maxSize = config('security.database.max_request_data_size', 2048);
+        $maxSize = config('shield.database.max_request_data_size', 2048);
         $size = mb_strlen($requestDataJson, '8bit');
 
         if ($size > $maxSize) {

@@ -10,7 +10,7 @@ class Swear extends AbstractMiddleware
     {
         $patterns = [];
 
-        if (! $words = config('security.middleware.' . $this->middleware . '.words')) {
+        if (! $words = config('shield.middleware.' . $this->middleware . '.words')) {
             return $patterns;
         }
 

@@ -11,7 +11,7 @@ class Url extends AbstractMiddleware
     {
         $protected = false;
 
-        if (! $inspections = config('security.middleware.' . $this->middleware . '.inspections')) {
+        if (! $inspections = config('shield.middleware.' . $this->middleware . '.inspections')) {
             return $protected;
         }
 

@@ -16,14 +16,14 @@ class UnblockIpsCommand extends Command
     {
         $now = Carbon::now(config('app.timezone'));
 
-        $ip = config('security.database.ip.model');
+        $ip = config('shield.database.ip.model');
 
         $ip::with('log')->blocked()->each(function ($ip) use ($now) {
             if (empty($ip->log)) {
                 return;
             }
 
-            $period = config('security.middleware.' . $ip->log->middleware . '.auto_block.period');
+            $period = config('shield.middleware.' . $ip->log->middleware . '.auto_block.period');
 
             if ($ip->created_at->addSeconds($period) > $now) {
                 return;

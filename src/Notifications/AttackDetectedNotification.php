@@ -34,7 +34,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     public function __construct($log)
     {
         $this->log = $log;
-        $this->notifications = config('security.notifications');
+        $this->notifications = config('shield.notifications');
     }
 
     /**
@@ -134,9 +134,9 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
             $url = preg_replace('/^https?:\/\/[^\/]+/', '', $url);
 
             return (new DiscordMessage)
-                ->from(config('security.notifications.discord.from'), config('security.notifications.discord.from_img'))
-                ->url(config('security.notifications.discord.route'))
-                ->title(config('security.notifications.discord.title'))
+                ->from(config('shield.notifications.discord.from'), config('shield.notifications.discord.from_img'))
+                ->url(config('shield.notifications.discord.route'))
+                ->title(config('shield.notifications.discord.title'))
                 ->description($body)
                 ->fields([
                     'IP' => $this->log->ip,
@@ -147,7 +147,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
                     'URL' => $url,
                 ], false)
                 ->timestamp(now())
-                ->footer(config('security.notifications.discord.footer'), config('security.notifications.discord.footer_img'))
+                ->footer(config('shield.notifications.discord.footer'), config('shield.notifications.discord.footer_img'))
                 ->warning();
         } catch (\Throwable $exception) {
             report($exception);

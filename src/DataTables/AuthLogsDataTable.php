@@ -20,7 +20,7 @@ class AuthLogsDataTable extends DataTable
             return 'actions';
         });
 
-        $nameField = config('security.dashboard.user_name_field');
+        $nameField = config('shield.dashboard.user_name_field');
 
         $builder->editColumn('email', function (AuthLog $authLog) use ($nameField) {
             return $authLog->email;
@@ -74,9 +74,9 @@ class AuthLogsDataTable extends DataTable
 
     public function query(): Builder
     {
-        $model = config('security.database.auth_log.model', AuthLog::class);
+        $model = config('shield.database.auth_log.model', AuthLog::class);
 
-        $tableName = config('security.database.table_prefix').config('security.database.auth_log.table');
+        $tableName = config('shield.database.table_prefix').config('shield.database.auth_log.table');
         $query = $model::query()
             ->select($tableName .'.*')
             ->with('user');

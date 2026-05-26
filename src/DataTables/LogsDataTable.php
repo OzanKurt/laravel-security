@@ -20,7 +20,7 @@ class LogsDataTable extends DataTable
             return 'actions';
         });
 
-        $nameField = config('security.dashboard.user_name_field');
+        $nameField = config('shield.dashboard.user_name_field');
 
         $builder->editColumn('user_name', function (Log $log) use ($nameField) {
             return $log->user?->{$nameField} ?? 'Guest';
@@ -76,9 +76,9 @@ class LogsDataTable extends DataTable
 
     public function query(): Builder
     {
-        $model = config('security.database.log.model', Log::class);
+        $model = config('shield.database.log.model', Log::class);
 
-        $tableName = config('security.database.table_prefix').config('security.database.log.table');
+        $tableName = config('shield.database.table_prefix').config('shield.database.log.table');
         $query = $model::query()
             ->select($tableName .'.*')
             ->with('user');
@@ -106,7 +106,7 @@ class LogsDataTable extends DataTable
             Column::make('id')
                 ->title(trans('security::dashboard.columns.id'))
                 ->class('all dtr-control'),
-            Column::make('user_name', 'user.'.config('security.dashboard.user_name_field'))
+            Column::make('user_name', 'user.'.config('shield.dashboard.user_name_field'))
                 ->title(trans('security::dashboard.columns.user_name'))
                 ->class('all'),
             Column::make('middleware')
