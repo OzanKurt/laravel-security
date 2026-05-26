@@ -345,6 +345,22 @@ ls_live_traffic
 
 7-day default retention. Sampling configurable; attacks/blocks always 100%.
 
+**Real-time streaming (v1.0 option):** When `live_traffic.real_time.enabled` is true, the capture pipeline fires `LiveTrafficCapturedEvent implements ShouldBroadcast` on the Laravel broadcasting bus. Dashboard subscribes via Laravel Echo to `private-security.live-traffic`. Works with any broadcast driver (Reverb, Pusher, Ably, Soketi). Default behavior is **polling (5–10s DataTable refresh)** — real-time is opt-in to avoid forcing broadcast infra on users.
+
+```php
+'live_traffic' => [
+    'real_time' => [
+        'enabled' => false,
+        'broadcast_driver' => null,            // null = Laravel default
+        'channel' => 'private-security.live-traffic',
+        'authorize_via' => 'viewSecurityDashboard',  // existing gate
+        'rate_limit_per_minute' => 600,        // protects clients from event flood
+    ],
+],
+```
+
+Composer suggests `laravel/reverb` for self-hosted broadcast.
+
 #### `ls_audit_log` (tamper-evident audit trail)
 
 ```sql
@@ -1449,28 +1465,174 @@ Configurable queue connection + name.
 
 ## 29. Premium Package (`ozankurt/laravel-security-premium`)
 
-Out of scope for the free core's spec, but the free core must:
+Detailed design out of scope for the free core, but the free core must support the integration points. Premium specifics get their own spec post-v1.0.
+
+### Distribution: Satis (public) + runtime license key
+
+The Satis repository at `satis.ozankurt.com` and the runtime license key are **two layers serving different purposes**:
+
+| Layer | What it does | What it doesn't do |
+|---|---|---|
+| Satis | Serves the package files via Composer | Can't enforce active subscription, domain limits, feature gating |
+| Runtime license key | Validates `LS_PREMIUM_LICENSE_KEY` against an API → returns valid/expiry/features/domain count | Doesn't prevent installation — buyer has source, but features stay locked without valid key |
+
+**Decision: Satis is PUBLIC** (no auth tokens for buyers). Code is inspectable anyway, and auth-token setup adds friction. The license key is the actual enforcement.
+
+### Buyer flow
+
+1. Buyer pays via Ozan's site → receives license key string (e.g. `ls-prem-xxxxxxxxxxxx`)
+2. Buyer adds to `composer.json` repositories list:
+   ```json
+   "repositories": [
+       { "type": "composer", "url": "https://satis.ozankurt.com" }
+   ]
+   ```
+3. Buyer runs `composer require ozankurt/laravel-security-premium`
+4. Buyer adds `LS_PREMIUM_LICENSE_KEY=ls-prem-xxxxxxxxxxxx` to `.env`
+5. Premium features activate on next request (after license check call)
+
+### License-check API contract
+
+Hosted by Ozan at `https://api.ozankurt.com/laravel-security/license/check` (or equivalent):
+
+```
+POST /laravel-security/license/check
+Content-Type: application/json
+
+{
+  "key": "ls-prem-xxxxxxxxxxxx",
+  "site_url": "https://buyer-app.example.com",
+  "package_version": "1.0.0",
+  "php_version": "8.3.1",
+  "laravel_version": "12.0.0"
+}
+
+→ 200 OK
+{
+  "valid": true,
+  "expires_at": "2027-05-26T00:00:00Z",
+  "plan": "pro",
+  "features": ["realtime_feed", "premium_audit", "remote_sink", "central_integration"],
+  "domain_limit": 5,
+  "domains_used": 2,
+  "grace_period_days": 7
+}
+
+→ 200 OK (invalid key)
+{
+  "valid": false,
+  "reason": "expired" | "revoked" | "domain_limit_exceeded" | "unknown_key",
+  "message": "Human-readable status"
+}
+```
+
+### Modelled on Wordfence's `wfLicense.php`
+
+Wordfence's actual model:
+1. User buys → license key
+2. Plugin sends key + site URL to `noc1.wordfence.com` API
+3. API returns JSON with validity, expiry, plan, features
+4. Plugin caches ~24h in DB
+5. Premium features check `wfLicense::isPremium()` before activating
+6. On expiry, features gracefully degrade → free behavior + UI banner
+
+We mirror this exactly, just with our own API endpoint.
+
+### `LicenseChecker` service (in premium package)
+
+```php
+namespace OzanKurt\Security\Premium;
+
+final class LicenseChecker
+{
+    public function status(): LicenseStatus;  // cached, ~24h
+    public function refresh(): LicenseStatus;  // force re-check
+    public function isActive(): bool;          // valid + within grace period
+    public function features(): array;
+    public function isFeatureAvailable(string $feature): bool;
+}
+```
+
+### Caching + grace period
+
+- License-check result cached 24h in Redis/file (key: `ls.premium.license`)
+- On 24h expiry, premium package re-checks
+- If API unreachable for >24h: enter 7-day grace period (configurable) — features stay active, dashboard shows "License check unreachable" warning
+- After grace period expires: features deactivate, dashboard shows "License expired" banner
+- Prevents an Ozan-side API outage from killing buyer sites
+
+### Premium feature gating in code
+
+Each premium feature checks `LicenseChecker::isFeatureAvailable($feature)` before activating. Examples:
+
+```php
+if (app(LicenseChecker::class)->isFeatureAvailable('realtime_feed')) {
+    // pull threat feed every 5min instead of daily
+}
+
+if (app(LicenseChecker::class)->isFeatureAvailable('remote_sink')) {
+    // enable S3 / webhook audit sinks
+}
+```
+
+When unavailable, the feature falls back to the free-package behavior (daily feed sync, file sink only, etc.).
+
+### Dashboard surface (in free core)
+
+The free core's dashboard has a "License" page even when premium not installed — shows:
+- Is premium installed? (`class_exists(\OzanKurt\Security\Premium\LicenseChecker::class)`)
+- Current license status + plan + expiry + domains used
+- "Buy / Renew" link to Ozan's site
+- "Force re-check" button → calls `LicenseChecker::refresh()`
+- Available features list
+- Last check timestamp + next scheduled check
+
+### Free core's responsibilities (for premium integration)
 
 1. Define stable contracts (§7) that premium overrides
 2. Bind default (free) implementations in `SecurityServiceProvider`
 3. Allow premium's `PremiumServiceProvider::register()` to override bindings via `$this->app->bind()`
-4. Surface license-key check in core dashboard (premium adds UI sections, but core knows whether premium is active)
-5. Never hard-depend on premium package classes
+4. Expose `app('security')->isPremiumActive(): bool` helper that core code can branch on
+5. Never hard-depend on premium package classes — only soft-detect via `class_exists`
 
-### License-key validation
+### Composer requirement on buyer side
 
-- Premium package ships a license-check service that pings `satis.ozankurt.com/license-check` (or equivalent) periodically
-- Cached result, ~24h TTL
-- Expired key → reverts to free behavior + dashboard banner
-- Key stored in `LS_PREMIUM_LICENSE_KEY` env var
+```json
+{
+    "require": {
+        "ozankurt/laravel-security": "^1.0",
+        "ozankurt/laravel-security-premium": "^1.0"
+    },
+    "repositories": [
+        { "type": "composer", "url": "https://satis.ozankurt.com" }
+    ]
+}
+```
+
+### Anti-abuse considerations
+
+- License check API includes `site_url` — same key from many sites = visible to Ozan
+- `domain_limit` enforced by API (returns `domain_limit_exceeded` past N domains)
+- If a customer shares their key publicly, Ozan can revoke + reissue
+- Key revocation is immediate (cached 24h max — accept this lag)
+- All key abuse audit-logged at API server
+- License key never logged client-side in `ls_audit_log` (sensitive — redacted via the standard redaction list)
 
 ---
 
 ## 30. Filament Adapter (`ozankurt/laravel-security-filament`)
 
-Ships later (post-1.0). Mirrors the Bootstrap dashboard as Filament v3/v5 resources. Composer package:
+Ships later (post-1.0). Mirrors the Bootstrap dashboard as Filament resources. Filament has different major versions (3, 4, 5) with breaking API changes — we ship the adapter as two parallel packages by version:
+
+| Package version | Filament versions supported |
+|---|---|
+| `ozankurt/laravel-security-filament` **v1.x** | Filament 3 and 4 |
+| `ozankurt/laravel-security-filament` **v2.x** | Filament 5+ |
+
+Same convention as `livewire/livewire` major-version splits. Users pin the major version matching their Filament.
 
 ```json
+// v1.x composer.json
 {
   "require": {
     "ozankurt/laravel-security": "^1.0",
@@ -1479,7 +1641,17 @@ Ships later (post-1.0). Mirrors the Bootstrap dashboard as Filament v3/v5 resour
 }
 ```
 
-Out of scope for v1.0 design; will get its own spec when started.
+```json
+// v2.x composer.json
+{
+  "require": {
+    "ozankurt/laravel-security": "^1.0",
+    "filament/filament": "^5.0"
+  }
+}
+```
+
+Out of scope for v1.0 design; gets its own spec when started. When we start v2.x of the adapter, we'll load the `filament-v5` skill for Filament-specific patterns.
 
 ---
 
@@ -1488,10 +1660,11 @@ Out of scope for v1.0 design; will get its own spec when started.
 These don't block v1.0 but should be revisited:
 
 1. **Package rename** — `ozankurt/laravel-security` → `ozankurt/laravel-shield`? Deferred. Revisit after v1.0 lands.
-2. **Tenancy support** — Multi-tenant installs (stancl/tenancy etc.). Document override pattern in v1.x.
-3. **Live traffic real-time stream** — Currently polled (5–10s). SSE/Reverb upgrade as v1.x feature.
-4. **Wordfence Central analogue** — Separate Laravel app, separate brainstorm. Plugin emits webhook events to enable it.
-5. **Compliance frameworks** — Audit log retention tuning, encryption-at-rest, signature-based audit verification. Document patterns for HIPAA/PCI/GDPR if/when users ask.
+2. **Wordfence Central analogue** — Separate Laravel app, separate brainstorm. Plugin emits webhook events on the stable contract from §17 to enable it.
+3. **Compliance frameworks** — Audit log retention tuning, encryption-at-rest, signature-based audit verification, framework-specific certifications. Patterns documented; specific HIPAA/PCI/GDPR/SOC2 certifications NOT built into v1. Default 365-day retention + HMAC chain + per-kind retention overrides cover ~95% of users; regulated industries extend on top.
+
+Explicitly NOT deferred (rejected from scope):
+- Multi-tenant support (stancl/tenancy etc.) — out of scope, not planned
 
 ---
 
@@ -1505,7 +1678,8 @@ These don't block v1.0 but should be revisited:
     "spatie/file-system-watcher": "^1.0 — live file monitoring via security:watch",
     "predis/predis": "^2.0 — Redis cache + queue (strongly recommended)",
     "spatie/laravel-medialibrary": "* — auto-integration for media library upload scanning",
-    "filament/filament": "^3.0|^4.0 — install ozankurt/laravel-security-filament for Filament panel"
+    "laravel/reverb": "^1.0 — self-hosted broadcasting for live traffic real-time mode",
+    "filament/filament": "^3.0|^4.0|^5.0 — install ozankurt/laravel-security-filament for Filament panel (match Filament version to the adapter package major version)"
   }
 }
 ```
@@ -1551,6 +1725,11 @@ LS_CLAMAV_ENABLED=false
 LS_CLAMAV_SOCKET=/var/run/clamav/clamd.ctl
 LS_SIGNATURE_PIN=                       # pin specific signature version
 
+# Live traffic
+LS_LIVE_TRAFFIC_ENABLED=true
+LS_LIVE_TRAFFIC_REALTIME_ENABLED=false       # opt-in for socket-based real-time stream
+LS_LIVE_TRAFFIC_BROADCAST_DRIVER=             # null = Laravel default
+
 # Notification channels
 LS_NOTIFY_MAIL_ENABLED=false
 LS_NOTIFY_SLACK_ENABLED=false
@@ -1573,8 +1752,11 @@ LS_ABUSEIPDB_KEY=
 LS_SPAMHAUS_ENABLED=true
 LS_OWASP_CRS_ENABLED=true
 
-# Premium
-LS_PREMIUM_LICENSE_KEY=
+# Premium (only meaningful when ozankurt/laravel-security-premium is installed)
+LS_PREMIUM_LICENSE_KEY=                       # license key from satis.ozankurt.com purchase
+LS_PREMIUM_LICENSE_CHECK_URL=https://api.ozankurt.com/laravel-security/license/check  # default
+LS_PREMIUM_LICENSE_CACHE_TTL=86400            # 24h
+LS_PREMIUM_LICENSE_GRACE_DAYS=7               # grace period if check API unreachable
 ```
 
 ---
