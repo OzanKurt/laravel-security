@@ -52,6 +52,13 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->singleton(\OzanKurt\Shield\Services\Acl\AclEvaluator::class);
 
         $this->app->singleton(\OzanKurt\Shield\Services\Waf\WafRuleResolver::class);
+
+        $this->app->singleton(\OzanKurt\Shield\Services\Audit\HmacChain::class, function ($app) {
+            return new \OzanKurt\Shield\Services\Audit\HmacChain(
+                env('LS_AUDIT_HMAC_SECRET', 'dev-secret-please-set-LS_AUDIT_HMAC_SECRET'),
+            );
+        });
+        $this->app->singleton(\OzanKurt\Shield\Services\Audit\AuditLogger::class);
     }
 
     /**
