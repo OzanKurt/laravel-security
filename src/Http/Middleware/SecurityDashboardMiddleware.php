@@ -11,7 +11,7 @@ class SecurityDashboardMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (! Gate::allows('viewSecurityDashboard')) {
+        if (! Gate::allows('viewShieldDashboard')) {
             abort(403);
         }
 

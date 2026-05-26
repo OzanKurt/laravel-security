@@ -106,7 +106,7 @@ In order to view the dashboard, you must enable it in your `AppServiceProvider`:
      */
     public function boot(): void
     {
-        Gate::define('viewSecurityDashboard', function (?User $user) {
+        Gate::define('viewShieldDashboard', function (?User $user) {
             return $user?->id === 1;
         });
 

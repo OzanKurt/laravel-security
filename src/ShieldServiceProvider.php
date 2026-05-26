@@ -61,7 +61,7 @@ class ShieldServiceProvider extends ServiceProvider
 
         if (config('shield.dashboard.enabled')) {
             $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
-                $gate->define('viewSecurityDashboard', fn ($user = null) => false);
+                $gate->define('viewShieldDashboard', fn ($user = null) => false);
             });
 
             $this->callAfterResolving('router', function (Router $router, Application $app) {
