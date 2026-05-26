@@ -2,6 +2,7 @@
 
 namespace OzanKurt\Shield\Tests\Feature;
 
+use OzanKurt\Shield\Enums\IpEntryType;
 use OzanKurt\Shield\Firewall\Middleware\Ip;
 use OzanKurt\Shield\Models\Ip as IpModel;
 use OzanKurt\Shield\Tests\TestCase;
@@ -15,7 +16,7 @@ class IpTest extends TestCase
 
     public function testShouldBlock()
     {
-        IpModel::create(['ip' => '127.0.0.1', 'is_blocked' => 1]);
+        IpModel::create(['ip' => '127.0.0.1', 'entry_type' => IpEntryType::BLOCK]);
 
         $response = (new Ip())->handle($this->app->request, $this->getNextClosure());
 
