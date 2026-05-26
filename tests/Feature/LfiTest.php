@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Shield\Middleware\Lfi;
+use OzanKurt\Shield\Firewall\Middleware\Lfi;
 use OzanKurt\Shield\Tests\TestCase;
 
 class LfiTest extends TestCase

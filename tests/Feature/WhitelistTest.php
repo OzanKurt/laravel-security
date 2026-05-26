@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Shield\Middleware\Whitelist;
+use OzanKurt\Shield\Firewall\Middleware\Whitelist;
 use OzanKurt\Shield\Tests\TestCase;
 
 class WhitelistTest extends TestCase

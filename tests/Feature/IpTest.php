@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Shield\Middleware\Ip;
+use OzanKurt\Shield\Firewall\Middleware\Ip;
 use OzanKurt\Shield\Models\Ip as IpModel;
 use OzanKurt\Shield\Tests\TestCase;
 

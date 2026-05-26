@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Shield\Middleware\Rfi;
+use OzanKurt\Shield\Firewall\Middleware\Rfi;
 use OzanKurt\Shield\Tests\TestCase;
 
 class RfiTest extends TestCase

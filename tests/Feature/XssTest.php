@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Shield\Middleware\Xss;
+use OzanKurt\Shield\Firewall\Middleware\Xss;
 use OzanKurt\Shield\Tests\TestCase;
 
 class XssTest extends TestCase

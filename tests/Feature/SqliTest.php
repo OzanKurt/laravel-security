@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Shield\Middleware\Sqli;
+use OzanKurt\Shield\Firewall\Middleware\Sqli;
 use OzanKurt\Shield\Tests\TestCase;
 
 class SqliTest extends TestCase
