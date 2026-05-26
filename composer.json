@@ -51,9 +51,6 @@
     "spatie/laravel-medialibrary": "Auto-integration for media library upload scanning",
     "laravel/reverb": "Self-hosted broadcasting for live traffic real-time mode (^1.0)"
   },
-  "replace": {
-    "ozankurt/laravel-security": "self.version"
-  },
   "autoload": {
     "psr-4": {
       "OzanKurt\\Shield\\": "src",
