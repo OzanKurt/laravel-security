@@ -592,7 +592,7 @@ A `firewall.disabled_routes` middleware that takes a list of route names / patte
 
 ---
 
-## Part 16 — Wordfence Source / License (critical)
+## Part 16 — Wordfence Source / License (RESOLVED)
 
 ### P1. Mapping of free vs premium
 
@@ -600,35 +600,34 @@ Confirm or correct:
 
 | Subsystem | Source available? | Plan |
 |---|---|---|
-| Free WAF rules (`lib/wordfenceScanner.php` patterns, `waf/` rules) | Yes | Port pattern lists, adapt to PHP regex |
-| Free WAF engine (`lib/wfWAF*.php`) | Yes | Don't port — already have Laravel middleware. Cherry-pick patterns. |
-| Free login security (`modules/login-security/`) | Yes | Port behavior, write Laravel-native |
-| Free scanner (`lib/wfScan*.php`, `lib/wordfenceHash.php`) | Yes | Port file traversal + signature matching |
-| Free signatures bundled with plugin | Yes | Re-ship under our license |
+| Free WAF rules (`lib/wordfenceScanner.php` patterns, `waf/` rules) | Yes (MIT) | Port pattern lists, adapt to PHP regex |
+| Free WAF engine (`lib/wfWAF*.php`) | Yes (MIT) | Don't port — already have Laravel middleware. Cherry-pick patterns. |
+| Free login security (`modules/login-security/`) | Yes (MIT) | Port behavior, write Laravel-native |
+| Free scanner (`lib/wfScan*.php`, `lib/wordfenceHash.php`) | Yes (MIT) | Port file traversal + signature matching |
+| Free signatures bundled with plugin | Yes (MIT) | Re-ship with proper attribution |
 | GeoIP database (`lib/geoip.mmdb`) | Bundled MaxMind GeoLite2 | Use MaxMind direct, not bundled |
-| Browscap data (`lib/wfBrowscap*.php`) | Yes | Port for bot detection |
-| Common passwords list (`lib/wfCommonPasswords.php`) | Yes | Port — useful for breached-password fallback offline |
+| Browscap data (`lib/wfBrowscap*.php`) | Yes (MIT) | Port for bot detection |
+| Common passwords list (`lib/wfCommonPasswords.php`) | Yes (MIT) | Port — useful for breached-password fallback offline |
 | **Premium** real-time threat feed | Re-implement from description | Pluggable provider system (Section C) |
 | **Premium** real-time IP blocklist | Re-implement | AbuseIPDB / Spamhaus integration |
 | **Premium** country blocking logic | Re-implement (free has skeleton) | DB-backed country list |
 | **Premium** audit log | Re-implement | HMAC chain + remote sink |
 | **Premium** Wordfence Central | Re-implement (defer) | v2 |
 
-**❓ Question for you:** is this mapping right? Specifically, what's in the "premium" bucket per the Wordfence team — anything I have miscategorized?
+### P2. License compatibility — RESOLVED
 
-### P2. License compatibility — MIT vs GPLv3 — CRITICAL
+**Wordfence 8.2.2 is MIT.** Confirmed in three places:
+- `wordfence/wordfence.php:14` → `License: MIT`
+- `wordfence/readme.txt:8` → `License: MIT`
+- `wordfence/license.txt` → `MIT`
 
-Wordfence source is GPLv3. This package is currently MIT.
+(Older Wordfence versions were GPLv3, but the team relicensed to MIT in a later release. Earlier in this doc I mistakenly cited GPLv3 — that was wrong, based on matching `License:` strings inside changelog text.)
 
-**Porting verbatim GPL → MIT is not legal.** Three options:
+`ozankurt/laravel-security` is also MIT. **Both projects are MIT — no license switch needed.** Port WF free code 1:1 as-is. Preserve original MIT attribution / NOTICE for the ported portions.
 
-- **(a)** Switch this package's license to GPLv3. Pro: lets us port code 1:1 verbatim, fastest. Con: GPL is sticky — every downstream user's Laravel app technically inherits GPL terms in the parts they distribute (Laravel apps are usually closed-source SaaS, so this is a real concern for users).
-- **(b)** Keep MIT, **never copy code verbatim**. Re-implement everything from behavioral description (use the WF source only as "documentation of behavior"). Slowest, but legally clean and preserves MIT for users.
-- **(c)** Dual license: MIT for the core, GPLv3 for any subdirectory containing ported code (e.g., `src/Wordfence/Ported/`). Users opt in to GPL by using those classes. Cleaner than (a) but more complex.
+Wordfence team also gave Ozan verbal permission to reuse the free source — MIT alone permits this; the verbal permission is bonus confirmation.
 
-**❓ Question for you:** Which license model? And — did the Wordfence team grant you a license exception (e.g., explicit permission to relicense their free code into MIT)? If yes, get it in writing.
-
-**My honest take:** Without a written exception, **(b) Re-implement, keep MIT** is the safe play. It's slower but durable. The Wordfence free code is good for behavior reference (regex patterns, edge cases, threat data layouts) — we copy *what it does*, not *how the lines are written*. Patterns and lists (rule regex, malware sigs, password lists) are arguable as facts/data not code — those can be reused with safer footing. For the scanner engine, login security, audit log — write fresh.
+**Decision: Stay MIT. Port free WF code freely. Re-implement premium features from description only.**
 
 ---
 
@@ -690,4 +689,4 @@ Once you answer (or "all defaults"), I'll:
 - Central deferred to v2 — design APIs now
 - PHP 8.0+ / Laravel 9–12, TDD for security-critical, PHPStan L5, single-tenant
 - Phased beta releases under 1.0.0-beta.N
-- License: **(b) Re-implement, keep MIT** *— pending your confirmation on Q1/Q2*
+- License: **Stay MIT, port WF free code freely (both are MIT — resolved)**
