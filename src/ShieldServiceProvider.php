@@ -177,6 +177,13 @@ class ShieldServiceProvider extends ServiceProvider
                     app(\OzanKurt\Shield\Services\Lookups\LookupResolver::class),
                 );
             })->name('threat-feed.index');
+
+            // Composer audit
+            $router->get('composer-audit', [\OzanKurt\Shield\Http\Controllers\ComposerAuditController::class, 'index'])->name('composer-audit.index');
+            $router->post('composer-audit/refresh', [\OzanKurt\Shield\Http\Controllers\ComposerAuditController::class, 'refresh'])->name('composer-audit.refresh');
+
+            // Diagnostics
+            $router->get('diagnostics', [\OzanKurt\Shield\Http\Controllers\DiagnosticsController::class, 'index'])->name('diagnostics.index');
         });
     }
 
@@ -258,6 +265,8 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\ReportSendCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ReportTestCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\FeedSyncCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ExportCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ImportCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
