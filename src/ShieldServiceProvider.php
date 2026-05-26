@@ -101,7 +101,12 @@ class ShieldServiceProvider extends ServiceProvider
 
     protected function registerMiddleware(Router $router): void
     {
-        $router->middlewareGroup('firewall.all', config('shield.all_middleware'));
+        $router->aliasMiddleware('firewall.correlation', \OzanKurt\Shield\Http\Middleware\AttachCorrelationId::class);
+
+        $router->middlewareGroup('firewall.all', array_merge(
+            ['firewall.correlation'],
+            config('shield.all_middleware', [])
+        ));
 
         $middlewares = [
             'firewall.agent' => \OzanKurt\Shield\Firewall\Middleware\Agent::class,
