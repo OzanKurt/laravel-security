@@ -10,6 +10,12 @@ use OzanKurt\Shield\Models\Lookups\AuditLogKind;
 use OzanKurt\Shield\Models\Lookups\AuthEventKind;
 use OzanKurt\Shield\Models\Lookups\LogKind;
 use OzanKurt\Shield\Models\Lookups\LogLevel;
+use OzanKurt\Shield\Models\Lookups\ScannerBackend;
+use OzanKurt\Shield\Models\Lookups\ScannerFindingStatus;
+use OzanKurt\Shield\Models\Lookups\ScannerStatus;
+use OzanKurt\Shield\Models\Lookups\ScannerTarget;
+use OzanKurt\Shield\Models\Lookups\ScannerTrigger;
+use OzanKurt\Shield\Models\Lookups\SignatureCategory;
 use OzanKurt\Shield\Models\Lookups\WafRuleAction;
 use OzanKurt\Shield\Models\Lookups\WafRuleCategory;
 use OzanKurt\Shield\Models\Lookups\WafRuleKind;
@@ -30,6 +36,12 @@ class LookupTableSeeder extends Seeder
         $this->seedWafRuleKinds();
         $this->seedWafRuleTargets();
         $this->seedWafRuleActions();
+        $this->seedSignatureCategories();
+        $this->seedScannerTargets();
+        $this->seedScannerBackends();
+        $this->seedScannerStatuses();
+        $this->seedScannerFindingStatuses();
+        $this->seedScannerTriggers();
     }
 
     private function seedAclKinds(): void
@@ -251,6 +263,121 @@ class LookupTableSeeder extends Seeder
                 'sort_order' => $i,
             ]);
             $i += 10;
+        }
+    }
+
+    private function seedSignatureCategories(): void
+    {
+        $cats = [
+            ['malware', 'Malware', 'Generic malicious code', 10],
+            ['backdoor', 'Backdoor', 'Unauthorized remote access mechanism', 20],
+            ['webshell', 'Web Shell', 'PHP/ASP web shell', 30],
+            ['phishing', 'Phishing', 'Credential-harvesting or deceptive pages', 40],
+            ['heuristic', 'Heuristic', 'Suspicious pattern without definitive match', 50],
+        ];
+
+        foreach ($cats as [$name, $label, $description, $sort]) {
+            SignatureCategory::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
+        }
+    }
+
+    private function seedScannerTargets(): void
+    {
+        $targets = [
+            ['vendor', 'Vendor directory', 'Composer vendor/ directory', 10],
+            ['app_files', 'Application files', 'app/, routes/, config/ PHP files', 20],
+            ['public_uploads', 'Public uploads', 'Publicly accessible uploaded files', 30],
+            ['recently_modified', 'Recently modified', 'Files modified in the last N hours', 40],
+            ['config_drift', 'Config drift', 'Config files compared against baseline', 50],
+            ['env_audit', '.env audit', 'Presence and safety check of .env files', 60],
+            ['dotfiles', 'Dot files', 'Hidden/dot files in web root', 70],
+            ['db_content', 'Database content', 'Scan selected DB columns for patterns', 80],
+            ['unknown_files', 'Unknown files', 'Files not tracked by composer or git', 90],
+        ];
+
+        foreach ($targets as [$name, $label, $description, $sort]) {
+            ScannerTarget::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
+        }
+    }
+
+    private function seedScannerBackends(): void
+    {
+        $backends = [
+            ['native', 'Native', 'Built-in PHP regex/hash/string signature matching', 10],
+            ['clamav', 'ClamAV', 'ClamAV daemon via xenolope/quahog socket', 20],
+            ['composer_audit', 'Composer Audit', 'composer audit --format=json vulnerability scan', 30],
+        ];
+
+        foreach ($backends as [$name, $label, $description, $sort]) {
+            ScannerBackend::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
+        }
+    }
+
+    private function seedScannerStatuses(): void
+    {
+        $statuses = [
+            ['queued', 'Queued', 'Waiting to start', 10],
+            ['running', 'Running', 'Scan currently in progress', 20],
+            ['completed', 'Completed', 'Scan finished successfully', 30],
+            ['failed', 'Failed', 'Scan terminated due to error', 40],
+            ['cancelled', 'Cancelled', 'Scan cancelled by user', 50],
+        ];
+
+        foreach ($statuses as [$name, $label, $description, $sort]) {
+            ScannerStatus::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
+        }
+    }
+
+    private function seedScannerFindingStatuses(): void
+    {
+        $statuses = [
+            ['open', 'Open', 'Finding not yet acted upon', 10],
+            ['quarantined', 'Quarantined', 'File moved to quarantine', 20],
+            ['resolved', 'Resolved', 'Finding resolved / cleaned', 30],
+            ['ignored', 'Ignored', 'Intentionally ignored', 40],
+            ['false_positive', 'False Positive', 'Marked as not a real threat', 50],
+        ];
+
+        foreach ($statuses as [$name, $label, $description, $sort]) {
+            ScannerFindingStatus::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
+        }
+    }
+
+    private function seedScannerTriggers(): void
+    {
+        $triggers = [
+            ['manual', 'Manual', 'Triggered by user or CLI', 10],
+            ['scheduled', 'Scheduled', 'Triggered by cron schedule', 20],
+            ['file_change', 'File Change', 'Triggered by file watcher event', 30],
+            ['webhook', 'Webhook', 'Triggered by external webhook call', 40],
+        ];
+
+        foreach ($triggers as [$name, $label, $description, $sort]) {
+            ScannerTrigger::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
         }
     }
 
