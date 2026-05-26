@@ -1,11 +1,15 @@
 {
-  "name": "ozankurt/laravel-security",
-  "description": "Web Application Firewall (WAF) package for Laravel",
+  "name": "ozankurt/laravel-shield",
+  "description": "Comprehensive Laravel security suite — WAF, malware scanner, ACL, audit log, live traffic, and notifications. The Wordfence-equivalent for Laravel.",
   "keywords": [
     "laravel",
-    "firewall",
+    "shield",
     "security",
+    "firewall",
     "waf",
+    "malware",
+    "scanner",
+    "audit-log",
     "blacklist",
     "xss",
     "sqli",
@@ -21,11 +25,17 @@
       "role": "Developer"
     }
   ],
+  "homepage": "https://laravel-shield.ozankurt.com",
+  "support": {
+    "issues": "https://github.com/OzanKurt/laravel-shield/issues",
+    "source": "https://github.com/OzanKurt/laravel-shield"
+  },
   "require": {
     "php": "^8.0",
     "laravel/framework": "^9.0|^10.0|^11.0|^12.0",
     "guzzlehttp/guzzle": "^7.4",
     "ozankurt/agent": "^1.0",
+    "ramsey/uuid": "^4.7",
     "voku/anti-xss": "~4.1.42",
     "voku/portable-utf8": "^6.0.13"
   },
@@ -33,21 +43,35 @@
     "phpunit/phpunit": "^9.5|^10.0",
     "orchestra/testbench": "^7.4|^8.0"
   },
+  "suggest": {
+    "geoip2/geoip2": "Required for ASN and country-level ACL kinds (^3.0)",
+    "xenolope/quahog": "Required for ClamAV scanner backend (^3.0)",
+    "spatie/file-system-watcher": "Required for shield:watch live file monitoring (^1.0)",
+    "predis/predis": "Strongly recommended for cache + queue backend (^2.0)",
+    "spatie/laravel-medialibrary": "Auto-integration for media library upload scanning",
+    "laravel/reverb": "Self-hosted broadcasting for live traffic real-time mode (^1.0)"
+  },
+  "replace": {
+    "ozankurt/laravel-security": "self.version"
+  },
   "autoload": {
     "psr-4": {
-      "OzanKurt\\Security\\": "src"
+      "OzanKurt\\Shield\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "OzanKurt\\Security\\Tests\\": "tests"
+      "OzanKurt\\Shield\\Tests\\": "tests"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "OzanKurt\\Security\\SecurityServiceProvider"
-      ]
+        "OzanKurt\\Shield\\ShieldServiceProvider"
+      ],
+      "aliases": {
+        "Shield": "OzanKurt\\Shield\\Facades\\Shield"
+      }
     }
   },
   "scripts": {
