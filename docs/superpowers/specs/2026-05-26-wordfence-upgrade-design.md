@@ -1618,6 +1618,40 @@ The free core's dashboard has a "License" page even when premium not installed �
 - All key abuse audit-logged at API server
 - License key never logged client-side in `ls_audit_log` (sensitive — redacted via the standard redaction list)
 
+### Honest threat model (read this before designing premium features)
+
+The runtime license check is **soft enforcement, not hard DRM.** Any determined buyer can open `vendor/ozankurt/laravel-security-premium/src/LicenseChecker.php` and patch `isFeatureAvailable()` to always return true. Same for every open-source-distributed premium plugin (Wordfence, Yoast, ACF Pro, etc.). Don't ship this expecting it to defeat crackers — it's not designed to.
+
+**What the license check IS for:**
+- Clean "license expired, please renew" UI signal for honest buyers
+- Make key sharing between companies slightly inconvenient (`domain_limit` tracking)
+- Create a billing/activation audit trail
+- Provide a revocation channel for leaked keys
+- Threshold: 95% of professional buyers pay rather than patch — their time is worth more than the license cost. Plus, `vendor/` resets on every `composer update`, so patching becomes maintenance overhead.
+
+**Where the actual enforcement lives: the SERVER side.**
+
+The real premium *value* sits on Ozan's API services, not in the buyer's `vendor/` directory:
+
+| Premium feature | Where the value physically lives | Crack-able locally? |
+|---|---|---|
+| Real-time threat feed sync | `api.ozankurt.com` gates feed access by license key | No — patcher gets stale free signatures |
+| Real-time IP blocklist | Same API endpoint | No |
+| Premium audit log remote sink (hosted version) | Ozan's hosted ingestion endpoint | No |
+| Future Central integration | Ozan's SaaS aggregator | No |
+| Local-only features (advanced report templates, premium UI, etc.) | Buyer's disk | Yes — accept this |
+
+**Design rule:** when adding any premium feature, ask "is the value local or on the server?" If local, it's patchable — that's fine for cosmetic stuff (fancy report templates, advanced dashboard pages). If the value is server-side data/services, route it through the license-gated API and the local code is just a client.
+
+**This is exactly how Wordfence operates.** Their entire PHP source is readable on WordPress.org. Premium value is the Threat Defense Feed, gated at their API. Local checks can be patched, but the patched plugin gets stale signatures — defeating the point.
+
+**We do NOT implement:**
+- Encrypted code blobs (IonCube / SourceGuardian style) — hostile to buyers, easy to bypass
+- Composer post-install validators — patcher disables the script
+- Runtime file checksums — patcher modifies the checksums too
+
+These are arms-race tactics that buy 30 seconds of cracker time and a lot of buyer friction. Not worth it.
+
 ---
 
 ## 30. Filament Adapter (`ozankurt/laravel-security-filament`)
