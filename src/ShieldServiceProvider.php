@@ -130,6 +130,13 @@ class ShieldServiceProvider extends ServiceProvider
 
             $router->get('cache', [CacheController::class, 'index'])->name('cache.index');
             $router->post('cache/clear', [CacheController::class, 'clear'])->name('cache.clear');
+
+            // Scanner
+            $router->get('scanner', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
+            $router->get('scanner/runs', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'runs'])->name('scanner.runs');
+            $router->get('scanner/findings', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'findings'])->name('scanner.findings');
+            $router->get('scanner/signatures', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'signatures'])->name('scanner.signatures');
+            $router->post('scanner/run', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'startScan'])->name('scanner.run');
         });
     }
 
@@ -196,6 +203,13 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\AuditDriftCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\SignaturesSyncCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\WatchCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ScanCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ScanStatusCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ScanCancelCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineListCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineRestoreCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ClamavStatusCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ClamavUpdateCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
