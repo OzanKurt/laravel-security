@@ -3,6 +3,7 @@
 namespace OzanKurt\Shield;
 
 use Illuminate\Contracts\Foundation\Application;
+use OzanKurt\Shield\Http\Controllers\AuditLogController;
 use OzanKurt\Shield\Http\Controllers\AuthLogsController;
 use OzanKurt\Shield\Http\Controllers\CacheController;
 use OzanKurt\Shield\Http\Controllers\IpsController;
@@ -112,6 +113,8 @@ class ShieldServiceProvider extends ServiceProvider
 
             $router->get('auth-logs', [AuthLogsController::class, 'index'])->name('auth-logs.index');
             $router->post('auth-logs/{authLog:id}/action', [AuthLogsController::class, 'postAction'])->name('auth-logs.action');
+
+            $router->get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
             $router->get('cache', [CacheController::class, 'index'])->name('cache.index');
             $router->post('cache/clear', [CacheController::class, 'clear'])->name('cache.clear');

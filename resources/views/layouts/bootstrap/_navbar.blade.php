@@ -34,6 +34,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('audit-log.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('audit-log.index') }}"
+                    >
+                        @lang('shield::dashboard.audit_log')
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ app('shield')->routeIsActive('cache.index') ? 'active' : '' }}"
                        href="{{ app('shield')->route('cache.index') }}"
                     >
