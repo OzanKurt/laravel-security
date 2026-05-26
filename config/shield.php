@@ -4,6 +4,21 @@ return [
 
     'enabled' => env('FIREWALL_ENABLED', true),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Bypass Mechanism
+    |--------------------------------------------------------------------------
+    |
+    | LS_BYPASS_KEY is intentionally read via env() inside the middleware (not
+    | here) so it is never baked into the config cache. Add IPs here (or via
+    | LS_BYPASS_IPS) to whitelist them permanently — they cannot be removed via
+    | the dashboard UI.
+    |
+    */
+    'bypass' => [
+        'ips' => array_filter(explode(',', env('LS_BYPASS_IPS', ''))),
+    ],
+
     'whitelist' => explode(',', env('FIREWALL_WHITELIST', '127.0.0.0/24')),
 
     'dashboard' => [

@@ -115,10 +115,13 @@ class ShieldServiceProvider extends ServiceProvider
     protected function registerMiddleware(Router $router): void
     {
         $router->aliasMiddleware('firewall.correlation', \OzanKurt\Shield\Http\Middleware\AttachCorrelationId::class);
+        $router->aliasMiddleware('firewall.bypass', \OzanKurt\Shield\Firewall\Middleware\Bypass::class);
         $router->aliasMiddleware('firewall.acl', \OzanKurt\Shield\Firewall\Middleware\Acl::class);
 
+        // firewall.all group: correlation → bypass → acl → additional configured middlewares
+        // bypass must come BEFORE acl so the acl short-circuit can fire on bypassed requests
         $router->middlewareGroup('firewall.all', array_merge(
-            ['firewall.correlation', 'firewall.acl'],
+            ['firewall.correlation', 'firewall.bypass', 'firewall.acl'],
             config('shield.all_middleware', [])
         ));
 
