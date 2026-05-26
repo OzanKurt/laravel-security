@@ -60,6 +60,8 @@ class ShieldServiceProvider extends ServiceProvider
             );
         });
         $this->app->singleton(\OzanKurt\Shield\Services\Audit\AuditLogger::class);
+
+        $this->app->singleton(\OzanKurt\Shield\Services\Audit\FileDriftDetector::class);
     }
 
     /**
@@ -176,6 +178,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\BypassRemoveCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\BypassListCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\InstallCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\AuditDriftCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
@@ -188,6 +191,12 @@ class ShieldServiceProvider extends ServiceProvider
                 app(Schedule::class)
                     ->command('shield:send-security-report-notification')
                     ->cron(config('shield.crons.security_report.cron_expression'));
+            }
+
+            if (config('shield.audit.drift.enabled', true)) {
+                app(Schedule::class)
+                    ->command('shield:audit-drift')
+                    ->cron(config('shield.audit.drift.cron', '0 4 * * *'));
             }
         });
     }

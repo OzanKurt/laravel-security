@@ -588,6 +588,20 @@ return [
 
     ],
 
+    'audit' => [
+        'drift' => [
+            'enabled' => env('SHIELD_DRIFT_ENABLED', true),
+            'paths' => [
+                'config/'       => '*.php',
+                '.env'          => null,
+                'composer.json' => null,
+                'composer.lock' => null,
+            ],
+            'baseline_path' => 'storage/shield/baselines/files.json',
+            'cron' => '0 4 * * *',
+        ],
+    ],
+
     'responses' => [
 
         'block' => [
