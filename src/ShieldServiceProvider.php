@@ -44,6 +44,8 @@ class ShieldServiceProvider extends ServiceProvider
         });
 
         $this->app->alias(Shield::class, 'shield');
+
+        $this->app->singleton(\OzanKurt\Shield\Support\CorrelationId::class);
     }
 
     /**

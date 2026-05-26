@@ -87,6 +87,11 @@ class Shield
         return $publishedManifest['version'] !== $packageManifest['version'];
     }
 
+    public function correlationId(): string
+    {
+        return app(\OzanKurt\Shield\Support\CorrelationId::class)->get();
+    }
+
     public function cleanInput(string|array $input): string|array
     {
         return $this->antiXss->xss_clean($input);
