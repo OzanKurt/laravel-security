@@ -135,6 +135,13 @@ class ShieldServiceProvider extends ServiceProvider
             $router->get('cache', [CacheController::class, 'index'])->name('cache.index');
             $router->post('cache/clear', [CacheController::class, 'clear'])->name('cache.clear');
 
+            // WAF rules
+            $router->get('rules', [\OzanKurt\Shield\Http\Controllers\WafRulesController::class, 'index'])->name('rules.index');
+            $router->post('rules', [\OzanKurt\Shield\Http\Controllers\WafRulesController::class, 'store'])->name('rules.store');
+            $router->put('rules/{id}', [\OzanKurt\Shield\Http\Controllers\WafRulesController::class, 'update'])->name('rules.update');
+            $router->post('rules/{id}/toggle', [\OzanKurt\Shield\Http\Controllers\WafRulesController::class, 'toggle'])->name('rules.toggle');
+            $router->delete('rules/{id}', [\OzanKurt\Shield\Http\Controllers\WafRulesController::class, 'destroy'])->name('rules.destroy');
+
             // Scanner
             $router->get('scanner', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'index'])->name('scanner.index');
             $router->get('scanner/runs', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'runs'])->name('scanner.runs');

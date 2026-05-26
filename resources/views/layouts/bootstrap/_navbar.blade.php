@@ -48,6 +48,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('rules.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('rules.index') }}"
+                    >
+                        Rules
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ app('shield')->routeIsActive('scanner.index') ? 'active' : '' }}"
                        href="{{ app('shield')->route('scanner.index') }}"
                     >
