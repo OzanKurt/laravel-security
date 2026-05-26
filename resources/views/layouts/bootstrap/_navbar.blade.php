@@ -33,6 +33,13 @@
                         @lang('shield::dashboard.ips')
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('cache.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('cache.index') }}"
+                    >
+                        Cache
+                    </a>
+                </li>
             </ul>
             <a class="navbar-brand mx-auto p-0"
                href="{{ app('shield')->logoHref() }}"
