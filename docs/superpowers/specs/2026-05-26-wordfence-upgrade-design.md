@@ -24,10 +24,11 @@ This master spec is the **single source of truth** when decisions conflict. Impl
 
 `ozankurt/laravel-security` becomes a **WAF / analyze / log / scan / alert** suite for Laravel apps, modelled on Wordfence's free + premium feature surface. The plugin's job is observability and defense at the request boundary; it does NOT own authentication, user management, or MFA — apps handle those.
 
-Three composer packages will ship:
-- **`ozankurt/laravel-security`** (Packagist, MIT) — the free core
-- **`ozankurt/laravel-security-premium`** (Satis on `satis.ozankurt.com`, paid) — premium tier (threat feed, real-time blocklist, premium audit log features)
-- **`ozankurt/laravel-security-filament`** (Packagist, MIT, later) — Filament dashboard adapter for users on Filament
+Two composer packages will ship:
+- **`ozankurt/laravel-security`** (Packagist, MIT) — single package containing all features (free + premium-gated); premium features activate at runtime via `LS_PREMIUM_LICENSE_KEY`
+- **`ozankurt/laravel-security-filament`** (Packagist, MIT, later) — Filament dashboard adapter (v1.x for Filament 3+4, v2.x for Filament 5+)
+
+The brand domain `laravel-shield.ozankurt.com` hosts the marketing/sales site, license-check API, customer accounts, and (later) the SIEM-aggregator dashboard that consumes webhook events from many plugin instances.
 
 Wordfence (current version 8.2.2) is MIT-licensed; this package is MIT. Free Wordfence source can be ported 1:1 with attribution. Premium Wordfence features are re-implemented from behavioral description only.
 
@@ -44,7 +45,7 @@ A future separate Laravel app (out of scope here) will aggregate data from many 
 3. **Configurable to the point of obsession** — every limit, threshold, retention period, regex, signature path is an exposed config key
 4. **Drop-in safety primitives** — security headers middleware, honeypot routes, sensitive-field redaction, generic disabled-routes middleware
 5. **Mobile-friendly dashboard** — every table works at 360px viewport
-6. **Free + premium business model** — open core, gated premium package on Satis
+6. **Free + premium business model** — single package on Packagist; premium features gated at runtime by license key, code lives alongside free code in the same repo
 7. **Tamper-evident audit trail** — HMAC chain, optional remote sink
 8. **Extensibility** — pluggable backends (storage, scanner, threat-feed, notification), service-container hooks for premium overrides
 
@@ -78,7 +79,7 @@ Ozan has verbal permission from the Wordfence author to reuse the free source. M
 
 ### Premium package license
 
-`ozankurt/laravel-security-premium` ships under a **commercial license** with terms permitting use by the buyer's organization for unlimited internal apps. Source is provided to buyers (via Satis) but redistribution is prohibited. License-key gated at runtime; expired key reverts to "free behavior" + UI banner.
+Premium features ship inside the same `ozankurt/laravel-security` package under the **same MIT license** as the rest of the code. The license **key** (sold via the Laravel Shield site) is what controls feature activation at runtime — not a code-distribution license. Anyone can read/copy the premium code; without a valid runtime license key (and the API-gated services it unlocks), the premium feature value is incomplete. See §29 for the honest threat model.
 
 ---
 
@@ -114,7 +115,7 @@ The upgrade ships as a series of versioned betas under `1.0.0-beta.N`, then incr
 | `1.0.0` | Polish, docs, migration guide, comprehensive Orchestra Testbench coverage | ~1 week |
 | `1.1.0` | Threat feed providers (AbuseIPDB, Spamhaus, MaxMind, OWASP CRS) | ~1 week |
 | `1.2.0` | Composer vuln scanner + diagnostics page + OWASP report card + import/export | ~1 week |
-| `2.0.0` | Premium package launch (`ozankurt/laravel-security-premium` on Satis) | Out of v1.0 scope; separately specced post-1.0 |
+| `2.0.0` | Premium tier activation goes live (license API + SIEM-aggregator dashboard at `laravel-shield.ozankurt.com`); premium features in the single package start being purchasable | Out of v1.0 scope; separately specced post-1.0 |
 
 Total: ~8–10 weeks of focused engineering to v1.0.
 
@@ -126,32 +127,33 @@ A future standalone Laravel app — like Sentry for WAF data — aggregates even
 
 ## 7. Package Structure
 
-### `ozankurt/laravel-security` (free core)
+**Two packages. One on Packagist for everything. One adapter.**
+
+### `ozankurt/laravel-security` (single package, free on Packagist)
 
 - Packagist, MIT
-- All features described in this spec **except** premium-gated ones
-- Self-contained: works without the premium package
-- Defines contracts (`ThreatFeedProvider`, `IpBlocklistProvider`, `AuditSink`, `StorageDriver`, `ScannerBackend`, `NotificationChannel`) that premium implementations bind into the service container
+- **Contains ALL features — both free-tier and premium-tier code lives in this same package**
+- Premium-tier features are gated at runtime by `Security::isPremium()` / `Security::isFeatureAvailable($feature)`
+- Without a valid `LS_PREMIUM_LICENSE_KEY`, premium-tier code paths gracefully fall back to free behavior
+- One repo, one CI, one release flow
 
-### `ozankurt/laravel-security-premium` (paid)
+**Why single-package:** Same enforcement level as a separate package (local checks are patchable either way; real moat is server-side API gating). Drops Satis, drops Composer auth, drops separate-repo sync overhead. This is the standard model for ACF, Yoast, Wordfence, and most successful "free+premium" PHP plugins.
 
-- Hosted on Satis at `satis.ozankurt.com`
-- Commercial license, source provided to buyers
-- License-key gated runtime check; expired key → reverts to free behavior + banner
-- Provides:
-  - Real-time threat feed sync (vs free daily/weekly)
-  - Real-time IP blocklist subscription
-  - Premium audit log features (remote sinks, signature-based verification)
-  - Future Central integration helpers
-
-### `ozankurt/laravel-security-filament` (free, later)
+### `ozankurt/laravel-security-filament` (free, later, separate)
 
 - Packagist, MIT
-- Filament v3/v5 panel adapter
-- Mirrors the Bootstrap dashboard's pages as Filament resources
-- Pluggable: users register the panel in their existing Filament install
+- Filament panel adapter
+- **v1.x** supports Filament 3 + 4
+- **v2.x** supports Filament 5+
+- Drops in for users who want a Filament dashboard instead of the Bootstrap one
 
-### Contracts the free core defines (premium overrides)
+### Future split (if ever needed)
+
+If we someday have code we genuinely don't want public (proprietary detection algorithms, ML models, etc.), we can spin out `ozankurt/laravel-security-premium` then — with private repo + Composer auth. The `Security::isPremium()` API is designed to be agnostic of where the premium code lives.
+
+For v1.0–v2.0: no split needed. All premium features are gated runtime checks within the single package.
+
+### Service contracts (in the single package, free + premium implementations side by side)
 
 ```php
 namespace OzanKurt\Security\Contracts;
@@ -165,7 +167,16 @@ interface NotificationChannel    { public function send(Notification $notificati
 interface SuspicionScorer        { public function score(string $ip): int; public function bump(string $ip, int $by): void; }
 ```
 
-The free core ships a default implementation of each. The premium package binds its own implementation in `PremiumServiceProvider::register()`, overriding the free default.
+Default implementations live in `OzanKurt\Security\Services\` (free behavior). Premium implementations live in `OzanKurt\Security\Premium\` (premium behavior). The `SecurityServiceProvider` binds the premium implementation when `Security::isPremium()` is true, otherwise the free one — runtime decision per service.
+
+```php
+// In SecurityServiceProvider::register()
+$this->app->bind(ThreatFeedProvider::class, function ($app) {
+    return Security::isPremium()
+        ? new Premium\RealtimeThreatFeedProvider()
+        : new Services\DailyThreatFeedProvider();
+});
+```
 
 ---
 
@@ -1463,33 +1474,22 @@ Configurable queue connection + name.
 
 ---
 
-## 29. Premium Package (`ozankurt/laravel-security-premium`)
+## 29. Premium Features (in the single `ozankurt/laravel-security` package)
 
-Detailed design out of scope for the free core, but the free core must support the integration points. Premium specifics get their own spec post-v1.0.
+Premium features live in the same package as free features, gated at runtime by `Security::isPremium()` / `Security::isFeatureAvailable($feature)`. No separate package, no Satis, no Composer auth — just Packagist + a license key.
 
-### Distribution: Satis (public) + runtime license key
+### Distribution: Packagist + runtime license key
 
-The Satis repository at `satis.ozankurt.com` and the runtime license key are **two layers serving different purposes**:
+Both free-tier and premium-tier code ships in the same `ozankurt/laravel-security` package on Packagist. Anyone can `composer require` it. **Premium features stay dormant until a valid `LS_PREMIUM_LICENSE_KEY` is present and validated by the license-check API.** No license key → free behavior, identical to a free-only install.
 
-| Layer | What it does | What it doesn't do |
-|---|---|---|
-| Satis | Serves the package files via Composer | Can't enforce active subscription, domain limits, feature gating |
-| Runtime license key | Validates `LS_PREMIUM_LICENSE_KEY` against an API → returns valid/expiry/features/domain count | Doesn't prevent installation — buyer has source, but features stay locked without valid key |
+### Buyer flow (much simpler than two-package design)
 
-**Decision: Satis is PUBLIC** (no auth tokens for buyers). Code is inspectable anyway, and auth-token setup adds friction. The license key is the actual enforcement.
+1. Buyer pays via the Laravel Shield site → receives license key string (e.g. `ls-prem-xxxxxxxxxxxx`)
+2. Buyer already has the package installed (`composer require ozankurt/laravel-security` — or already had it from when they were a free user)
+3. Buyer adds `LS_PREMIUM_LICENSE_KEY=ls-prem-xxxxxxxxxxxx` to `.env`
+4. Premium features activate on next request (after license check call, cached 24h)
 
-### Buyer flow
-
-1. Buyer pays via Ozan's site → receives license key string (e.g. `ls-prem-xxxxxxxxxxxx`)
-2. Buyer adds to `composer.json` repositories list:
-   ```json
-   "repositories": [
-       { "type": "composer", "url": "https://satis.ozankurt.com" }
-   ]
-   ```
-3. Buyer runs `composer require ozankurt/laravel-security-premium`
-4. Buyer adds `LS_PREMIUM_LICENSE_KEY=ls-prem-xxxxxxxxxxxx` to `.env`
-5. Premium features activate on next request (after license check call)
+No `auth.json`, no extra repositories in `composer.json`, no private repo SSH keys.
 
 ### License-check API contract
 
@@ -1538,7 +1538,7 @@ Wordfence's actual model:
 
 We mirror this exactly, just with our own API endpoint.
 
-### `LicenseChecker` service (in premium package)
+### `LicenseChecker` service (in the same single package, under `OzanKurt\Security\Premium\`)
 
 ```php
 namespace OzanKurt\Security\Premium;
@@ -1552,6 +1552,8 @@ final class LicenseChecker
     public function isFeatureAvailable(string $feature): bool;
 }
 ```
+
+Accessed via the `Security` facade: `Security::isPremium()`, `Security::isFeatureAvailable('realtime_feed')`.
 
 ### Caching + grace period
 
@@ -1577,37 +1579,44 @@ if (app(LicenseChecker::class)->isFeatureAvailable('remote_sink')) {
 
 When unavailable, the feature falls back to the free-package behavior (daily feed sync, file sink only, etc.).
 
-### Dashboard surface (in free core)
+### Dashboard surface
 
-The free core's dashboard has a "License" page even when premium not installed — shows:
-- Is premium installed? (`class_exists(\OzanKurt\Security\Premium\LicenseChecker::class)`)
+The dashboard's "License" page is always present (premium UI code is in the package whether activated or not):
 - Current license status + plan + expiry + domains used
-- "Buy / Renew" link to Ozan's site
-- "Force re-check" button → calls `LicenseChecker::refresh()`
+- Without a key: "Buy a license" CTA → Laravel Shield site
+- With a valid key: shows plan, expiry, "Force re-check" button → `LicenseChecker::refresh()`
 - Available features list
 - Last check timestamp + next scheduled check
 
-### Free core's responsibilities (for premium integration)
+### How the binding works (single-package, runtime branching)
 
-1. Define stable contracts (§7) that premium overrides
-2. Bind default (free) implementations in `SecurityServiceProvider`
-3. Allow premium's `PremiumServiceProvider::register()` to override bindings via `$this->app->bind()`
-4. Expose `app('security')->isPremiumActive(): bool` helper that core code can branch on
-5. Never hard-depend on premium package classes — only soft-detect via `class_exists`
+1. `SecurityServiceProvider::register()` binds each contract to a factory closure
+2. The closure checks `Security::isPremium()` (or `isFeatureAvailable($feature)`) AT RESOLUTION TIME — not registration time
+3. Returns the premium implementation when license valid, the free implementation otherwise
+4. Result is per-request — license can be revoked mid-runtime and the next request gets the free impl
 
-### Composer requirement on buyer side
+```php
+// Example binding pattern
+$this->app->bind(\OzanKurt\Security\Contracts\ThreatFeedProvider::class, function ($app) {
+    return $app->make(\OzanKurt\Security\Facades\Security::class)->isFeatureAvailable('realtime_feed')
+        ? new \OzanKurt\Security\Premium\RealtimeThreatFeedProvider()
+        : new \OzanKurt\Security\Services\DailyThreatFeedProvider();
+});
+```
+
+Both implementations live in the same package's `src/` tree — no separate package boundary.
+
+### Composer requirement on buyer side (free OR premium — same install)
 
 ```json
 {
     "require": {
-        "ozankurt/laravel-security": "^1.0",
-        "ozankurt/laravel-security-premium": "^1.0"
-    },
-    "repositories": [
-        { "type": "composer", "url": "https://satis.ozankurt.com" }
-    ]
+        "ozankurt/laravel-security": "^1.0"
+    }
 }
 ```
+
+That's it. No extra repositories, no auth files. Premium features just activate when `LS_PREMIUM_LICENSE_KEY` is present and valid.
 
 ### Anti-abuse considerations
 
@@ -1620,7 +1629,7 @@ The free core's dashboard has a "License" page even when premium not installed �
 
 ### Honest threat model (read this before designing premium features)
 
-The runtime license check is **soft enforcement, not hard DRM.** Any determined buyer can open `vendor/ozankurt/laravel-security-premium/src/LicenseChecker.php` and patch `isFeatureAvailable()` to always return true. Same for every open-source-distributed premium plugin (Wordfence, Yoast, ACF Pro, etc.). Don't ship this expecting it to defeat crackers — it's not designed to.
+The runtime license check is **soft enforcement, not hard DRM.** Any determined buyer can open `vendor/ozankurt/laravel-security/src/Premium/LicenseChecker.php` and patch `isFeatureAvailable()` to always return true. Same for every open-source-distributed premium plugin (Wordfence, Yoast, ACF Pro, etc.). Don't ship this expecting it to defeat crackers — it's not designed to.
 
 **What the license check IS for:**
 - Clean "license expired, please renew" UI signal for honest buyers
@@ -1786,9 +1795,9 @@ LS_ABUSEIPDB_KEY=
 LS_SPAMHAUS_ENABLED=true
 LS_OWASP_CRS_ENABLED=true
 
-# Premium (only meaningful when ozankurt/laravel-security-premium is installed)
-LS_PREMIUM_LICENSE_KEY=                       # license key from satis.ozankurt.com purchase
-LS_PREMIUM_LICENSE_CHECK_URL=https://api.ozankurt.com/laravel-security/license/check  # default
+# Premium tier (activates premium-gated features in the single ozankurt/laravel-security package)
+LS_PREMIUM_LICENSE_KEY=                       # license key purchased at laravel-shield.ozankurt.com
+LS_PREMIUM_LICENSE_CHECK_URL=https://laravel-shield.ozankurt.com/api/license/check  # default
 LS_PREMIUM_LICENSE_CACHE_TTL=86400            # 24h
 LS_PREMIUM_LICENSE_GRACE_DAYS=7               # grace period if check API unreachable
 ```
@@ -1934,12 +1943,14 @@ This is the rough order of work within each beta — phase-by-phase specs will d
 2. Diagnostics page (sysinfo + OWASP score)
 3. Import/export config + ACL
 
-### `2.0.0` — Premium
+### `2.0.0` — Premium tier activation
 
-1. `ozankurt/laravel-security-premium` separate repo
-2. License-key check
-3. Premium binding overrides
-4. Satis setup at `satis.ozankurt.com`
+1. Activate premium binding factories in `SecurityServiceProvider` (premium implementation classes already live in the single package's `src/Premium/`)
+2. License-check API live at `laravel-shield.ozankurt.com/api/license/check`
+3. Customer purchase / account flow on the marketing site
+4. Premium dashboard pages activated when license valid
+
+(Implementation note: no separate package, no Satis. The "2.0.0 launch" is mostly about the *service side* being live — the license API, customer accounts, billing — not the plugin code itself, which already shipped premium-code-gated since v1.0.)
 
 ---
 
