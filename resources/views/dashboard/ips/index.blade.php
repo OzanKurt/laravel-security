@@ -10,7 +10,7 @@
                             @lang('security::dashboard.ips') ({{ $ipsCount }})
                         </div>
                         <div>
-                            {{--                            <a href="{{ app('security')->route('logs.index') }}" class="btn btn-sm btn-danger">--}}
+                            {{--                            <a href="{{ app('shield')->route('logs.index') }}" class="btn btn-sm btn-danger">--}}
                             {{--                                Clear Logs--}}
                             {{--                            </a>--}}
                         </div>

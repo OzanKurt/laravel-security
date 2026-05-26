@@ -27,8 +27,8 @@ class SendSecurityReportNotificationCommand extends Command
         $prevRunDate = new Carbon($expression->getPreviousRunDate());
         $currentRunDate = now();
 
-        /** @var \OzanKurt\Shield\Security $security */
-        $security = app('security');
+        /** @var \OzanKurt\Shield\Shield $security */
+        $security = app('shield');
         $recentlyModifiedFiles = $security->getRecentlyModifiedFiles($prevRunDate, 15, true);
 
         $notification = new SecurityReportNotification($recentlyModifiedFiles, $prevRunDate, $currentRunDate);

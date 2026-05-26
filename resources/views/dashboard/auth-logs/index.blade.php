@@ -10,7 +10,7 @@
                             @lang('security::dashboard.auth_logs') ({{ $authLogsCount }})
                         </div>
                         <div>
-{{--                            <a href="{{ app('security')->route('auth-logs.index') }}" class="btn btn-sm btn-danger">--}}
+{{--                            <a href="{{ app('shield')->route('auth-logs.index') }}" class="btn btn-sm btn-danger">--}}
 {{--                                Clear Logs--}}
 {{--                            </a>--}}
                         </div>

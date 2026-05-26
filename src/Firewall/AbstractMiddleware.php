@@ -45,7 +45,7 @@ abstract class AbstractMiddleware
             return true;
         }
 
-        if (app('security')->isIpWhitelistedInDatabase()) {
+        if (app('shield')->isIpWhitelistedInDatabase()) {
             return true;
         }
 

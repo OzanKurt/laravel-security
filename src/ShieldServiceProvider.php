@@ -33,17 +33,17 @@ class ShieldServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/security.php', 'security');
+        $this->mergeConfigFrom(__DIR__ . '/../config/shield.php', 'shield');
 
         $this->app->register(\OzanKurt\Agent\AgentServiceProvider::class);
 
-        $this->app->singleton(Security::class, function () {
+        $this->app->singleton(Shield::class, function () {
             $antiXss = new AntiXSS();
 
-            return new Security($antiXss);
+            return new Shield($antiXss);
         });
 
-        $this->app->alias(Security::class, 'security');
+        $this->app->alias(Shield::class, 'shield');
     }
 
     /**

@@ -5,7 +5,7 @@ namespace OzanKurt\Shield\Firewall\Middleware;
 use Closure;
 use OzanKurt\Shield\Firewall\AbstractMiddleware;
 use OzanKurt\Shield\Events\AttackDetectedEvent;
-use OzanKurt\Shield\Security;
+use OzanKurt\Shield\Shield;
 use OzanKurt\Shield\Helpers\BladeEchoCleaner;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 class Xss extends AbstractMiddleware
 {
     public function __construct(
-        protected Security $security,
+        protected Shield $security,
         protected BladeEchoCleaner $bladeEchoCleaner,
     ) { }
 

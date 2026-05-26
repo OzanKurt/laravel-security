@@ -8,7 +8,7 @@ use OzanKurt\Shield\Enums\IpEntryType;
 use OzanKurt\Shield\Helpers\RecentlyModifiedFiles;
 use voku\helper\AntiXSS;
 
-class Security
+class Shield
 {
     public AntiXSS $antiXss;
     public ?bool $ipWhitelistedInDatabase = null;
@@ -127,6 +127,6 @@ class Security
     {
         return config('shield.dashboard.logo_target_route_name')
             ? route(config('shield.dashboard.logo_target_route_name'))
-            : app('security')->route('dashboard.index');
+            : app('shield')->route('dashboard.index');
     }
 }

@@ -7,7 +7,7 @@ use OzanKurt\Shield\DataTables\LogsDataTable;
 use OzanKurt\Shield\Http\Middleware\SecurityDashboardMiddleware;
 use OzanKurt\Shield\Models\Ip;
 use OzanKurt\Shield\Models\Log;
-use OzanKurt\Shield\Security;
+use OzanKurt\Shield\Shield;
 
 class LogsController extends Controller
 {

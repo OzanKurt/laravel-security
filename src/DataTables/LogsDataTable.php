@@ -33,11 +33,11 @@ class LogsDataTable extends DataTable
         });
 
         $builder->editColumn('request_data', function (Log $log) {
-            return app('security')->highlightJson($log->request_data);
+            return app('shield')->highlightJson($log->request_data);
         });
 
         $builder->editColumn('meta_data', function (Log $log) {
-            return app('security')->highlightJson($log->meta_data);
+            return app('shield')->highlightJson($log->meta_data);
         });
 
         $builder->editColumn('created_at', function (Log $log) {
@@ -91,7 +91,7 @@ class LogsDataTable extends DataTable
         return $this->builder()
             ->setTableId('logsDataTable')
             ->columns($this->getColumns())
-            ->minifiedAjax(app('security')->route('logs.index', [
+            ->minifiedAjax(app('shield')->route('logs.index', [
                 'mode' => 'dataTable',
             ]))
             ->orderBy(1)

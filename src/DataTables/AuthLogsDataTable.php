@@ -31,11 +31,11 @@ class AuthLogsDataTable extends DataTable
         });
 
         $builder->editColumn('request_data', function (AuthLog $authLog) {
-            return app('security')->highlightJson($authLog->request_data ?? []);
+            return app('shield')->highlightJson($authLog->request_data ?? []);
         });
 
         $builder->editColumn('meta_data', function (AuthLog $authLog) {
-            return app('security')->highlightJson($authLog->meta_data ?? []);
+            return app('shield')->highlightJson($authLog->meta_data ?? []);
         });
 
         $builder->editColumn('created_at', function (AuthLog $authLog) {
@@ -89,7 +89,7 @@ class AuthLogsDataTable extends DataTable
         return $this->builder()
             ->setTableId('authLogsDataTable')
             ->columns($this->getColumns())
-            ->minifiedAjax(app('security')->route('auth-logs.index', [
+            ->minifiedAjax(app('shield')->route('auth-logs.index', [
                 'mode' => 'dataTable',
             ]))
             ->orderBy(1)

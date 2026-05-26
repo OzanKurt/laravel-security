@@ -20,7 +20,7 @@ class IpsDataTable extends DataTable
             $links = [];
 
             if ($ip->entry_type == IpEntryType::BLOCK || $ip->entry_type == IpEntryType::BLACKLIST) {
-                $whitelistRoute = app('security')->route('ips.action', [
+                $whitelistRoute = app('shield')->route('ips.action', [
                     'ip' => $ip,
                     'action' => 'whitelist',
                 ]);
@@ -36,7 +36,7 @@ class IpsDataTable extends DataTable
             }
 
             if ($ip->entry_type == IpEntryType::WHITELIST) {
-                $blacklistRoute = app('security')->route('ips.action', [
+                $blacklistRoute = app('shield')->route('ips.action', [
                     'ip' => $ip,
                     'action' => 'blacklist',
                 ]);
@@ -51,7 +51,7 @@ class IpsDataTable extends DataTable
                 $links[] = $blacklistLink;
             }
 
-            $deleteRoute = app('security')->route('ips.action', [
+            $deleteRoute = app('shield')->route('ips.action', [
                 'ip' => $ip,
                 'action' => 'delete',
             ]);
@@ -118,7 +118,7 @@ class IpsDataTable extends DataTable
         return $this->builder()
             ->setTableId('ipsDataTable')
             ->columns($this->getColumns())
-            ->minifiedAjax(app('security')->route('ips.index', [
+            ->minifiedAjax(app('shield')->route('ips.index', [
                 'mode' => 'dataTable',
             ]))
             ->orderBy(1)

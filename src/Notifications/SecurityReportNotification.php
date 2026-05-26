@@ -89,7 +89,7 @@ class SecurityReportNotification extends Notification implements ShouldQueue
             ])
 //            ->from($this->notifications['mail']['from'], $this->notifications['mail']['name'])
             ->subject($subject ?? 'Security Report')
-            ->action('View Security Dashboard', app('security')->route('dashboard.index'));
+            ->action('View Security Dashboard', app('shield')->route('dashboard.index'));
     }
 
     /**

@@ -9,7 +9,7 @@ use OzanKurt\Shield\Models\Ip;
 use OzanKurt\Shield\Models\Log;
 use OzanKurt\Shield\Notifications\Notifiable;
 use OzanKurt\Shield\Notifications\SecurityReportNotification;
-use OzanKurt\Shield\Security;
+use OzanKurt\Shield\Shield;
 
 class DashboardController extends Controller
 {
@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $ipsBlocked = Ip::whereIn('entry_type', [IpEntryType::BLOCK])->count();
         $requestsBlocked = Ip::whereIn('entry_type', [IpEntryType::BLOCK, IpEntryType::BLACKLIST])->sum('request_count');
 
-        $recentlyModifiedFiles = app('security')->getRecentlyModifiedFiles(now()->subDays(7), 100);
+        $recentlyModifiedFiles = app('shield')->getRecentlyModifiedFiles(now()->subDays(7), 100);
 
         return view('security::dashboard.index')->with([
             'attacksDetected' => $attacksDetected,
