@@ -63,6 +63,16 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->singleton(\OzanKurt\Shield\Services\Audit\AuditLogger::class);
 
         $this->app->singleton(\OzanKurt\Shield\Services\Audit\FileDriftDetector::class);
+
+        $this->app->singleton(\OzanKurt\Shield\Services\Scanner\Scanner::class, function ($app) {
+            return new \OzanKurt\Shield\Services\Scanner\Scanner(
+                [
+                    new \OzanKurt\Shield\Services\Scanner\Backends\NativeBackend(),
+                ],
+                $app->make(\OzanKurt\Shield\Services\Lookups\LookupResolver::class),
+                $app->make(\OzanKurt\Shield\Support\CorrelationId::class),
+            );
+        });
     }
 
     /**
