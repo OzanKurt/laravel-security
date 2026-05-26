@@ -53,7 +53,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    @include('security::layouts.bootstrap._navbar')
+    @include('shield::layouts.bootstrap._navbar')
 
     <!-- Container -->
     <div class="container mb-5">

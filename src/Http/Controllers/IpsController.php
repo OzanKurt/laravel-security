@@ -19,7 +19,7 @@ class IpsController extends Controller
 
         $ipsCount = Ip::count();
 
-        return view('security::dashboard.ips.index')->with([
+        return view('shield::dashboard.ips.index')->with([
             'ipsCount' => $ipsCount,
             'dataTable' => $dataTable->html(),
         ]);
@@ -40,8 +40,8 @@ class IpsController extends Controller
                         'type' => 'toastr',
                         'data' => [
                             'type' => 'success',
-                            'title' => trans('security::responses.ip.whitelisted.title'),
-                            'message' => trans('security::responses.ip.whitelisted.message'),
+                            'title' => trans('shield::responses.ip.whitelisted.title'),
+                            'message' => trans('shield::responses.ip.whitelisted.message'),
                         ],
                     ],
                     [
@@ -65,8 +65,8 @@ class IpsController extends Controller
                         'type' => 'toastr',
                         'data' => [
                             'type' => 'success',
-                            'title' => trans('security::responses.ip.blacklisted.title'),
-                            'message' => trans('security::responses.ip.blacklisted.message'),
+                            'title' => trans('shield::responses.ip.blacklisted.title'),
+                            'message' => trans('shield::responses.ip.blacklisted.message'),
                         ],
                     ],
                     [
@@ -89,8 +89,8 @@ class IpsController extends Controller
                         'type' => 'toastr',
                         'data' => [
                             'type' => 'success',
-                            'title' => trans('security::responses.ip.deleted.title'),
-                            'message' => trans('security::responses.ip.deleted.message'),
+                            'title' => trans('shield::responses.ip.deleted.title'),
+                            'message' => trans('shield::responses.ip.deleted.message'),
                         ],
                     ],
                     [

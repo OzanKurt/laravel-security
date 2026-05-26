@@ -18,7 +18,7 @@ class AuthLogsController extends Controller
 
         $authLogsCount = AuthLog::count();
 
-        return view('security::dashboard.auth-logs.index')->with([
+        return view('shield::dashboard.auth-logs.index')->with([
             'authLogsCount' => $authLogsCount,
             'dataTable' => $dataTable->html(),
         ]);

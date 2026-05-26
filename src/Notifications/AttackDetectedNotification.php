@@ -79,11 +79,11 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     {
         $domain = request()->getHttpHost();
 
-        $subject = trans('security::notifications.attack_detected.mail.subject', [
+        $subject = trans('shield::notifications.attack_detected.mail.subject', [
             'domain' => $domain,
         ]);
 
-        $message = trans('security::notifications.attack_detected.mail.message', [
+        $message = trans('shield::notifications.attack_detected.mail.message', [
             'domain' => $domain,
             'middleware' => ucfirst($this->log->middleware),
             'ip' => $this->log->ip,
@@ -104,7 +104,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
      */
     public function toSlack($notifiable)
     {
-        $message = trans('security::notifications.attack_detected.slack.message', [
+        $message = trans('shield::notifications.attack_detected.slack.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
@@ -125,7 +125,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
 
     public function toDiscord()
     {
-        $body = trans('security::notifications.attack_detected.discord.message', [
+        $body = trans('shield::notifications.attack_detected.discord.message', [
             'domain' => request()->getHttpHost(),
         ]);
 

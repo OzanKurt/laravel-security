@@ -21,7 +21,7 @@ class LogsController extends Controller
 
         $logsCount = Log::count();
 
-        return view('security::dashboard.logs.index')->with([
+        return view('shield::dashboard.logs.index')->with([
             'logsCount' => $logsCount,
             'dataTable' => $dataTable->html(),
         ]);

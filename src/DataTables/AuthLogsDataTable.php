@@ -27,7 +27,7 @@ class AuthLogsDataTable extends DataTable
         });
 
         $builder->editColumn('is_successful', function (AuthLog $authLog) use ($nameField) {
-            return $authLog->is_successful ? __('security::dashboard.yes') : __('security::dashboard.no');
+            return $authLog->is_successful ? __('shield::dashboard.yes') : __('shield::dashboard.no');
         });
 
         $builder->editColumn('request_data', function (AuthLog $authLog) {
@@ -95,41 +95,41 @@ class AuthLogsDataTable extends DataTable
             ->orderBy(1)
             ->responsive(true)
             ->autoWidth(true)
-            ->setTemplate('security::datatables.template');
+            ->setTemplate('shield::datatables.template');
     }
 
     protected function getColumns(): array
     {
         return [
             Column::make('id')
-                ->title(trans('security::dashboard.columns.id'))
+                ->title(trans('shield::dashboard.columns.id'))
                 ->class('all dtr-control'),
             Column::make('email')
-                ->title(trans('security::dashboard.columns.email'))
+                ->title(trans('shield::dashboard.columns.email'))
                 ->class('all'),
             Column::make('is_successful')
-                ->title(trans('security::dashboard.columns.is_successful'))
+                ->title(trans('shield::dashboard.columns.is_successful'))
                 ->class('all'),
             Column::make('ip')
-                ->title(trans('security::dashboard.columns.ip'))
+                ->title(trans('shield::dashboard.columns.ip'))
                 ->class('all'),
             Column::make('user_agent')
-                ->title(trans('security::dashboard.columns.user_agent'))
+                ->title(trans('shield::dashboard.columns.user_agent'))
                 ->class('none'),
             Column::make('referrer')
-                ->title(trans('security::dashboard.columns.referrer'))
+                ->title(trans('shield::dashboard.columns.referrer'))
                 ->class('none'),
             Column::make('request_data')
-                ->title(trans('security::dashboard.columns.request_data'))
+                ->title(trans('shield::dashboard.columns.request_data'))
                 ->class('none'),
             Column::make('meta_data')
-                ->title(trans('security::dashboard.columns.meta_data'))
+                ->title(trans('shield::dashboard.columns.meta_data'))
                 ->class('none'),
             Column::make('created_at')
-                ->title(trans('security::dashboard.columns.created_at'))
+                ->title(trans('shield::dashboard.columns.created_at'))
                 ->class('none'),
             Column::make('updated_at')
-                ->title(trans('security::dashboard.columns.updated_at'))
+                ->title(trans('shield::dashboard.columns.updated_at'))
                 ->class('none'),
         ];
     }

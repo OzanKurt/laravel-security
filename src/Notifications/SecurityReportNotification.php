@@ -75,15 +75,15 @@ class SecurityReportNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         $domain = request()->getSchemeAndHttpHost();
-        $message = trans('security::notifications.security_report.mail.message', [
+        $message = trans('shield::notifications.security_report.mail.message', [
             'domain' => "**[$domain]($domain)**",
             'start' => "**{$this->start->format('d/m/Y')}**",
             'end' => "**{$this->end->format('d/m/Y')}**",
         ]);
 
         return (new MailMessage)
-            ->theme('security::notifications.themes.default')
-            ->markdown('security::notifications.security-report-notification', [
+            ->theme('shield::notifications.themes.default')
+            ->markdown('shield::notifications.security-report-notification', [
                 'message' => $message,
                 'recentlyModifiedFiles' => $this->recentlyModifiedFiles,
             ])
@@ -100,7 +100,7 @@ class SecurityReportNotification extends Notification implements ShouldQueue
      */
     public function toSlack($notifiable)
     {
-        $message = trans('security::notifications.slack.message', [
+        $message = trans('shield::notifications.slack.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
@@ -121,7 +121,7 @@ class SecurityReportNotification extends Notification implements ShouldQueue
 
     public function toDiscord()
     {
-        $body = trans('security::notifications.discord.message', [
+        $body = trans('shield::notifications.discord.message', [
             'domain' => request()->getHttpHost(),
         ]);
 

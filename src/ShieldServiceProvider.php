@@ -134,7 +134,7 @@ class ShieldServiceProvider extends ServiceProvider
 
     protected function registerTranslations(): void
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'security');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'shield');
     }
 
     protected function registerCommands(): void
@@ -159,7 +159,7 @@ class ShieldServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
-        View::addNamespace('security', __DIR__ . '/../resources/views');
+        View::addNamespace('shield', __DIR__ . '/../resources/views');
     }
 
     protected function getMigrationPathFor(string $modelKey): string

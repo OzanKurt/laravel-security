@@ -21,7 +21,7 @@ class DashboardController extends Controller
 
         $recentlyModifiedFiles = app('shield')->getRecentlyModifiedFiles(now()->subDays(7), 100);
 
-        return view('security::dashboard.index')->with([
+        return view('shield::dashboard.index')->with([
             'attacksDetected' => $attacksDetected,
             'ipsBlocked' => $ipsBlocked,
             'requestsBlocked' => $requestsBlocked,

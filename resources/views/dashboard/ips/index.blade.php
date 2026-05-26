@@ -1,4 +1,4 @@
-@extends('security::layouts.bootstrap.app')
+@extends('shield::layouts.bootstrap.app')
 
 @section('content')
     <div class="mt-5">
@@ -7,7 +7,7 @@
                 <div class="card shadow">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <div>
-                            @lang('security::dashboard.ips') ({{ $ipsCount }})
+                            @lang('shield::dashboard.ips') ({{ $ipsCount }})
                         </div>
                         <div>
                             {{--                            <a href="{{ app('shield')->route('logs.index') }}" class="btn btn-sm btn-danger">--}}

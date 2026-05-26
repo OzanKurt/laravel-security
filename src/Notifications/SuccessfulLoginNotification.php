@@ -65,11 +65,11 @@ class SuccessfulLoginNotification extends Notification implements ShouldQueue
     {
         $domain = request()->getHttpHost();
 
-        $subject = trans('security::notifications.mail.subject', [
+        $subject = trans('shield::notifications.mail.subject', [
             'domain' => $domain,
         ]);
 
-        $message = trans('security::notifications.mail.message', [
+        $message = trans('shield::notifications.mail.message', [
             'domain' => $domain,
             'middleware' => ucfirst($this->log->middleware),
             'ip' => $this->log->ip,
@@ -90,7 +90,7 @@ class SuccessfulLoginNotification extends Notification implements ShouldQueue
      */
     public function toSlack($notifiable)
     {
-        $message = trans('security::notifications.slack.message', [
+        $message = trans('shield::notifications.slack.message', [
             'domain' => request()->getHttpHost(),
         ]);
 

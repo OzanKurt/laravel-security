@@ -154,10 +154,10 @@ abstract class AbstractMiddleware
             return Response::view($view, $data, $response['code']);
         }
 
-        if (Lang::has('security::responses.' . $this->reason . '.message')) {
-            $message = trans('security::responses.' . $this->reason . '.message');
+        if (Lang::has('shield::responses.' . $this->reason . '.message')) {
+            $message = trans('shield::responses.' . $this->reason . '.message');
         } else {
-            $message = trans('security::responses.access_denied.message');
+            $message = trans('shield::responses.access_denied.message');
         }
 
         if ($redirect = $response['redirect']) {
