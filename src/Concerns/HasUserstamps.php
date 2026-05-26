@@ -31,8 +31,13 @@ trait HasUserstamps
             if (method_exists($model, 'isForceDeleting') && ! $model->isForceDeleting()) {
                 $userId = Auth::id();
                 if ($userId !== null) {
+                    // Set in-memory so the model reflects the new value
                     $model->deleted_by_id = $userId;
-                    $model->save();
+                    // Persist via query builder (skips model events to avoid cascade)
+                    $model->newQuery()
+                        ->withoutGlobalScopes()
+                        ->where($model->getKeyName(), $model->getKey())
+                        ->update(['deleted_by_id' => $userId]);
                 }
             }
         });
