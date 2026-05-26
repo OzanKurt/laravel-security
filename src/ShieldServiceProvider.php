@@ -88,6 +88,8 @@ class ShieldServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->registerViews();
 
+        $this->registerSpatieMediaLibraryIntegration();
+
         if (config('shield.dashboard.enabled')) {
             $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
                 $gate->define('viewShieldDashboard', fn ($user = null) => false);
@@ -148,6 +150,7 @@ class ShieldServiceProvider extends ServiceProvider
         $router->aliasMiddleware('firewall.bypass', \OzanKurt\Shield\Firewall\Middleware\Bypass::class);
         $router->aliasMiddleware('firewall.acl', \OzanKurt\Shield\Firewall\Middleware\Acl::class);
         $router->aliasMiddleware('firewall.live_traffic', \OzanKurt\Shield\Http\Middleware\LiveTrafficCapture::class);
+        $router->aliasMiddleware('firewall.av_uploads', \OzanKurt\Shield\Firewall\Middleware\AvUploads::class);
 
         // firewall.all group: correlation → bypass → acl → live_traffic (terminable) → configured middlewares
         // bypass must come BEFORE acl so the acl short-circuit can fire on bypassed requests
@@ -242,6 +245,28 @@ class ShieldServiceProvider extends ServiceProvider
     protected function registerViews(): void
     {
         View::addNamespace('shield', __DIR__ . '/../resources/views');
+    }
+
+    /**
+     * If the host application has Spatie Media Library installed, attach our
+     * MediaScanListener to the Media model's `saving` event so uploads get
+     * scanned before persistence.
+     */
+    protected function registerSpatieMediaLibraryIntegration(): void
+    {
+        if (! class_exists(\Spatie\MediaLibrary\MediaCollections\Models\Media::class)) {
+            return;
+        }
+
+        if (! config('shield.scanner.spatie_media_library.enabled', true)) {
+            return;
+        }
+
+        $listener = $this->app->make(\OzanKurt\Shield\Integrations\SpatieMediaLibrary\MediaScanListener::class);
+
+        \Spatie\MediaLibrary\MediaCollections\Models\Media::saving(function ($media) use ($listener) {
+            $listener->saving($media);
+        });
     }
 
     protected function getMigrationPathFor(string $modelKey): string

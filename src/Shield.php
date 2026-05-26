@@ -92,6 +92,58 @@ class Shield
         return app(\OzanKurt\Shield\Support\CorrelationId::class)->get();
     }
 
+    /**
+     * Scan an UploadedFile (or any path) via the configured scanner backends.
+     *
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile|string $fileOrPath
+     * @return array{clean: bool, findings: array<int, array<string, mixed>>}
+     */
+    public function scanUploadedFile($fileOrPath): array
+    {
+        $path = is_object($fileOrPath) && method_exists($fileOrPath, 'getRealPath')
+            ? $fileOrPath->getRealPath()
+            : (string) $fileOrPath;
+
+        return $this->scanFile($path);
+    }
+
+    /**
+     * Scan an arbitrary file path with all available backends (native + ClamAV when present).
+     *
+     * @return array{clean: bool, findings: array<int, array<string, mixed>>}
+     */
+    public function scanFile(string $path): array
+    {
+        if (! is_file($path)) {
+            return ['clean' => true, 'findings' => []];
+        }
+
+        $findings = [];
+
+        foreach (app(\OzanKurt\Shield\Services\Scanner\Backends\NativeBackend::class)->scanFile($path) as $f) {
+            $findings[] = $f + ['backend' => 'native'];
+        }
+
+        if (class_exists(\OzanKurt\Shield\Services\Scanner\Backends\ClamAvBackend::class)
+            && class_exists(\Xenolope\Quahog\Client::class)) {
+            try {
+                $clamav = app(\OzanKurt\Shield\Services\Scanner\Backends\ClamAvBackend::class);
+                if ($clamav->isAvailable()) {
+                    foreach ($clamav->scanFile($path) as $f) {
+                        $findings[] = $f + ['backend' => 'clamav'];
+                    }
+                }
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        return [
+            'clean' => empty($findings),
+            'findings' => $findings,
+        ];
+    }
+
     public function cleanInput(string|array $input): string|array
     {
         return $this->antiXss->xss_clean($input);
