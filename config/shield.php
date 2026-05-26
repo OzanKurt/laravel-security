@@ -13,7 +13,7 @@ return [
         'date_format' => 'd/m/Y H:i:s',
         'middleware' => [
             'auth',
-            OzanKurt\Shield\Http\Middleware\SecurityDashboardMiddleware::class,
+            OzanKurt\Shield\Http\Middleware\ShieldDashboardMiddleware::class,
         ],
         'user_name_field' => 'full_name',
         'logo_target_route_name' => null,

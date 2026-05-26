@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use OzanKurt\Shield\Shield;
 use Illuminate\Support\Facades\Gate;
 
-class SecurityDashboardMiddleware
+class ShieldDashboardMiddleware
 {
     public function handle(Request $request, Closure $next)
     {

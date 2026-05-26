@@ -4,7 +4,7 @@ namespace OzanKurt\Shield\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use OzanKurt\Shield\Enums\IpEntryType;
-use OzanKurt\Shield\Http\Middleware\SecurityDashboardMiddleware;
+use OzanKurt\Shield\Http\Middleware\ShieldDashboardMiddleware;
 use OzanKurt\Shield\Models\Ip;
 use OzanKurt\Shield\Models\Log;
 use OzanKurt\Shield\Notifications\Notifiable;
