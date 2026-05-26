@@ -616,6 +616,21 @@ return [
         ],
     ],
 
+    'live_traffic' => [
+        'enabled' => env('LS_LIVE_TRAFFIC_ENABLED', true),
+        'sample_rate' => env('LS_LIVE_TRAFFIC_SAMPLE_RATE', 0.1),
+        'skip_paths' => [
+            '_debugbar/*', 'shield/*', 'vendor/shield/*',
+            'horizon/*', 'telescope/*',
+            'css/*', 'js/*', 'images/*', 'fonts/*',
+            'favicon.ico',
+        ],
+        'real_time' => [
+            'enabled' => env('LS_LIVE_TRAFFIC_REALTIME', false),
+            'channel' => env('LS_LIVE_TRAFFIC_CHANNEL', 'shield.live-traffic'),
+        ],
+    ],
+
     'audit' => [
         'drift' => [
             'enabled' => env('SHIELD_DRIFT_ENABLED', true),

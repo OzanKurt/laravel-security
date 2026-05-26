@@ -128,6 +128,8 @@ class ShieldServiceProvider extends ServiceProvider
 
             $router->get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 
+            $router->get('live-traffic', [\OzanKurt\Shield\Http\Controllers\LiveTrafficController::class, 'index'])->name('live-traffic.index');
+
             $router->get('cache', [CacheController::class, 'index'])->name('cache.index');
             $router->post('cache/clear', [CacheController::class, 'clear'])->name('cache.clear');
 
@@ -145,11 +147,12 @@ class ShieldServiceProvider extends ServiceProvider
         $router->aliasMiddleware('firewall.correlation', \OzanKurt\Shield\Http\Middleware\AttachCorrelationId::class);
         $router->aliasMiddleware('firewall.bypass', \OzanKurt\Shield\Firewall\Middleware\Bypass::class);
         $router->aliasMiddleware('firewall.acl', \OzanKurt\Shield\Firewall\Middleware\Acl::class);
+        $router->aliasMiddleware('firewall.live_traffic', \OzanKurt\Shield\Http\Middleware\LiveTrafficCapture::class);
 
-        // firewall.all group: correlation → bypass → acl → additional configured middlewares
+        // firewall.all group: correlation → bypass → acl → live_traffic (terminable) → configured middlewares
         // bypass must come BEFORE acl so the acl short-circuit can fire on bypassed requests
         $router->middlewareGroup('firewall.all', array_merge(
-            ['firewall.correlation', 'firewall.bypass', 'firewall.acl'],
+            ['firewall.correlation', 'firewall.bypass', 'firewall.acl', 'firewall.live_traffic'],
             config('shield.all_middleware', [])
         ));
 

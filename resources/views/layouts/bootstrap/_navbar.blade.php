@@ -41,6 +41,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('live-traffic.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('live-traffic.index') }}"
+                    >
+                        Live traffic
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ app('shield')->routeIsActive('scanner.index') ? 'active' : '' }}"
                        href="{{ app('shield')->route('scanner.index') }}"
                     >
