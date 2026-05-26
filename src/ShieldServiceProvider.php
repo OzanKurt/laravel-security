@@ -3,10 +3,10 @@
 namespace OzanKurt\Shield;
 
 use Illuminate\Contracts\Foundation\Application;
+use OzanKurt\Shield\Http\Controllers\AclController;
 use OzanKurt\Shield\Http\Controllers\AuditLogController;
 use OzanKurt\Shield\Http\Controllers\AuthLogsController;
 use OzanKurt\Shield\Http\Controllers\CacheController;
-use OzanKurt\Shield\Http\Controllers\IpsController;
 use OzanKurt\Shield\Http\Controllers\DashboardController;
 use OzanKurt\Shield\Http\Controllers\LogsController;
 use voku\helper\AntiXSS;
@@ -105,14 +105,16 @@ class ShieldServiceProvider extends ServiceProvider
         ], function ($router) {
             $router->get('', [DashboardController::class, 'index'])->name('dashboard.index');
 
-            $router->get('ips', [IpsController::class, 'index'])->name('ips.index');
-            $router->post('ips/{ip:id}/action', [IpsController::class, 'postAction'])->name('ips.action');
+            // ACL (replaces old ips routes)
+            $router->get('acl', [AclController::class, 'index'])->name('acl.index');
+            $router->post('acl/{acl:id}/action', [AclController::class, 'postAction'])->name('acl.action');
+            // Legacy ips aliases for backwards compatibility
+            $router->get('ips', [AclController::class, 'index'])->name('ips.index');
+            $router->post('ips/{acl:id}/action', [AclController::class, 'postAction'])->name('ips.action');
 
             $router->get('logs', [LogsController::class, 'index'])->name('logs.index');
-            $router->post('logs/{log:id}/action', [LogsController::class, 'postAction'])->name('logs.action');
 
             $router->get('auth-logs', [AuthLogsController::class, 'index'])->name('auth-logs.index');
-            $router->post('auth-logs/{authLog:id}/action', [AuthLogsController::class, 'postAction'])->name('auth-logs.action');
 
             $router->get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
 

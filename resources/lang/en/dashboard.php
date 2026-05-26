@@ -19,6 +19,7 @@ return [
         'title' => 'Your Laravel Security package assets are out of date!',
         'description' => 'You are using outdated versions of assets. Please re-publish the package assets by running the command:',
     ],
+    'acl' => 'ACL',
     'audit_log' => 'Audit Log',
     'audit_log_filters' => 'Filters',
     'apply_filters' => 'Apply',
@@ -50,5 +51,10 @@ return [
         'description' => 'Description',
         'subject_type' => 'Subject',
         'correlation_id' => 'Correlation',
+        'value' => 'Value',
+        'action' => 'Action',
+        'source' => 'Source',
+        'hit_count' => 'Hits',
+        'expires_at' => 'Expires At',
     ],
 ];

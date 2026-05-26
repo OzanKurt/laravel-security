@@ -27,10 +27,10 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ app('shield')->routeIsActive('ips.index') ? 'active' : '' }}"
-                       href="{{ app('shield')->route('ips.index') }}"
+                    <a class="nav-link {{ app('shield')->routeIsActive('acl.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('acl.index') }}"
                     >
-                        @lang('shield::dashboard.ips')
+                        @lang('shield::dashboard.acl')
                     </a>
                 </li>
                 <li class="nav-item">
