@@ -50,6 +50,8 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->singleton(\OzanKurt\Shield\Services\Lookups\LookupResolver::class);
 
         $this->app->singleton(\OzanKurt\Shield\Services\Acl\AclEvaluator::class);
+
+        $this->app->singleton(\OzanKurt\Shield\Services\Waf\WafRuleResolver::class);
     }
 
     /**
@@ -144,6 +146,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app['events']->listen(AuthFailedEvent::class, FailedLoginListener::class);
 
         \OzanKurt\Shield\Models\Acl::observe(\OzanKurt\Shield\Observers\AclObserver::class);
+        \OzanKurt\Shield\Models\WafRule::observe(\OzanKurt\Shield\Observers\WafRuleObserver::class);
     }
 
     protected function registerTranslations(): void
