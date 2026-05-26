@@ -33,10 +33,8 @@ abstract class TestCase extends BaseTestCase
 
     protected function setUpDatabase()
     {
-        $create_logs_table = include __DIR__.'/../database/migrations/create_logs_table.php';
-        $create_logs_table->up();
-        $create_ips_table = include __DIR__.'/../database/migrations/create_ips_table.php';
-        $create_ips_table->up();
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        (new \OzanKurt\Shield\Database\Seeders\LookupTableSeeder())->run();
     }
 
     protected function setUpConfig()

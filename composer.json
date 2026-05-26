@@ -56,7 +56,8 @@
   },
   "autoload": {
     "psr-4": {
-      "OzanKurt\\Shield\\": "src"
+      "OzanKurt\\Shield\\": "src",
+      "OzanKurt\\Shield\\Database\\": "database"
     }
   },
   "autoload-dev": {

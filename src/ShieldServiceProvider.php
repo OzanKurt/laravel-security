@@ -48,6 +48,8 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app->singleton(\OzanKurt\Shield\Support\CorrelationId::class);
 
         $this->app->singleton(\OzanKurt\Shield\Services\Lookups\LookupResolver::class);
+
+        $this->app->singleton(\OzanKurt\Shield\Services\Acl\AclEvaluator::class);
     }
 
     /**
