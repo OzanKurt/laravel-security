@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Notifications;
+namespace OzanKurt\Shield\Notifications;
 
 use Illuminate\Notifications\Notifiable as NotifiableTrait;
 

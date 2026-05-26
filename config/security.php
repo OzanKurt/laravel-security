@@ -13,7 +13,7 @@ return [
         'date_format' => 'd/m/Y H:i:s',
         'middleware' => [
             'auth',
-            OzanKurt\Security\Http\Middleware\SecurityDashboardMiddleware::class,
+            OzanKurt\Shield\Http\Middleware\SecurityDashboardMiddleware::class,
         ],
         'user_name_field' => 'full_name',
         'logo_target_route_name' => null,
@@ -31,17 +31,17 @@ return [
         ],
 
         'auth_log' => [
-            'model' => \OzanKurt\Security\Models\AuthLog::class,
+            'model' => \OzanKurt\Shield\Models\AuthLog::class,
             'table' => 'auth_logs',
         ],
 
         'log' => [
-            'model' => \OzanKurt\Security\Models\Log::class,
+            'model' => \OzanKurt\Shield\Models\Log::class,
             'table' => 'logs',
         ],
 
         'ip' => [
-            'model' => \OzanKurt\Security\Models\Ip::class,
+            'model' => \OzanKurt\Shield\Models\Ip::class,
             'table' => 'ips',
         ],
     ],

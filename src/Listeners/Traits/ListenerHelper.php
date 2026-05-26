@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Listeners\Traits;
+namespace OzanKurt\Shield\Listeners\Traits;
 
 use Illuminate\Http\Request;
-use OzanKurt\Security\Helpers\Helper;
-use OzanKurt\Security\Models\AuthLog;
+use OzanKurt\Shield\Helpers\Helper;
+use OzanKurt\Shield\Models\AuthLog;
 use RuntimeException;
 
 trait ListenerHelper

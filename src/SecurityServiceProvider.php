@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security;
+namespace OzanKurt\Shield;
 
 use Illuminate\Contracts\Foundation\Application;
-use OzanKurt\Security\Http\Controllers\AuthLogsController;
-use OzanKurt\Security\Http\Controllers\IpsController;
-use OzanKurt\Security\Http\Controllers\DashboardController;
-use OzanKurt\Security\Http\Controllers\LogsController;
+use OzanKurt\Shield\Http\Controllers\AuthLogsController;
+use OzanKurt\Shield\Http\Controllers\IpsController;
+use OzanKurt\Shield\Http\Controllers\DashboardController;
+use OzanKurt\Shield\Http\Controllers\LogsController;
 use voku\helper\AntiXSS;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Notifications\ChannelManager;
@@ -17,14 +17,14 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Auth\Events\Login as AuthLoginEvent;
 use Illuminate\Auth\Events\Failed as AuthFailedEvent;
-use OzanKurt\Security\Commands\SendSecurityReportNotificationCommand;
-use OzanKurt\Security\Commands\UnblockIpsCommand;
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Listeners\AttackDetectedListener;
-use OzanKurt\Security\Listeners\BlockIpListener;
-use OzanKurt\Security\Listeners\FailedLoginListener;
-use OzanKurt\Security\Listeners\SuccessfulLoginListener;
-use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
+use OzanKurt\Shield\Commands\SendSecurityReportNotificationCommand;
+use OzanKurt\Shield\Commands\UnblockIpsCommand;
+use OzanKurt\Shield\Events\AttackDetectedEvent;
+use OzanKurt\Shield\Listeners\AttackDetectedListener;
+use OzanKurt\Shield\Listeners\BlockIpListener;
+use OzanKurt\Shield\Listeners\FailedLoginListener;
+use OzanKurt\Shield\Listeners\SuccessfulLoginListener;
+use OzanKurt\Shield\Notifications\Channels\Discord\DiscordChannel;
 
 class SecurityServiceProvider extends ServiceProvider
 {
@@ -76,7 +76,7 @@ class SecurityServiceProvider extends ServiceProvider
 
         $name = config('security.dashboard.route_name', 'security.');
         $router->group([
-            'namespace' => 'OzanKurt\Security\Http\Controllers',
+            'namespace' => 'OzanKurt\Shield\Http\Controllers',
             'prefix' => config('security.dashboard.route_prefix', 'security'),
             'middleware' => [
                 'web',
@@ -102,21 +102,21 @@ class SecurityServiceProvider extends ServiceProvider
         $router->middlewareGroup('firewall.all', config('security.all_middleware'));
 
         $middlewares = [
-            'firewall.agent' => \OzanKurt\Security\Firewall\Middleware\Agent::class,
-            'firewall.bot' => \OzanKurt\Security\Firewall\Middleware\Bot::class,
-            'firewall.ip' => \OzanKurt\Security\Firewall\Middleware\Ip::class,
-            'firewall.geo' => \OzanKurt\Security\Firewall\Middleware\Geo::class,
-            'firewall.lfi' => \OzanKurt\Security\Firewall\Middleware\Lfi::class,
-            'firewall.php' => \OzanKurt\Security\Firewall\Middleware\Php::class,
-            'firewall.referrer' => \OzanKurt\Security\Firewall\Middleware\Referrer::class,
-            'firewall.rfi' => \OzanKurt\Security\Firewall\Middleware\Rfi::class,
-            'firewall.session' => \OzanKurt\Security\Firewall\Middleware\Session::class,
-            'firewall.sqli' => \OzanKurt\Security\Firewall\Middleware\Sqli::class,
-            'firewall.swear' => \OzanKurt\Security\Firewall\Middleware\Swear::class,
-            'firewall.url' => \OzanKurt\Security\Firewall\Middleware\Url::class,
-            'firewall.whitelist' => \OzanKurt\Security\Firewall\Middleware\Whitelist::class,
-            'firewall.xss' => \OzanKurt\Security\Firewall\Middleware\Xss::class,
-            'firewall.keyword' => \OzanKurt\Security\Firewall\Middleware\Keyword::class,
+            'firewall.agent' => \OzanKurt\Shield\Firewall\Middleware\Agent::class,
+            'firewall.bot' => \OzanKurt\Shield\Firewall\Middleware\Bot::class,
+            'firewall.ip' => \OzanKurt\Shield\Firewall\Middleware\Ip::class,
+            'firewall.geo' => \OzanKurt\Shield\Firewall\Middleware\Geo::class,
+            'firewall.lfi' => \OzanKurt\Shield\Firewall\Middleware\Lfi::class,
+            'firewall.php' => \OzanKurt\Shield\Firewall\Middleware\Php::class,
+            'firewall.referrer' => \OzanKurt\Shield\Firewall\Middleware\Referrer::class,
+            'firewall.rfi' => \OzanKurt\Shield\Firewall\Middleware\Rfi::class,
+            'firewall.session' => \OzanKurt\Shield\Firewall\Middleware\Session::class,
+            'firewall.sqli' => \OzanKurt\Shield\Firewall\Middleware\Sqli::class,
+            'firewall.swear' => \OzanKurt\Shield\Firewall\Middleware\Swear::class,
+            'firewall.url' => \OzanKurt\Shield\Firewall\Middleware\Url::class,
+            'firewall.whitelist' => \OzanKurt\Shield\Firewall\Middleware\Whitelist::class,
+            'firewall.xss' => \OzanKurt\Shield\Firewall\Middleware\Xss::class,
+            'firewall.keyword' => \OzanKurt\Shield\Firewall\Middleware\Keyword::class,
         ];
 
         foreach ($middlewares as $name => $class) {

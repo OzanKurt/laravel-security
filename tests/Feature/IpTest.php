@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Tests\Feature;
+namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Security\Middleware\Ip;
-use OzanKurt\Security\Models\Ip as IpModel;
-use OzanKurt\Security\Tests\TestCase;
+use OzanKurt\Shield\Middleware\Ip;
+use OzanKurt\Shield\Models\Ip as IpModel;
+use OzanKurt\Shield\Tests\TestCase;
 
 class IpTest extends TestCase
 {

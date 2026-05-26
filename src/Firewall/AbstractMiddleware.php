@@ -1,13 +1,13 @@
 <?php
 
-namespace OzanKurt\Security\Firewall;
+namespace OzanKurt\Shield\Firewall;
 
 use Closure;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Firewall\Traits\MiddlewareHelper;
+use OzanKurt\Shield\Events\AttackDetectedEvent;
+use OzanKurt\Shield\Firewall\Traits\MiddlewareHelper;
 
 abstract class AbstractMiddleware
 {

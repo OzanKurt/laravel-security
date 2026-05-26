@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Enums;
+namespace OzanKurt\Shield\Enums;
 
 enum LogLevel: string
 {

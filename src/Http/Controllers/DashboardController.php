@@ -1,15 +1,15 @@
 <?php
 
-namespace OzanKurt\Security\Http\Controllers;
+namespace OzanKurt\Shield\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Http\Middleware\SecurityDashboardMiddleware;
-use OzanKurt\Security\Models\Ip;
-use OzanKurt\Security\Models\Log;
-use OzanKurt\Security\Notifications\Notifiable;
-use OzanKurt\Security\Notifications\SecurityReportNotification;
-use OzanKurt\Security\Security;
+use OzanKurt\Shield\Enums\IpEntryType;
+use OzanKurt\Shield\Http\Middleware\SecurityDashboardMiddleware;
+use OzanKurt\Shield\Models\Ip;
+use OzanKurt\Shield\Models\Log;
+use OzanKurt\Shield\Notifications\Notifiable;
+use OzanKurt\Shield\Notifications\SecurityReportNotification;
+use OzanKurt\Shield\Security;
 
 class DashboardController extends Controller
 {

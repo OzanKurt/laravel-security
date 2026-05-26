@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\Commands;
+namespace OzanKurt\Shield\Commands;
 
 use Cron\CronExpression;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
-use OzanKurt\Security\Notifications\Notifiable;
-use OzanKurt\Security\Notifications\SecurityReportNotification;
+use OzanKurt\Shield\Notifications\Notifiable;
+use OzanKurt\Shield\Notifications\SecurityReportNotification;
 use Throwable;
 
 class SendSecurityReportNotificationCommand extends Command
@@ -27,7 +27,7 @@ class SendSecurityReportNotificationCommand extends Command
         $prevRunDate = new Carbon($expression->getPreviousRunDate());
         $currentRunDate = now();
 
-        /** @var \OzanKurt\Security\Security $security */
+        /** @var \OzanKurt\Shield\Security $security */
         $security = app('security');
         $recentlyModifiedFiles = $security->getRecentlyModifiedFiles($prevRunDate, 15, true);
 

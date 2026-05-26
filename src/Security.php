@@ -1,11 +1,11 @@
 <?php
 
-namespace OzanKurt\Security;
+namespace OzanKurt\Shield;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Helpers\RecentlyModifiedFiles;
+use OzanKurt\Shield\Enums\IpEntryType;
+use OzanKurt\Shield\Helpers\RecentlyModifiedFiles;
 use voku\helper\AntiXSS;
 
 class Security

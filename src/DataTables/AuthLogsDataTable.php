@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\DataTables;
+namespace OzanKurt\Shield\DataTables;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use OzanKurt\Security\Models\AuthLog;
-use OzanKurt\Security\Models\Ip;
-use OzanKurt\Security\Models\Log;
+use OzanKurt\Shield\Models\AuthLog;
+use OzanKurt\Shield\Models\Ip;
+use OzanKurt\Shield\Models\Log;
 use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\Html\Column;
 

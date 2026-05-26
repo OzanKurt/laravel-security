@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Tests\Feature;
+namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Security\Middleware\Sqli;
-use OzanKurt\Security\Tests\TestCase;
+use OzanKurt\Shield\Middleware\Sqli;
+use OzanKurt\Shield\Tests\TestCase;
 
 class SqliTest extends TestCase
 {

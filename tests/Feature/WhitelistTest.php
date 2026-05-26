@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Tests\Feature;
+namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Security\Middleware\Whitelist;
-use OzanKurt\Security\Tests\TestCase;
+use OzanKurt\Shield\Middleware\Whitelist;
+use OzanKurt\Shield\Tests\TestCase;
 
 class WhitelistTest extends TestCase
 {

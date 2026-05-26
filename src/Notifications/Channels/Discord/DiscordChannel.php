@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Notifications\Channels\Discord;
+namespace OzanKurt\Shield\Notifications\Channels\Discord;
 
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Http;

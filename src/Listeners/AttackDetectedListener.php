@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Listeners;
+namespace OzanKurt\Shield\Listeners;
 
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Notifications\AttackDetectedNotification;
-use OzanKurt\Security\Notifications\Notifiable;
+use OzanKurt\Shield\Events\AttackDetectedEvent;
+use OzanKurt\Shield\Notifications\AttackDetectedNotification;
+use OzanKurt\Shield\Notifications\Notifiable;
 use Throwable;
 
 class AttackDetectedListener

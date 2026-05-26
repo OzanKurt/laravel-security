@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Notifications;
+namespace OzanKurt\Shield\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -8,8 +8,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Support\Carbon;
-use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
-use OzanKurt\Security\Notifications\Channels\Discord\DiscordMessage;
+use OzanKurt\Shield\Notifications\Channels\Discord\DiscordChannel;
+use OzanKurt\Shield\Notifications\Channels\Discord\DiscordMessage;
 
 class SecurityReportNotification extends Notification implements ShouldQueue
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Events;
+namespace OzanKurt\Shield\Events;
 
 class AttackDetectedEvent
 {

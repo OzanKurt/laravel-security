@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Tests\Feature;
+namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Security\Middleware\Xss;
-use OzanKurt\Security\Tests\TestCase;
+use OzanKurt\Shield\Middleware\Xss;
+use OzanKurt\Shield\Tests\TestCase;
 
 class XssTest extends TestCase
 {

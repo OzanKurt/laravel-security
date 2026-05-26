@@ -1,11 +1,11 @@
 <?php
 
-namespace OzanKurt\Security\Listeners;
+namespace OzanKurt\Shield\Listeners;
 
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Models\Ip;
-use OzanKurt\Security\Models\Log;
+use OzanKurt\Shield\Enums\IpEntryType;
+use OzanKurt\Shield\Events\AttackDetectedEvent;
+use OzanKurt\Shield\Models\Ip;
+use OzanKurt\Shield\Models\Log;
 use Carbon\Carbon;
 
 class BlockIpListener

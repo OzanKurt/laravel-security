@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Http\Middleware;
+namespace OzanKurt\Shield\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use OzanKurt\Security\Security;
+use OzanKurt\Shield\Security;
 use Illuminate\Support\Facades\Gate;
 
 class SecurityDashboardMiddleware

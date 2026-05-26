@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
 use Illuminate\Http\Request;
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Enums\IpEntryType;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
 
 class Ip extends AbstractMiddleware
 {

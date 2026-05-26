@@ -1,11 +1,11 @@
 <?php
 
-namespace OzanKurt\Security\Http\Controllers;
+namespace OzanKurt\Shield\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use OzanKurt\Security\DataTables\IpsDataTable;
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Models\Ip;
+use OzanKurt\Shield\DataTables\IpsDataTable;
+use OzanKurt\Shield\Enums\IpEntryType;
+use OzanKurt\Shield\Models\Ip;
 
 class IpsController extends Controller
 {

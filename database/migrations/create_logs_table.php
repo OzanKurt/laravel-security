@@ -1,6 +1,6 @@
 <?php
 
-use OzanKurt\Security\Enums\LogLevel;
+use OzanKurt\Shield\Enums\LogLevel;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;

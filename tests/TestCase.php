@@ -1,8 +1,8 @@
 <?php
 
-namespace OzanKurt\Security\Tests;
+namespace OzanKurt\Shield\Tests;
 
-use OzanKurt\Security\SecurityServiceProvider;
+use OzanKurt\Shield\SecurityServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase

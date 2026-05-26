@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\Tests\Feature;
+namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Security\Models\Log;
-use OzanKurt\Security\Traits\Helper;
-use OzanKurt\Security\Tests\TestCase;
-use OzanKurt\Security\Notifications\Notifiable;
-use OzanKurt\Security\Notifications\AttackDetected;
+use OzanKurt\Shield\Models\Log;
+use OzanKurt\Shield\Traits\Helper;
+use OzanKurt\Shield\Tests\TestCase;
+use OzanKurt\Shield\Notifications\Notifiable;
+use OzanKurt\Shield\Notifications\AttackDetected;
 
 class NotificationTest extends TestCase
 {

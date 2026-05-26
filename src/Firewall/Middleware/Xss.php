@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
 use Closure;
-use OzanKurt\Security\Firewall\AbstractMiddleware;
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Security;
-use OzanKurt\Security\Helpers\BladeEchoCleaner;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Events\AttackDetectedEvent;
+use OzanKurt\Shield\Security;
+use OzanKurt\Shield\Helpers\BladeEchoCleaner;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\ParameterBag;
 

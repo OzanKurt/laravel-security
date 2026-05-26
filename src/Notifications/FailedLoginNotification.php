@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\Notifications;
+namespace OzanKurt\Shield\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use OzanKurt\Security\Models\AuthLog;
+use OzanKurt\Shield\Models\AuthLog;
 
 class FailedLoginNotification extends Notification implements ShouldQueue
 {

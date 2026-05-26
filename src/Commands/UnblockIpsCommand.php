@@ -1,8 +1,8 @@
 <?php
 
-namespace OzanKurt\Security\Commands;
+namespace OzanKurt\Shield\Commands;
 
-use OzanKurt\Security\Models\Ip;
+use OzanKurt\Shield\Models\Ip;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\Helpers;
+namespace OzanKurt\Shield\Helpers;
 
 use Illuminate\Http\Request;
 use OzanKurt\Agent\Agent as Parser;
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Enums\LogLevel;
-use OzanKurt\Security\Models\Log;
+use OzanKurt\Shield\Enums\IpEntryType;
+use OzanKurt\Shield\Enums\LogLevel;
+use OzanKurt\Shield\Models\Log;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 trait Helper

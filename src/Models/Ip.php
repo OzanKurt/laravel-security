@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Models;
+namespace OzanKurt\Shield\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OzanKurt\Security\Enums\IpEntryType;
+use OzanKurt\Shield\Enums\IpEntryType;
 
 class Ip extends Model
 {

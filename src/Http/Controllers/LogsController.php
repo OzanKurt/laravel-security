@@ -1,13 +1,13 @@
 <?php
 
-namespace OzanKurt\Security\Http\Controllers;
+namespace OzanKurt\Shield\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use OzanKurt\Security\DataTables\LogsDataTable;
-use OzanKurt\Security\Http\Middleware\SecurityDashboardMiddleware;
-use OzanKurt\Security\Models\Ip;
-use OzanKurt\Security\Models\Log;
-use OzanKurt\Security\Security;
+use OzanKurt\Shield\DataTables\LogsDataTable;
+use OzanKurt\Shield\Http\Middleware\SecurityDashboardMiddleware;
+use OzanKurt\Shield\Models\Ip;
+use OzanKurt\Shield\Models\Log;
+use OzanKurt\Shield\Security;
 
 class LogsController extends Controller
 {

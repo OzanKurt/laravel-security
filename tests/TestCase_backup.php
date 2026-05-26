@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Tests;
+namespace OzanKurt\Shield\Tests;
 
 use Illuminate\Contracts\Config\Repository;
-use OzanKurt\Security\SecurityServiceProvider;
+use OzanKurt\Shield\SecurityServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

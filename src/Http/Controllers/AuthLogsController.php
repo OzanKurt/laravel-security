@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Http\Controllers;
+namespace OzanKurt\Shield\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use OzanKurt\Security\DataTables\AuthLogsDataTable;
-use OzanKurt\Security\Models\AuthLog;
+use OzanKurt\Shield\DataTables\AuthLogsDataTable;
+use OzanKurt\Shield\Models\AuthLog;
 
 class AuthLogsController extends Controller
 {
