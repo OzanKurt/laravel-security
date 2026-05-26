@@ -35,6 +35,7 @@ abstract class TestCase extends BaseTestCase
     {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         (new \OzanKurt\Shield\Database\Seeders\LookupTableSeeder())->run();
+        (new \OzanKurt\Shield\Database\Seeders\BuiltinWafRuleSeeder())->run();
     }
 
     protected function setUpConfig()
