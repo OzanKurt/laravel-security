@@ -588,6 +588,34 @@ return [
 
     ],
 
+    'scanner' => [
+        'clamav' => [
+            'enabled' => env('LS_CLAMAV_ENABLED', false),
+            'socket' => env('LS_CLAMAV_SOCKET', '/var/run/clamav/clamd.ctl'),
+            'timeout' => 30,
+        ],
+        'native' => [
+            'max_file_bytes' => 5 * 1024 * 1024, // 5 MB
+        ],
+        'signatures' => [
+            'url' => env('LS_SIGNATURE_URL', 'https://api.github.com/repos/OzanKurt/laravel-shield-signatures/releases/latest'),
+            'pin' => env('LS_SIGNATURE_PIN'),
+            'sync_cron' => '0 5 * * *',
+        ],
+        'quarantine' => [
+            'path' => 'storage/shield/quarantine',
+            'per_target' => [
+                'public_uploads' => 'move_and_stub',
+                'unknown_files' => 'move_and_stub',
+            ],
+        ],
+        'watch' => [
+            'enabled' => env('LS_WATCH_ENABLED', false),
+            'paths' => [],
+            'poll_interval_ms' => env('LS_WATCH_POLL_MS', 3000),
+        ],
+    ],
+
     'audit' => [
         'drift' => [
             'enabled' => env('SHIELD_DRIFT_ENABLED', true),
