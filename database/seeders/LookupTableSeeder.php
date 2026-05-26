@@ -153,6 +153,8 @@ class LookupTableSeeder extends Seeder
         $kinds = [
             'auth.login', 'auth.logout', 'auth.failed_login', 'auth.password_reset',
             'user.created', 'user.updated', 'user.deleted',
+            // Explicit model-event kinds used by HasAuditLog trait
+            'model.user.created', 'model.user.updated', 'model.user.deleted',
             'role.attached', 'role.detached',
             'config.drift', 'file.drift', 'composer.changed', '.env.changed',
             'acl.added', 'acl.updated', 'acl.deleted', 'acl.expired',
