@@ -8,8 +8,8 @@ return [
 
     'dashboard' => [
         'enabled' => env('FIREWALL_DASHBOARD_ENABLED', true),
-        'route_prefix' => 'security',
-        'route_name' => 'security.',
+        'route_prefix' => 'shield',
+        'route_name' => 'shield.',
         'date_format' => 'd/m/Y H:i:s',
         'middleware' => [
             'auth',

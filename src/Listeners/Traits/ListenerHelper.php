@@ -34,7 +34,7 @@ trait ListenerHelper
     public function isNotificationEnabled()
     {
         if (! $this->notification) {
-            throw new RuntimeException("The notification [{$this->notification}] is not configured in the `config/security.php` file.");
+            throw new RuntimeException("The notification [{$this->notification}] is not configured in the `config/shield.php` file.");
         }
 
         return config("shield.notifications.{$this->notification}.enabled", false);

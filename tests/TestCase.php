@@ -15,7 +15,7 @@ abstract class TestCase extends BaseTestCase
 
         $this->setUpDatabase();
 
-        $this->artisan('vendor:publish', ['--tag' => 'security']);
+        $this->artisan('vendor:publish', ['--tag' => 'shield']);
         // $this->artisan('migrate:refresh', ['--database' => 'testbench']);
     }
 
@@ -51,15 +51,15 @@ abstract class TestCase extends BaseTestCase
             ],
         ]);
 
-        config(['security' => include __DIR__.'/../config/security.php']);
-        config(['security.database.connection' => 'testbench']);
+        config(['shield' => include __DIR__.'/../config/shield.php']);
+        config(['shield.database.connection' => 'testbench']);
 
-        config(['security.notifications.mail.enabled' => false]);
-        config(['security.middleware.ip.methods' => ['all']]);
-        config(['security.middleware.lfi.methods' => ['all']]);
-        config(['security.middleware.rfi.methods' => ['all']]);
-        config(['security.middleware.sqli.methods' => ['all']]);
-        config(['security.middleware.xss.methods' => ['all']]);
+        config(['shield.notifications.mail.enabled' => false]);
+        config(['shield.middleware.ip.methods' => ['all']]);
+        config(['shield.middleware.lfi.methods' => ['all']]);
+        config(['shield.middleware.rfi.methods' => ['all']]);
+        config(['shield.middleware.sqli.methods' => ['all']]);
+        config(['shield.middleware.xss.methods' => ['all']]);
     }
 
     public function getNextClosure()

@@ -74,10 +74,10 @@ class ShieldServiceProvider extends ServiceProvider
     {
         $middleware = config('shield.dashboard.middleware', []);
 
-        $name = config('shield.dashboard.route_name', 'security.');
+        $name = config('shield.dashboard.route_name', 'shield.');
         $router->group([
             'namespace' => 'OzanKurt\Shield\Http\Controllers',
-            'prefix' => config('shield.dashboard.route_prefix', 'security'),
+            'prefix' => config('shield.dashboard.route_prefix', 'shield'),
             'middleware' => [
                 'web',
                 ...$middleware,
@@ -182,30 +182,30 @@ class ShieldServiceProvider extends ServiceProvider
     {
         // config
         $this->publishes([
-            __DIR__ . '/../config/security.php' => config_path('security.php'),
-        ], 'security-config');
+            __DIR__ . '/../config/shield.php' => config_path('shield.php'),
+        ], 'shield-config');
 
         // lang
-        $langPath = 'vendor/security';
+        $langPath = 'vendor/shield';
         $langPath = (function_exists('lang_path'))
             ? lang_path($langPath)
             : resource_path('lang/' . $langPath);
 
         $this->publishes([
             __DIR__ . '/../resources/lang' => $langPath,
-        ], 'security-lang');
+        ], 'shield-lang');
 
         // migrations
         $this->publishes([
             __DIR__ . '/../database/migrations/create_auth_logs_table.php' => $this->getMigrationPathFor('auth_log'),
             __DIR__ . '/../database/migrations/create_ips_table.php' => $this->getMigrationPathFor('ip'),
             __DIR__ . '/../database/migrations/create_logs_table.php' => $this->getMigrationPathFor('log'),
-        ], 'security-migrations');
+        ], 'shield-migrations');
 
         // public
         $this->publishes([
-            __DIR__ . '/../public' => public_path('vendor/security'),
-        ], 'security-assets');
+            __DIR__ . '/../public' => public_path('vendor/shield'),
+        ], 'shield-assets');
     }
 
     protected function registerDiscordChannel(): void

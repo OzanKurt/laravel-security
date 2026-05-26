@@ -73,7 +73,7 @@ class Shield
 
     public static function assetsOutdated()
     {
-        $publishedManifest = public_path('vendor/security/manifest.json');
+        $publishedManifest = public_path('vendor/shield/manifest.json');
 
         if (!File::exists($publishedManifest)) {
             return true;

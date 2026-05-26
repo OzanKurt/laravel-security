@@ -18,7 +18,7 @@ class SecurityDashboardMiddleware
         $isOutdated = Shield::assetsOutdated();
 
         if ($isOutdated && session()->has('outdated') === false) {
-            return redirect()->route('security.dashboard.index')->with('outdated', true);
+            return redirect()->route('shield.dashboard.index')->with('outdated', true);
         }
 
         return $next($request);

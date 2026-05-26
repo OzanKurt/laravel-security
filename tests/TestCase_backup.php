@@ -15,7 +15,7 @@ abstract class TestCase extends OrchestraTestCase
     {
         parent::setUp();
 
-        $this->artisan('vendor:publish', ['--tag' => 'security']);
+        $this->artisan('vendor:publish', ['--tag' => 'shield']);
 
         $this->afterApplicationCreated(function () {
             $this->artisan('migrate:refresh', ['--database' => 'testbench']);
@@ -43,21 +43,21 @@ abstract class TestCase extends OrchestraTestCase
                 'prefix'   => '',
             ]);
 
-            // Setup security config
-            $config->set(['security' => require __DIR__ . '/../config/security.php']);
+            // Setup shield config
+            $config->set(['shield' => require __DIR__ . '/../config/shield.php']);
 
-            $config->set(['security.database.connection' => 'testbench']);
+            $config->set(['shield.database.connection' => 'testbench']);
 
-            $config->set(['security.notifications.mail.enabled' => false]);
-            $config->set(['security.middleware.ip.methods' => ['all']]);
-            $config->set(['security.middleware.lfi.methods' => ['all']]);
-            $config->set(['security.middleware.rfi.methods' => ['all']]);
-            $config->set(['security.middleware.sqli.methods' => ['all']]);
-            $config->set(['security.middleware.xss.methods' => ['all']]);
+            $config->set(['shield.notifications.mail.enabled' => false]);
+            $config->set(['shield.middleware.ip.methods' => ['all']]);
+            $config->set(['shield.middleware.lfi.methods' => ['all']]);
+            $config->set(['shield.middleware.rfi.methods' => ['all']]);
+            $config->set(['shield.middleware.sqli.methods' => ['all']]);
+            $config->set(['shield.middleware.xss.methods' => ['all']]);
 
-            $config->set(['security.notifications.discord.enabled' => true]);
-            $config->set(['security.notifications.discord.to' => 'https://discord.com/api/webhooks/1213258698470727770/z48rQz0svhO4WvllVWq_6mh8ehnsJEPg2KnE5Mk7V0q2pBrlQ4Kv0ePwyBFz3xOl5GU9']);
-            $config->set(['security.notifications.discord.channel' => \NotificationChannels\Discord\DiscordChannel::class]);
+            $config->set(['shield.notifications.discord.enabled' => true]);
+            $config->set(['shield.notifications.discord.to' => 'https://discord.com/api/webhooks/1213258698470727770/z48rQz0svhO4WvllVWq_6mh8ehnsJEPg2KnE5Mk7V0q2pBrlQ4Kv0ePwyBFz3xOl5GU9']);
+            $config->set(['shield.notifications.discord.channel' => \NotificationChannels\Discord\DiscordChannel::class]);
         });
     }
 

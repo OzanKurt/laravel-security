@@ -13,7 +13,7 @@
                             @lang('shield::dashboard.outdated_notification.description')<br>
                             <br>
                             <code>
-                                php artisan vendor:publish --provider="OzanKurt\Shield\ShieldServiceProvider" --tag="security-assets"
+                                php artisan vendor:publish --provider="OzanKurt\Shield\ShieldServiceProvider" --tag="shield-assets"
                             </code>
                         </div>
                     </div>
