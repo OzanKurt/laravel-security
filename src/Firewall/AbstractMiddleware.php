@@ -1,13 +1,13 @@
 <?php
 
-namespace OzanKurt\Security\Firewall;
+namespace OzanKurt\Shield\Firewall;
 
 use Closure;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Firewall\Traits\MiddlewareHelper;
+use OzanKurt\Shield\Events\AttackDetectedEvent;
+use OzanKurt\Shield\Firewall\Traits\MiddlewareHelper;
 
 abstract class AbstractMiddleware
 {
@@ -27,7 +27,7 @@ abstract class AbstractMiddleware
         }
 
         if ($this->check($this->getPatterns())) {
-            return $this->respond(config('security.responses.block'));
+            return $this->respond(config('shield.responses.block'));
         }
 
         return $next($request);
@@ -45,7 +45,7 @@ abstract class AbstractMiddleware
             return true;
         }
 
-        if (app('security')->isIpWhitelistedInDatabase()) {
+        if (app('shield')->isIpWhitelistedInDatabase()) {
             return true;
         }
 
@@ -70,7 +70,12 @@ abstract class AbstractMiddleware
 
     public function getPatterns()
     {
-        return config('security.middleware.' . $this->middleware . '.patterns', []);
+        /** @var \OzanKurt\Shield\Services\Waf\WafRuleResolver $resolver */
+        $resolver = app(\OzanKurt\Shield\Services\Waf\WafRuleResolver::class);
+
+        return $resolver->forCategory($this->middleware)
+            ->pluck('pattern')
+            ->all();
     }
 
     public function check($patterns)
@@ -154,10 +159,10 @@ abstract class AbstractMiddleware
             return Response::view($view, $data, $response['code']);
         }
 
-        if (Lang::has('security::responses.' . $this->reason . '.message')) {
-            $message = trans('security::responses.' . $this->reason . '.message');
+        if (Lang::has('shield::responses.' . $this->reason . '.message')) {
+            $message = trans('shield::responses.' . $this->reason . '.message');
         } else {
-            $message = trans('security::responses.access_denied.message');
+            $message = trans('shield::responses.access_denied.message');
         }
 
         if ($redirect = $response['redirect']) {

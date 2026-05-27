@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
 use Illuminate\Http\Request;
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Enums\IpEntryType;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
 
 class Ip extends AbstractMiddleware
 {
@@ -12,7 +12,7 @@ class Ip extends AbstractMiddleware
     {
         $this->reason = 'ip_blocked';
 
-        $model = config('security.database.ip.model');
+        $model = config('shield.database.ip.model');
 
         $clientIp = request()->ip();
 

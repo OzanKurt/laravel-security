@@ -1,7 +1,7 @@
 <x-mail::layout>
 {{-- Header --}}
 <x-slot:header>
-@component('security::notifications.header', ['url' => config('app.url')])
+@component('shield::notifications.header', ['url' => config('app.url')])
 @endcomponent
 </x-slot:header>
 

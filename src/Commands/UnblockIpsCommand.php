@@ -1,14 +1,14 @@
 <?php
 
-namespace OzanKurt\Security\Commands;
+namespace OzanKurt\Shield\Commands;
 
-use OzanKurt\Security\Models\Ip;
+use OzanKurt\Shield\Models\Ip;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class UnblockIpsCommand extends Command
 {
-    protected $signature = 'security:unblock-ips';
+    protected $signature = 'shield:unblock-ips';
 
     protected $description = 'Unblock ips based on their block period';
 
@@ -16,14 +16,14 @@ class UnblockIpsCommand extends Command
     {
         $now = Carbon::now(config('app.timezone'));
 
-        $ip = config('security.database.ip.model');
+        $ip = config('shield.database.ip.model');
 
         $ip::with('log')->blocked()->each(function ($ip) use ($now) {
             if (empty($ip->log)) {
                 return;
             }
 
-            $period = config('security.middleware.' . $ip->log->middleware . '.auto_block.period');
+            $period = config('shield.middleware.' . $ip->log->middleware . '.auto_block.period');
 
             if ($ip->created_at->addSeconds($period) > $now) {
                 return;

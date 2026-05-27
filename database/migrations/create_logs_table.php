@@ -1,6 +1,6 @@
 <?php
 
-use OzanKurt\Security\Enums\LogLevel;
+use OzanKurt\Shield\Enums\LogLevel;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -11,8 +11,8 @@ return new class extends Migration
 
     public function __construct()
     {
-        $this->connection = config('security.database.connection');
-        $this->tableName = config('security.database.table_prefix') . config('security.database.log.table');
+        $this->connection = config('shield.database.connection');
+        $this->tableName = config('shield.database.table_prefix') . config('shield.database.log.table');
     }
 
     public function up(): void

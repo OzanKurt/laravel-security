@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Tests\Feature;
+namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Security\Middleware\Lfi;
-use OzanKurt\Security\Tests\TestCase;
+use OzanKurt\Shield\Firewall\Middleware\Lfi;
+use OzanKurt\Shield\Tests\TestCase;
 
 class LfiTest extends TestCase
 {

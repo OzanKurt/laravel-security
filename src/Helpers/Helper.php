@@ -1,12 +1,12 @@
 <?php
 
-namespace OzanKurt\Security\Helpers;
+namespace OzanKurt\Shield\Helpers;
 
 use Illuminate\Http\Request;
 use OzanKurt\Agent\Agent as Parser;
-use OzanKurt\Security\Enums\IpEntryType;
-use OzanKurt\Security\Enums\LogLevel;
-use OzanKurt\Security\Models\Log;
+use OzanKurt\Shield\Enums\IpEntryType;
+use OzanKurt\Shield\Enums\LogLevel;
+use OzanKurt\Shield\Models\Log;
 use Symfony\Component\HttpFoundation\IpUtils;
 
 trait Helper
@@ -23,7 +23,7 @@ trait Helper
         $requestData = $this->request->input();
         $requestDataJson = json_encode($requestData);
 
-        $maxSize = config('security.database.max_request_data_size', 2048);
+        $maxSize = config('shield.database.max_request_data_size', 2048);
         $size = mb_strlen($requestDataJson, '8bit');
 
         if ($size > $maxSize) {

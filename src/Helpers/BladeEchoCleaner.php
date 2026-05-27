@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Helpers;
+namespace OzanKurt\Shield\Helpers;
 
 class BladeEchoCleaner
 {
@@ -11,7 +11,7 @@ class BladeEchoCleaner
      */
     public function __construct()
     {
-        $bladeEchoTags = config('security.middleware.xss.blade_echo_tags', []);
+        $bladeEchoTags = config('shield.middleware.xss.blade_echo_tags', []);
 
         foreach ($bladeEchoTags as $pair) {
             $this->bladeEchoPatterns[] = sprintf('/(@)?%s\s*(.+?)\s*%s(\r?\n)?/s', $pair[0], $pair[1]);

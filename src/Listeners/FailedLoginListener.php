@@ -1,11 +1,11 @@
 <?php
 
-namespace OzanKurt\Security\Listeners;
+namespace OzanKurt\Shield\Listeners;
 
 use Illuminate\Auth\Events\Failed as Event;
-use OzanKurt\Security\Listeners\Traits\ListenerHelper;
-use OzanKurt\Security\Notifications\FailedLoginNotification;
-use OzanKurt\Security\Notifications\Notifiable;
+use OzanKurt\Shield\Listeners\Traits\ListenerHelper;
+use OzanKurt\Shield\Notifications\FailedLoginNotification;
+use OzanKurt\Shield\Notifications\Notifiable;
 
 class FailedLoginListener
 {

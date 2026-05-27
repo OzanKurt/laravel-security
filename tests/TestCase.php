@@ -1,8 +1,8 @@
 <?php
 
-namespace OzanKurt\Security\Tests;
+namespace OzanKurt\Shield\Tests;
 
-use OzanKurt\Security\SecurityServiceProvider;
+use OzanKurt\Shield\ShieldServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -15,7 +15,7 @@ abstract class TestCase extends BaseTestCase
 
         $this->setUpDatabase();
 
-        $this->artisan('vendor:publish', ['--tag' => 'security']);
+        $this->artisan('vendor:publish', ['--tag' => 'shield']);
         // $this->artisan('migrate:refresh', ['--database' => 'testbench']);
     }
 
@@ -27,16 +27,15 @@ abstract class TestCase extends BaseTestCase
     protected function getPackageProviders($app)
     {
         return [
-            SecurityServiceProvider::class,
+            ShieldServiceProvider::class,
         ];
     }
 
     protected function setUpDatabase()
     {
-        $create_logs_table = include __DIR__.'/../database/migrations/create_logs_table.php';
-        $create_logs_table->up();
-        $create_ips_table = include __DIR__.'/../database/migrations/create_ips_table.php';
-        $create_ips_table->up();
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        (new \OzanKurt\Shield\Database\Seeders\LookupTableSeeder())->run();
+        (new \OzanKurt\Shield\Database\Seeders\BuiltinWafRuleSeeder())->run();
     }
 
     protected function setUpConfig()
@@ -51,15 +50,23 @@ abstract class TestCase extends BaseTestCase
             ],
         ]);
 
-        config(['security' => include __DIR__.'/../config/security.php']);
-        config(['security.database.connection' => 'testbench']);
+        config(['shield' => include __DIR__.'/../config/shield.php']);
+        config(['shield.database.connection' => 'testbench']);
 
-        config(['security.notifications.mail.enabled' => false]);
-        config(['security.middleware.ip.methods' => ['all']]);
-        config(['security.middleware.lfi.methods' => ['all']]);
-        config(['security.middleware.rfi.methods' => ['all']]);
-        config(['security.middleware.sqli.methods' => ['all']]);
-        config(['security.middleware.xss.methods' => ['all']]);
+        // Clear the default whitelist so test IP (127.0.0.1) is not whitelisted,
+        // allowing the testShouldBlock tests to exercise blocking logic.
+        config(['shield.whitelist' => []]);
+
+        // Return a response object instead of calling abort() so that tests can
+        // inspect the status code via ->getStatusCode() on the returned response.
+        config(['shield.responses.block.abort' => false]);
+
+        config(['shield.notifications.mail.enabled' => false]);
+        config(['shield.middleware.ip.methods' => ['all']]);
+        config(['shield.middleware.lfi.methods' => ['all']]);
+        config(['shield.middleware.rfi.methods' => ['all']]);
+        config(['shield.middleware.sqli.methods' => ['all']]);
+        config(['shield.middleware.xss.methods' => ['all']]);
     }
 
     public function getNextClosure()

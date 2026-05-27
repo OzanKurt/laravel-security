@@ -63,7 +63,7 @@
                 You are using outdated versions of assets. Please re-publish the package assets by running the command:<br>
                 <br>
                 <code>
-                    php artisan vendor:publish --provider="OzanKurt\Security\SecurityServiceProvider" --tag="security-assets"
+                    php artisan vendor:publish --provider="OzanKurt\Shield\ShieldServiceProvider" --tag="shield-assets"
                 </code>
             </div>
         </div>

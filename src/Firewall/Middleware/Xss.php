@@ -1,19 +1,19 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
 use Closure;
-use OzanKurt\Security\Firewall\AbstractMiddleware;
-use OzanKurt\Security\Events\AttackDetectedEvent;
-use OzanKurt\Security\Security;
-use OzanKurt\Security\Helpers\BladeEchoCleaner;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Events\AttackDetectedEvent;
+use OzanKurt\Shield\Shield;
+use OzanKurt\Shield\Helpers\BladeEchoCleaner;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 class Xss extends AbstractMiddleware
 {
     public function __construct(
-        protected Security $security,
+        protected Shield $security,
         protected BladeEchoCleaner $bladeEchoCleaner,
     ) { }
 
@@ -30,13 +30,13 @@ class Xss extends AbstractMiddleware
             return $next($request);
         }
 
-        $mode = config('security.middleware.xss.mode', 'block');
+        $mode = config('shield.middleware.xss.mode', 'block');
 
         $this->clean($request);
 
         if ($mode === 'block') {
             if ($this->check($this->getPatterns())) {
-                return $this->respond(config('security.responses.block'));
+                return $this->respond(config('shield.responses.block'));
             }
         }
 
@@ -143,7 +143,7 @@ class Xss extends AbstractMiddleware
     {
         $output = $this->security->cleanInput((string) $value);
 
-        if (! config('security.middleware.xss.allow_blade_echoes')) {
+        if (! config('shield.middleware.xss.allow_blade_echoes')) {
             $output = $this->bladeEchoCleaner->clean((string) $output);
         }
 
@@ -151,7 +151,7 @@ class Xss extends AbstractMiddleware
             return $output;
         }
 
-        $mode = config('security.middleware.xss.mode', 'block');
+        $mode = config('shield.middleware.xss.mode', 'block');
 
         return $mode === 'clean' ? null : $value;
     }

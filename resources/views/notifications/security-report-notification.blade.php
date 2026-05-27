@@ -1,5 +1,5 @@
 {{-- @formatter:off --}}
-@component('security::notifications.message')
+@component('shield::notifications.message')
 
 {{-- Greeting --}}
 # @lang('Hello!')
@@ -9,7 +9,7 @@
 Here is a summary of what happened since the last report:
 
 <h1 class="section-title">
-@lang('security::notifications.security_report.most_blocked_ips')
+@lang('shield::notifications.security_report.most_blocked_ips')
 </h1>
 
 <x-mail::table>
@@ -17,13 +17,13 @@ Here is a summary of what happened since the last report:
         <thead>
         <tr>
             <th class="text-left" style="width: 33%;">
-                @lang('security::notifications.security_report.ip')
+                @lang('shield::notifications.security_report.ip')
             </th>
             <th class="text-left" style="width: 33%;">
-                @lang('security::notifications.security_report.country')
+                @lang('shield::notifications.security_report.country')
             </th>
             <th class="text-left">
-                @lang('security::notifications.security_report.total_blocks')
+                @lang('shield::notifications.security_report.total_blocks')
             </th>
         </tr>
         </thead>
@@ -42,7 +42,7 @@ Here is a summary of what happened since the last report:
 </x-mail::table>
 
 <h1 class="section-title">
-@lang('security::notifications.security_report.most_blocked_countries')
+@lang('shield::notifications.security_report.most_blocked_countries')
 </h1>
 
 <x-mail::table>
@@ -50,13 +50,13 @@ Here is a summary of what happened since the last report:
         <thead>
         <tr>
             <th class="text-left" style="width: 33%;">
-                @lang('security::notifications.security_report.country')
+                @lang('shield::notifications.security_report.country')
             </th>
             <th class="text-left" style="width: 33%;">
-                @lang('security::notifications.security_report.total_blocked_ips')
+                @lang('shield::notifications.security_report.total_blocked_ips')
             </th>
             <th class="text-left">
-                @lang('security::notifications.security_report.total_blocks')
+                @lang('shield::notifications.security_report.total_blocks')
             </th>
         </tr>
         </thead>
@@ -76,7 +76,7 @@ Here is a summary of what happened since the last report:
 </x-mail::table>
 
 <h1 class="section-title">
-@lang('security::notifications.security_report.most_failed_login_attempts')
+@lang('shield::notifications.security_report.most_failed_login_attempts')
 </h1>
 
 <x-mail::table>
@@ -84,13 +84,13 @@ Here is a summary of what happened since the last report:
         <thead>
         <tr>
             <th class="text-left" style="width: 33%;">
-                @lang('security::notifications.security_report.user')
+                @lang('shield::notifications.security_report.user')
             </th>
             <th class="text-left" style="width: 33%;">
-                @lang('security::notifications.security_report.login_attempts')
+                @lang('shield::notifications.security_report.login_attempts')
             </th>
             <th class="text-left">
-                @lang('security::notifications.security_report.user_exists')
+                @lang('shield::notifications.security_report.user_exists')
             </th>
         </tr>
         </thead>
@@ -107,7 +107,7 @@ Here is a summary of what happened since the last report:
 </x-mail::table>
 
 <h1 class="section-title">
-@lang('security::notifications.security_report.last_modified_files')
+@lang('shield::notifications.security_report.last_modified_files')
 </h1>
 
 <x-mail::table>
@@ -115,10 +115,10 @@ Here is a summary of what happened since the last report:
         <thead>
             <tr>
                 <th class="text-left" style="width: 25%;">
-                    @lang('security::notifications.security_report.last_modification')
+                    @lang('shield::notifications.security_report.last_modification')
                 </th>
                 <th class="text-left">
-                    @lang('security::notifications.security_report.file')
+                    @lang('shield::notifications.security_report.file')
                 </th>
             </tr>
         </thead>

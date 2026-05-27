@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
-use OzanKurt\Security\Firewall\AbstractMiddleware;
-use OzanKurt\Security\Events\AttackDetected;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Events\AttackDetected;
 
 class Referrer extends AbstractMiddleware
 {
@@ -11,7 +11,7 @@ class Referrer extends AbstractMiddleware
     {
         $status = false;
 
-        if (! $blocked = config('security.middleware.' . $this->middleware . '.blocked')) {
+        if (! $blocked = config('shield.middleware.' . $this->middleware . '.blocked')) {
             return $status;
         }
 

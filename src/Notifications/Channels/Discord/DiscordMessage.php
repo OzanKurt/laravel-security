@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Notifications\Channels\Discord;
+namespace OzanKurt\Shield\Notifications\Channels\Discord;
 
 use Carbon\Carbon;
 

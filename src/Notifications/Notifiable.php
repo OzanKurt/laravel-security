@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Notifications;
+namespace OzanKurt\Shield\Notifications;
 
 use Illuminate\Notifications\Notifiable as NotifiableTrait;
 
@@ -10,17 +10,17 @@ class Notifiable
 
     public function routeNotificationForMail()
     {
-        return config('security.notifications.mail.to');
+        return config('shield.notifications.mail.to');
     }
 
     public function routeNotificationForSlack()
     {
-        return config('security.notifications.slack.to');
+        return config('shield.notifications.slack.to');
     }
 
     public function routeNotificationForDiscord()
     {
-        return config('security.notifications.discord.webhook_url');
+        return config('shield.notifications.discord.webhook_url');
     }
 
     public function getKey()

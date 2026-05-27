@@ -16,20 +16,20 @@
 
     <!-- Font Awesome 5 -->
     <link rel="stylesheet" media="screen, print" href="{{ asset('vendor/smartadmin/css/fontawesome.bundle.css') }}">
-    <link rel="stylesheet" media="screen, print" href="{{ asset('vendor/security/plugins/fontawesome/css/fa-regular.css') }}">
+    <link rel="stylesheet" media="screen, print" href="{{ asset('vendor/shield/plugins/fontawesome/css/fa-regular.css') }}">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="{{ asset('vendor/security/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/security/plugins/DataTables/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/shield/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/shield/plugins/DataTables/datatables.min.css') }}">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
     <style>
         html, body {
             font-family: Nunito, sans-serif;
-            background: url("{{ asset('vendor/security/images/cloud-bg.png') }}");
+            background: url("{{ asset('vendor/shield/images/cloud-bg.png') }}");
         }
         html[data-bs-theme="dark"], [data-bs-theme="dark"] body {
-            background: url("{{ asset('vendor/security/images/cloud-bg-dark.png') }}");
+            background: url("{{ asset('vendor/shield/images/cloud-bg-dark.png') }}");
         }
 
         .dtr-details {width: 100%;}
@@ -53,7 +53,7 @@
 </head>
 <body>
     <!-- Navbar -->
-    @include('security::layouts.bootstrap._navbar')
+    @include('shield::layouts.bootstrap._navbar')
 
     <!-- Container -->
     <div class="container mb-5">
@@ -62,8 +62,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('vendor/security/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('vendor/security/plugins/DataTables/datatables.min.js') }}"></script>
+    <script src="{{ asset('vendor/shield/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('vendor/shield/plugins/DataTables/datatables.min.js') }}"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
     <script>

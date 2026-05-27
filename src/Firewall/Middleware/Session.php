@@ -1,8 +1,8 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
-use OzanKurt\Security\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
 
 class Session extends AbstractMiddleware
 {

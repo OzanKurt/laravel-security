@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
-use OzanKurt\Security\Firewall\AbstractMiddleware;
-use OzanKurt\Security\Events\AttackDetectedEvent;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Events\AttackDetectedEvent;
 
 class Keyword extends AbstractMiddleware
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Tests\Feature;
+namespace OzanKurt\Shield\Tests\Feature;
 
-use OzanKurt\Security\Middleware\Rfi;
-use OzanKurt\Security\Tests\TestCase;
+use OzanKurt\Shield\Firewall\Middleware\Rfi;
+use OzanKurt\Shield\Tests\TestCase;
 
 class RfiTest extends TestCase
 {

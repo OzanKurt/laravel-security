@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
-use OzanKurt\Security\Firewall\AbstractMiddleware;
-use OzanKurt\Security\Events\AttackDetected;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Events\AttackDetected;
 use OzanKurt\Agent\Agent;
 
 class Bot extends AbstractMiddleware
@@ -16,7 +16,7 @@ class Bot extends AbstractMiddleware
             return false;
         }
 
-        if (! $crawlers = config('security.middleware.' . $this->middleware . '.crawlers')) {
+        if (! $crawlers = config('shield.middleware.' . $this->middleware . '.crawlers')) {
             return false;
         }
 

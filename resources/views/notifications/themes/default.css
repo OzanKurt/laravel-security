@@ -318,7 +318,7 @@ img {
     word-break: break-all;
 }
 
-.flag{display:inline-block;height:16px;width:16px;vertical-align:middle;line-height:16px;background:url(/vendor/security/images/flags16.png) no-repeat;}
+.flag{display:inline-block;height:16px;width:16px;vertical-align:middle;line-height:16px;background:url(/vendor/shield/images/flags16.png) no-repeat;}
 ._African_Union{background-position:0 -16px;}
 ._Arab_League{background-position:0 -32px;}
 ._ASEAN{background-position:0 -48px;}

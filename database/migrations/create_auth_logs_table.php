@@ -10,8 +10,8 @@ return new class extends Migration
 
     public function __construct()
     {
-        $this->connection = config('security.database.connection');
-        $this->tableName = config('security.database.table_prefix') . config('security.database.auth_log.table');
+        $this->connection = config('shield.database.connection');
+        $this->tableName = config('shield.database.table_prefix') . config('shield.database.auth_log.table');
     }
 
     public function up(): void

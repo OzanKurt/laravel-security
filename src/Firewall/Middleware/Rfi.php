@@ -1,8 +1,8 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
-use OzanKurt\Security\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
 
 class Rfi extends AbstractMiddleware
 {
@@ -55,7 +55,7 @@ class Rfi extends AbstractMiddleware
 
     protected function applyExceptions($string)
     {
-        $exceptions = config('security.middleware.' . $this->middleware . '.exceptions');
+        $exceptions = config('shield.middleware.' . $this->middleware . '.exceptions');
 
         $domain = $this->request->getHost();
 

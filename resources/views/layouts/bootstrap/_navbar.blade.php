@@ -6,42 +6,77 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mb-2 mb-lg-0" style="width: 40%">
                 <li class="nav-item">
-                    <a class="nav-link {{ app('security')->routeIsActive('dashboard.index') ? 'active' : '' }}"
-                       href="{{ app('security')->route('dashboard.index') }}"
+                    <a class="nav-link {{ app('shield')->routeIsActive('dashboard.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('dashboard.index') }}"
                     >
-                        @lang('security::dashboard.dashboard')
+                        @lang('shield::dashboard.dashboard')
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ app('security')->routeIsActive('auth-logs.index') ? 'active' : '' }}"
-                       href="{{ app('security')->route('auth-logs.index') }}"
+                    <a class="nav-link {{ app('shield')->routeIsActive('auth-logs.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('auth-logs.index') }}"
                     >
-                        @lang('security::dashboard.auth_logs')
+                        @lang('shield::dashboard.auth_logs')
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ app('security')->routeIsActive('logs.index') ? 'active' : '' }}"
-                       href="{{ app('security')->route('logs.index') }}"
+                    <a class="nav-link {{ app('shield')->routeIsActive('logs.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('logs.index') }}"
                     >
-                        @lang('security::dashboard.logs')
+                        @lang('shield::dashboard.logs')
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{ app('security')->routeIsActive('ips.index') ? 'active' : '' }}"
-                       href="{{ app('security')->route('ips.index') }}"
+                    <a class="nav-link {{ app('shield')->routeIsActive('acl.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('acl.index') }}"
                     >
-                        @lang('security::dashboard.ips')
+                        @lang('shield::dashboard.acl')
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('audit-log.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('audit-log.index') }}"
+                    >
+                        @lang('shield::dashboard.audit_log')
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('live-traffic.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('live-traffic.index') }}"
+                    >
+                        Live traffic
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('rules.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('rules.index') }}"
+                    >
+                        Rules
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('scanner.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('scanner.index') }}"
+                    >
+                        Scanner
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('cache.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('cache.index') }}"
+                    >
+                        Cache
                     </a>
                 </li>
             </ul>
             <a class="navbar-brand mx-auto p-0"
-               href="{{ app('security')->logoHref() }}"
+               href="{{ app('shield')->logoHref() }}"
             >
-                <img src="{{ asset('vendor/security/images/laravel-security.png') }}" alt="Logo" style="height: 38px;">
+                <img src="{{ asset('vendor/shield/images/laravel-security.png') }}" alt="Logo" style="height: 38px;">
             </a>
             <ul class="navbar-nav justify-content-end" style="width: 40%">
                 <li class="nav-item dropdown">
-                    @include('security::layouts.bootstrap._theme-switcher')
+                    @include('shield::layouts.bootstrap._theme-switcher')
                 </li>
             </ul>
         </div>

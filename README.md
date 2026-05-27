@@ -1,202 +1,141 @@
-# Web Application Firewall (WAF) package for Laravel
+# Laravel Shield
 
-![Downloads](https://img.shields.io/packagist/dt/ozankurt/laravel-security)
-![Tests](https://img.shields.io/github/actions/workflow/status/ozankurt/laravel-security/tests.yml?label=tests)
-[![StyleCI](https://github.styleci.io/repos/197242392/shield?style=flat&branch=master)](https://styleci.io/repos/197242392)
-[![License](https://img.shields.io/github/license/ozankurt/laravel-security)](LICENSE.md)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/ozankurt/laravel-shield.svg?style=flat-square)](https://packagist.org/packages/ozankurt/laravel-shield)
+[![License](https://img.shields.io/packagist/l/ozankurt/laravel-shield.svg?style=flat-square)](LICENSE.md)
 
-This package intends to protect your Laravel app from different type of attacks such as XSS, SQLi, RFI, LFI, User Agent, and a lot more. It will also block repeated attacks and send notification via email and/or slack when attack is detected. Furthermore, it will log failed logins and block the IP after a number of attempts.
+**Comprehensive security suite for Laravel — the Wordfence equivalent.**
 
-Note: Some middleware classes (i.e. Xss) are empty as the `Middleware` abstract class that they extend does all of the job, dynamically. In short, they all works ;)
+WAF + scanner + ACL + audit log + live traffic + notifications, all configurable, all auditable, all Laravel-native.
 
-## Getting Started
+> **Brand site:** [laravel-shield.ozankurt.com](https://laravel-shield.ozankurt.com) — docs, pricing, license activation.
 
-### 1. Install
+---
 
-Run the following command:
+## Why Laravel Shield
 
-```bash
-composer require ozankurt/laravel-security
-```
+| Need | What Shield gives you |
+|---|---|
+| Block malicious requests | 15+ WAF middlewares (XSS, SQLi, LFI, RFI, PHP wrappers, sessions, agents, geo, bots, keyword path filters) + DB-backed rule engine |
+| Manage allow/deny lists | Unified `ls_acl` table — IP / CIDR / ASN / country / regex / hostname, first-match-wins evaluation, Redis-cached |
+| Detect malware | Scanner with native engine + ClamAV + composer audit; quarantine + restore; signature feed sync |
+| Audit-log everything | HMAC-chained `ls_audit_log`, file/config/composer drift detection, `HasAuditLog` trait for model events |
+| See live traffic | Sampled `ls_live_traffic` table with optional real-time broadcasting (Reverb / Pusher / Ably) |
+| Get alerts | Mail / Slack / Discord / Telegram / Webhook channels, severity-routed |
+| Stay locked out? | Three-layer bypass (env key + config IPs + Artisan recovery commands) |
+| Beyond Wordfence | Security headers + CSP nonce, honeypot routes, generalized redaction, suspicious activity scoring, HTTPS enforcement, cookie security audit, trusted-proxy auto-discovery, pre-configured rate limiters |
 
-### 2. Publish
+---
 
-Publish configuration, language, and migrations
-
-```bash
-php artisan vendor:publish --tag=security
-```
-
-### 3. Database
-
-Create db tables
+## Install
 
 ```bash
-php artisan migrate
+composer require ozankurt/laravel-shield
+php artisan shield:install
 ```
 
-### 4. Configure
+`shield:install` publishes config + migrations + lang + assets, runs migrations, seeds lookup tables + ~47 built-in WAF rules + ~33 built-in malware signatures, generates `LS_AUDIT_HMAC_SECRET` + `LS_BYPASS_KEY` if missing, and optionally whitelists your current IP so you don't lock yourself out.
 
-You can change the security settings of your app from `config/security.php` file
-
-## Usage
-
-Middlewares are already defined so should just add them to routes. The `firewall.all` middleware applies all the middlewares available in the `all_middleware` array of config file.
+Then expose the dashboard by allowing the gate it defines:
 
 ```php
-Route::group(['middleware' => 'firewall.all'], function () {
-    Route::get('/', 'HomeController@index');
+// AppServiceProvider::boot()
+Gate::define('viewShieldDashboard', fn ($user) => $user && $user->is_admin);
+```
+
+Visit `/shield`.
+
+## Quickstart middlewares
+
+In your route file or middleware group, attach what you need:
+
+```php
+Route::middleware('firewall.all')->group(function () {
+    Route::post('/login', LoginController::class);
+});
+
+Route::post('/api/upload', UploadController::class)
+    ->middleware(['firewall.av_uploads', 'throttle:shield_login']);
+
+Route::middleware(['firewall.acl', 'firewall.headers'])->group(function () {
+    // Public site with security headers + ACL evaluation
 });
 ```
 
-You can apply each middleware per route. For example, you can allow only whitelisted IPs to access admin:
+## Configuration
+
+After install, see `config/shield.php`. Every limit, threshold, regex, path, and behaviour is exposed. Highlights:
 
 ```php
-Route::group(['middleware' => 'firewall.whitelist'], function () {
-    Route::get('/admin', 'AdminController@index');
-});
+// Storage strategy (sync default; queue/redis_batch for high traffic)
+'storage' => ['driver' => env('LS_STORAGE_DRIVER', 'sync'), 'sample_rate' => ['live_traffic' => 0.1]],
+
+// Audit log with HMAC chain tamper evidence
+'audit' => ['drift' => ['enabled' => true, 'paths' => ['config/' => '*.php', '.env' => null]]],
+
+// Scanner with ClamAV (composer suggest xenolope/quahog)
+'scanner' => ['clamav' => ['enabled' => env('LS_CLAMAV_ENABLED', false)]],
+
+// Three-layer bypass for admin lockout recovery
+'bypass' => ['ips' => array_filter(explode(',', env('LS_BYPASS_IPS', '')))],
+
+// Beyond-WF extras (all opt-in)
+'headers' => ['enabled' => true, 'csp' => ['enabled' => false, 'use_nonce' => true]],
+'honeypot' => ['enabled' => false, 'paths' => ['wp-admin', '.env', 'phpmyadmin', '.git/config']],
+'scoring' => ['enabled' => false, 'threshold' => 100, 'window' => 3600],
 ```
 
-Or you can get notified when anyone NOT in `whitelist` access admin, by adding it to the `inspections` config:
+## Documentation
 
-```php
-Route::group(['middleware' => 'firewall.url'], function () {
-    Route::get('/admin', 'AdminController@index');
-});
-```
+| Topic | Doc |
+|---|---|
+| Installation + configuration | [docs/installation.md](docs/installation.md) |
+| ACL evaluation + matchers | [docs/acl.md](docs/acl.md) |
+| Audit log + HMAC chain | [docs/audit-log.md](docs/audit-log.md) |
+| Scanner + ClamAV + signatures | [docs/scanner.md](docs/scanner.md) |
+| File-change watcher | [docs/security-watch.md](docs/security-watch.md) |
+| Notifications + multi-cadence reports | [docs/notifications.md](docs/notifications.md) |
+| Bypass mechanism | [docs/bypass.md](docs/bypass.md) |
+| Premium tier + license | [docs/premium.md](docs/premium.md) |
 
-Available middlewares applicable to routes:
+## Premium tier
 
-```php
-firewall.all
+Premium features live in the **same package**, gated by `LS_PREMIUM_LICENSE_KEY` at runtime. No separate composer repo, no Satis, no auth tokens. Buy at [laravel-shield.ozankurt.com](https://laravel-shield.ozankurt.com), paste the key into `.env`, premium features activate on next request.
 
-firewall.agent
-firewall.bot
-firewall.geo
-firewall.ip
-firewall.lfi
-firewall.php
-firewall.referrer
-firewall.rfi
-firewall.session
-firewall.sqli
-firewall.swear
-firewall.url
-firewall.whitelist
-firewall.xss
-firewall.keyword
-```
+Premium unlocks:
+- Real-time threat feed sync (free tier syncs daily; premium polls every few minutes)
+- Real-time IP blocklist subscription
+- Hosted audit-log sink (forward audit events to the Shield Central app for cross-site aggregation)
+- Future SIEM dashboard integration
 
-You may also define `routes` for each middleware in `config/security.php` and apply that middleware or `firewall.all` at the top of all routes.
+The license check is honest soft-enforcement (see [docs/premium.md](docs/premium.md) — the real moat is the API services Ozan hosts, which patching the local check can't unlock).
 
-## Notifications
+## Versioning
 
-Firewall will send a notification as soon as an attack has been detected. Emails entered in `notifications.email.to` config must be valid Laravel users in order to send notifications. Check out the Notifications documentation of Laravel for further information.
+Semver. Major versions break public API surfaces (table names, namespace, config keys). Beta releases under `1.0.0-beta.N` shipped the foundation; `1.0.0` is the polished v1.
 
-## Dashboard
+| Version | Headline |
+|---|---|
+| `1.0.0-beta.1` | Foundation: rename, schema reset, ACL, audit log, bypass |
+| `1.0.0-beta.2` | Audit log expansion, file drift detection, Yajra dropped |
+| `1.0.0-beta.3` | Scanner + ClamAV + signature sync + file watcher |
+| `1.0.0-beta.4` | Live traffic + upload AV + Spatie Media Library integration + WAF rules UI |
+| `1.0.0-beta.5` | Headers + honeypots + redaction + scoring + HTTPS + cookies + trusted proxies + rate limiters |
+| `1.0.0` | Polished release with multi-cadence reports + Wordfence-style executive email + docs |
+| `1.1.0` | Threat feed providers (AbuseIPDB, Spamhaus, MaxMind, OWASP CRS) |
+| `1.2.0` | composer audit dashboard, diagnostics + OWASP score card, import/export |
+| `2.0.0` | Premium tier activation goes live (license API + SIEM aggregator at `laravel-shield.ozankurt.com`) |
 
-In order to view the dashboard, you must enable it in your `AppServiceProvider`:
+## Companion packages
 
-```php
-    use App\Models\User;
-    use Illuminate\Support\Facades\Gate;
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        Gate::define('viewSecurityDashboard', function (?User $user) {
-            return $user?->id === 1;
-        });
-
-        // ...
-    }
-```
-
-## .env Variables
-
-```sh
-FIREWALL_ENABLED=true
-FIREWALL_WHITELIST="127.0.0.0/24"
-
-FIREWALL_DASHBOARD_ENABLED=true
-
-FIREWALL_DB_CONNECTION="${DB_CONNECTION}"
-FIREWALL_DB_PREFIX=security_
-
-FIREWALL_CRON_ENABLED=false
-FIREWALL_CRON_EXPRESSION="* * * * *"
-
-FIREWALL_NOTIFICATIONS_ATTACK_DETECTED_ENABLED=false
-FIREWALL_NOTIFICATIONS_SECURITY_REPORT_ENABLED=false
-FIREWALL_NOTIFICATIONS_SUCCESSFUL_LOGIN_ENABLED=false
-
-FIREWALL_NOTIFICATION_CHANNELS_EMAIL_ENABLED=false
-FIREWALL_NOTIFICATION_CHANNELS_EMAIL_NAME="${MAIL_FROM_NAME}"
-FIREWALL_NOTIFICATION_CHANNELS_EMAIL_FROM="${MAIL_FROM_ADDRESS}"
-FIREWALL_NOTIFICATION_CHANNELS_EMAIL_TO="webmaster@example.com"
-FIREWALL_NOTIFICATION_CHANNELS_EMAIL_QUEUE=default
-
-FIREWALL_NOTIFICATION_CHANNELS_SLACK_ENABLED=false
-FIREWALL_NOTIFICATION_CHANNELS_SLACK_EMOJI=":fire:"
-FIREWALL_NOTIFICATION_CHANNELS_SLACK_FROM="Laravel Security"
-FIREWALL_NOTIFICATION_CHANNELS_SLACK_TO= # webhook url
-FIREWALL_NOTIFICATION_CHANNELS_SLACK_CHANNEL=null
-FIREWALL_NOTIFICATION_CHANNELS_SLACK_QUEUE=default
-
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_ENABLED=false
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_WEBHOOK_URL=
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_QUEUE=default
-
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FROM="Laravel Security"
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FROM_IMG=https://ozankurt.com/laravel-security.png
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_ROUTE=
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_TITLE="Attack Detected"
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FOOTER="Laravel Security"
-FIREWALL_NOTIFICATION_CHANNELS_DISCORD_FOOTER_IMG=https://ozankurt.com/laravel-security.png
-
-FIREWALL_MIDDLEWARE_IP_ENABLED=true
-FIREWALL_MIDDLEWARE_AGENT_ENABLED=true
-FIREWALL_MIDDLEWARE_BOT_ENABLED=true
-FIREWALL_MIDDLEWARE_GEO_ENABLED=true
-FIREWALL_MIDDLEWARE_LFI_ENABLED=true
-FIREWALL_MIDDLEWARE_LOGIN_ENABLED=true
-FIREWALL_MIDDLEWARE_PHP_ENABLED=true
-FIREWALL_MIDDLEWARE_REFERRER_ENABLED=true
-FIREWALL_MIDDLEWARE_RFI_ENABLED=true
-FIREWALL_MIDDLEWARE_SESSION_ENABLED=true
-FIREWALL_MIDDLEWARE_SQLI_ENABLED=true
-FIREWALL_MIDDLEWARE_SWEAR_ENABLED=true
-FIREWALL_MIDDLEWARE_URL_ENABLED=true
-FIREWALL_MIDDLEWARE_WHITELIST_ENABLED=true
-FIREWALL_MIDDLEWARE_XSS_ENABLED=true
-FIREWALL_MIDDLEWARE_KEYWORD_ENABLED=true
-```
-
-## Changelog
-
-Please see [Releases](../../releases) for more information on what has changed recently.
-
-## Contributing
-
-Pull requests are more than welcome. You must follow the PSR coding standards.
-
-## Security
-
-Please review [our security policy](https://github.com/ozankurt/laravel-security/security/policy) on how to report security vulnerabilities.
+- **`ozankurt/laravel-shield-filament`** — Filament panel adapter. v1.x for Filament 3 + 4, v2.x for Filament 5+. (Ships post-1.0.)
+- **`ozankurt/laravel-shield-signatures`** — Public GitHub repo of malware signatures. `shield:signatures-sync` pulls from here.
 
 ## Credits
 
-- [ozankurt/laravel-security](https://github.com/ozankurt/laravel-security)
-- [All Contributors](../../contributors)
-
-## Todo
-
-- [ ] logs/ips datatable
-- [ ] ip by country breakdown -> datatable + chart
-- [ ] type of attack breakdown -> datatable + chart
+- Built on top of `voku/anti-xss`, `ramsey/uuid`, `symfony/http-foundation`, `ozankurt/agent`, and the standard Laravel framework
+- WAF rule patterns + malware signatures derived in part from [Wordfence Security](https://www.wordfence.com/) (MIT)
+- ClamAV integration via [xenolope/quahog](https://github.com/jonnywilliamson/quahog)
 
 ## License
 
-The MIT License (MIT). Please see [LICENSE](LICENSE.md) for more information.
+MIT — see [LICENSE.md](LICENSE.md).

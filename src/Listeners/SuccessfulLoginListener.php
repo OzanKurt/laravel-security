@@ -1,11 +1,11 @@
 <?php
 
-namespace OzanKurt\Security\Listeners;
+namespace OzanKurt\Shield\Listeners;
 
 use Illuminate\Auth\Events\Login as Event;
-use OzanKurt\Security\Listeners\Traits\ListenerHelper;
-use OzanKurt\Security\Notifications\Notifiable;
-use OzanKurt\Security\Notifications\SuccessfulLoginNotification;
+use OzanKurt\Shield\Listeners\Traits\ListenerHelper;
+use OzanKurt\Shield\Notifications\Notifiable;
+use OzanKurt\Shield\Notifications\SuccessfulLoginNotification;
 
 class SuccessfulLoginListener
 {

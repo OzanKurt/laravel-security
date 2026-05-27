@@ -1,14 +1,14 @@
 <?php
 
-namespace OzanKurt\Security\Notifications;
+namespace OzanKurt\Shield\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
-use OzanKurt\Security\Notifications\Channels\Discord\DiscordChannel;
-use OzanKurt\Security\Notifications\Channels\Discord\DiscordMessage;
+use OzanKurt\Shield\Notifications\Channels\Discord\DiscordChannel;
+use OzanKurt\Shield\Notifications\Channels\Discord\DiscordMessage;
 
 class AttackDetectedNotification extends Notification implements ShouldQueue
 {
@@ -34,7 +34,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     public function __construct($log)
     {
         $this->log = $log;
-        $this->notifications = config('security.notifications');
+        $this->notifications = config('shield.notifications');
     }
 
     /**
@@ -79,11 +79,11 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     {
         $domain = request()->getHttpHost();
 
-        $subject = trans('security::notifications.attack_detected.mail.subject', [
+        $subject = trans('shield::notifications.attack_detected.mail.subject', [
             'domain' => $domain,
         ]);
 
-        $message = trans('security::notifications.attack_detected.mail.message', [
+        $message = trans('shield::notifications.attack_detected.mail.message', [
             'domain' => $domain,
             'middleware' => ucfirst($this->log->middleware),
             'ip' => $this->log->ip,
@@ -104,7 +104,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
      */
     public function toSlack($notifiable)
     {
-        $message = trans('security::notifications.attack_detected.slack.message', [
+        $message = trans('shield::notifications.attack_detected.slack.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
@@ -125,7 +125,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
 
     public function toDiscord()
     {
-        $body = trans('security::notifications.attack_detected.discord.message', [
+        $body = trans('shield::notifications.attack_detected.discord.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
@@ -134,9 +134,9 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
             $url = preg_replace('/^https?:\/\/[^\/]+/', '', $url);
 
             return (new DiscordMessage)
-                ->from(config('security.notifications.discord.from'), config('security.notifications.discord.from_img'))
-                ->url(config('security.notifications.discord.route'))
-                ->title(config('security.notifications.discord.title'))
+                ->from(config('shield.notifications.discord.from'), config('shield.notifications.discord.from_img'))
+                ->url(config('shield.notifications.discord.route'))
+                ->title(config('shield.notifications.discord.title'))
                 ->description($body)
                 ->fields([
                     'IP' => $this->log->ip,
@@ -147,7 +147,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
                     'URL' => $url,
                 ], false)
                 ->timestamp(now())
-                ->footer(config('security.notifications.discord.footer'), config('security.notifications.discord.footer_img'))
+                ->footer(config('shield.notifications.discord.footer'), config('shield.notifications.discord.footer_img'))
                 ->warning();
         } catch (\Throwable $exception) {
             report($exception);

@@ -1,8 +1,8 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
-use OzanKurt\Security\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
 
 class Swear extends AbstractMiddleware
 {
@@ -10,7 +10,7 @@ class Swear extends AbstractMiddleware
     {
         $patterns = [];
 
-        if (! $words = config('security.middleware.' . $this->middleware . '.words')) {
+        if (! $words = config('shield.middleware.' . $this->middleware . '.words')) {
             return $patterns;
         }
 

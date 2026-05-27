@@ -3,6 +3,7 @@
 /.vscode
 /tests/databases
 /vendor
+/wordfence
 .DS_Store
 .phpunit.result.cache
 composer.phar

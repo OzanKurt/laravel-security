@@ -1,9 +1,9 @@
 <?php
 
-namespace OzanKurt\Security\Firewall\Middleware;
+namespace OzanKurt\Shield\Firewall\Middleware;
 
-use OzanKurt\Security\Firewall\AbstractMiddleware;
-use OzanKurt\Security\Events\AttackDetected;
+use OzanKurt\Shield\Firewall\AbstractMiddleware;
+use OzanKurt\Shield\Events\AttackDetected;
 use OzanKurt\Agent\Agent as Parser;
 
 class Agent extends AbstractMiddleware
@@ -72,7 +72,7 @@ class Agent extends AbstractMiddleware
 
     protected function isBrowser()
     {
-        if (! $browsers = config('security.middleware.' . $this->middleware . '.browsers')) {
+        if (! $browsers = config('shield.middleware.' . $this->middleware . '.browsers')) {
             return false;
         }
 
@@ -89,7 +89,7 @@ class Agent extends AbstractMiddleware
 
     protected function isPlatform()
     {
-        if (! $platforms = config('security.middleware.' . $this->middleware . '.platforms')) {
+        if (! $platforms = config('shield.middleware.' . $this->middleware . '.platforms')) {
             return false;
         }
 
@@ -106,7 +106,7 @@ class Agent extends AbstractMiddleware
 
     protected function isDevice()
     {
-        if (! $devices = config('security.middleware.' . $this->middleware . '.devices')) {
+        if (! $devices = config('shield.middleware.' . $this->middleware . '.devices')) {
             return false;
         }
 
@@ -145,7 +145,7 @@ class Agent extends AbstractMiddleware
 
     protected function isProperty()
     {
-        if (! $agents = config('security.middleware.' . $this->middleware . '.properties')) {
+        if (! $agents = config('shield.middleware.' . $this->middleware . '.properties')) {
             return false;
         }
 

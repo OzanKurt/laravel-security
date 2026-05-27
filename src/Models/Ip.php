@@ -1,10 +1,10 @@
 <?php
 
-namespace OzanKurt\Security\Models;
+namespace OzanKurt\Shield\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use OzanKurt\Security\Enums\IpEntryType;
+use OzanKurt\Shield\Enums\IpEntryType;
 
 class Ip extends Model
 {
@@ -20,11 +20,11 @@ class Ip extends Model
     public function __construct(array $attributes = [])
     {
         if (! isset($this->connection)) {
-            $this->setConnection(config('security.database.connection'));
+            $this->setConnection(config('shield.database.connection'));
         }
 
         if (! isset($this->table)) {
-            $this->setTable(config('security.database.table_prefix').config('security.database.ip.table'));
+            $this->setTable(config('shield.database.table_prefix').config('shield.database.ip.table'));
         }
 
         // add a scope to the model
@@ -37,11 +37,11 @@ class Ip extends Model
 
     public function log()
     {
-        return $this->belongsTo(config('security.database.log.model'));
+        return $this->belongsTo(config('shield.database.log.model'));
     }
 
     public function logs()
     {
-        return $this->hasMany(config('security.database.log.model'), 'ip', 'ip');
+        return $this->hasMany(config('shield.database.log.model'), 'ip', 'ip');
     }
 }

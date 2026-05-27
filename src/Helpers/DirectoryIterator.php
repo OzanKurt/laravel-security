@@ -1,6 +1,6 @@
 <?php
 
-namespace OzanKurt\Security\Helpers;
+namespace OzanKurt\Shield\Helpers;
 
 abstract class DirectoryIterator
 {

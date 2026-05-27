@@ -1,13 +1,13 @@
 <?php
 
-namespace OzanKurt\Security\Notifications;
+namespace OzanKurt\Shield\Notifications;
 
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use OzanKurt\Security\Models\AuthLog;
+use OzanKurt\Shield\Models\AuthLog;
 
 class SuccessfulLoginNotification extends Notification implements ShouldQueue
 {
@@ -19,7 +19,7 @@ class SuccessfulLoginNotification extends Notification implements ShouldQueue
         public AuthLog $authLog
     )
     {
-        $this->config = config('security.notifications.successful_login');
+        $this->config = config('shield.notifications.successful_login');
     }
 
     /**
@@ -65,11 +65,11 @@ class SuccessfulLoginNotification extends Notification implements ShouldQueue
     {
         $domain = request()->getHttpHost();
 
-        $subject = trans('security::notifications.mail.subject', [
+        $subject = trans('shield::notifications.mail.subject', [
             'domain' => $domain,
         ]);
 
-        $message = trans('security::notifications.mail.message', [
+        $message = trans('shield::notifications.mail.message', [
             'domain' => $domain,
             'middleware' => ucfirst($this->log->middleware),
             'ip' => $this->log->ip,
@@ -90,7 +90,7 @@ class SuccessfulLoginNotification extends Notification implements ShouldQueue
      */
     public function toSlack($notifiable)
     {
-        $message = trans('security::notifications.slack.message', [
+        $message = trans('shield::notifications.slack.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
