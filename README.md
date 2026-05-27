@@ -109,32 +109,10 @@ Premium unlocks:
 
 The license check is honest soft-enforcement (see [docs/premium.md](docs/premium.md) — the real moat is the API services Ozan hosts, which patching the local check can't unlock).
 
-## Versioning
-
-Semver. Major versions break public API surfaces (table names, namespace, config keys). Beta releases under `1.0.0-beta.N` shipped the foundation; `1.0.0` is the polished v1.
-
-| Version | Headline |
-|---|---|
-| `1.0.0-beta.1` | Foundation: rename, schema reset, ACL, audit log, bypass |
-| `1.0.0-beta.2` | Audit log expansion, file drift detection, Yajra dropped |
-| `1.0.0-beta.3` | Scanner + ClamAV + signature sync + file watcher |
-| `1.0.0-beta.4` | Live traffic + upload AV + Spatie Media Library integration + WAF rules UI |
-| `1.0.0-beta.5` | Headers + honeypots + redaction + scoring + HTTPS + cookies + trusted proxies + rate limiters |
-| `1.0.0` | Polished release with multi-cadence reports + Wordfence-style executive email + docs |
-| `1.1.0` | Threat feed providers (AbuseIPDB, Spamhaus, MaxMind, OWASP CRS) |
-| `1.2.0` | composer audit dashboard, diagnostics + OWASP score card, import/export |
-| `2.0.0` | Premium tier activation goes live (license API + SIEM aggregator at `laravel-shield.ozankurt.com`) |
-
 ## Companion packages
 
 - **`ozankurt/laravel-shield-filament`** — Filament panel adapter. v1.x for Filament 3 + 4, v2.x for Filament 5+. (Ships post-1.0.)
 - **`ozankurt/laravel-shield-signatures`** — Public GitHub repo of malware signatures. `shield:signatures-sync` pulls from here.
-
-## Credits
-
-- Built on top of `voku/anti-xss`, `ramsey/uuid`, `symfony/http-foundation`, `ozankurt/agent`, and the standard Laravel framework
-- WAF rule patterns + malware signatures derived in part from [Wordfence Security](https://www.wordfence.com/) (MIT)
-- ClamAV integration via [xenolope/quahog](https://github.com/jonnywilliamson/quahog)
 
 ## License
 
