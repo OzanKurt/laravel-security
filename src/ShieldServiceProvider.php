@@ -322,6 +322,13 @@ class ShieldServiceProvider extends ServiceProvider
     /**
      * Register honeypot routes that auto-block on hit. Catches scanner probes
      * like /wp-admin, /.env, /phpmyadmin etc.
+     *
+     * Each configured path registers TWO routes:
+     *   1. Exact match  — /wp-admin
+     *   2. Subpath match — /wp-admin/{any} where {any} matches anything
+     *
+     * Both fire the same controller. Subpath match catches probes like
+     * /wp-admin/install.php, /.git/HEAD, /phpmyadmin/scripts/setup.php.
      */
     protected function registerHoneypotRoutes(Router $router): void
     {
@@ -329,10 +336,17 @@ class ShieldServiceProvider extends ServiceProvider
             return;
         }
 
+        $controller = \OzanKurt\Shield\Http\Controllers\HoneypotController::class;
         $paths = (array) config('shield.honeypot.paths', []);
 
         foreach ($paths as $path) {
-            $router->any('/' . ltrim($path, '/'), [\OzanKurt\Shield\Http\Controllers\HoneypotController::class, 'trap'])
+            $trimmed = ltrim($path, '/');
+
+            // Exact path
+            $router->any('/' . $trimmed, [$controller, 'trap']);
+
+            // Subpath wildcard — /<path>/<anything>
+            $router->any('/' . $trimmed . '/{any}', [$controller, 'trap'])
                 ->where('any', '.*');
         }
     }

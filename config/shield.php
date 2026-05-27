@@ -642,11 +642,106 @@ return [
 
     'honeypot' => [
         'enabled' => env('LS_HONEYPOT_ENABLED', false),
+
+        /*
+         * Each entry registers a route that ALWAYS returns 404 + audit-logs
+         * the hit + auto-blocks the source IP for shield.honeypot.block_duration
+         * seconds.
+         *
+         * Wildcard subpaths are matched automatically — adding "wp-admin" also
+         * catches /wp-admin, /wp-admin/, /wp-admin/install.php, etc.
+         *
+         * Paths below are high-confidence probes that have ZERO legitimate use
+         * in a Laravel app. Do NOT add /api, /robots.txt, /favicon.ico,
+         * /.well-known/*, /sitemap.xml, /health, /up — those are legitimate.
+         */
         'paths' => [
-            'wp-admin', 'wp-login.php', 'wp-config.php', '.env', '.env.bak',
-            'phpmyadmin', 'pma', 'wordpress', '.git/config', 'xmlrpc.php',
+            // WordPress core probes
+            'wp-admin', 'wp-login.php', 'wp-config.php', 'wp-config.php.bak',
+            'wp-config.php.old', 'wp-config.php.save', 'wp-config.php~',
+            'wp-cron.php', 'wp-trackback.php', 'wp-mail.php', 'wp-signup.php',
+            'wp-includes/wlwmanifest.xml', 'wp-includes/ID3/license.txt',
+            'wp-content/debug.log', 'wp-content/plugins',
+            'wordpress', 'blog/wp-admin', 'blog/wp-login.php',
+            'xmlrpc.php',
+
+            // phpMyAdmin variants
+            'phpmyadmin', 'phpMyAdmin', 'pma', 'pMa', 'PMA', 'pmamy', 'pmamy2', 'pmd',
+            'mysql', 'mysqladmin', 'dbadmin', 'myadmin',
+            'adminer', 'adminer.php', 'sqlmanager', 'websql',
+            'myadmin/scripts/setup.php',
+
+            // Other admin panels
+            'cpanel', 'whm', 'webmail', 'plesk', 'plesk-stat',
+            'webmin', 'ispconfig', 'vesta', 'vestacp', 'directadmin',
+
+            // Config + dotfile leaks
+            '.env', '.env.bak', '.env.production', '.env.local', '.env.old',
+            '.env.staging', '.env.save', '.env.dev', '.env.development', '.env.backup',
+            '.git', '.git/config', '.git/HEAD', '.git/index', '.git/logs/HEAD',
+            '.svn/entries', '.svn/wc.db',
+            '.hg/hgrc', '.hg/store/00manifest.i', '.bzr',
+            '.DS_Store',
+            '.htaccess.bak', '.htpasswd',
+            '.npmrc', '.pypirc',
+            '.aws/credentials', '.aws/config',
+            '.ssh/id_rsa', '.ssh/authorized_keys',
+            '.composer/auth.json',
+
+            // Backup probes
+            'backup', 'backup.sql', 'backup.zip', 'backup.tar.gz', 'backup.tgz',
+            'backup.7z', 'backup.rar', 'backup.tar', 'backup.tar.bz2',
+            'db.sql', 'dump.sql', 'database.sql', 'mysql.sql',
+            'site.zip', 'www.zip', 'html.zip', 'public.zip', 'public_html.zip',
+            'master.zip', 'develop.zip', 'main.zip',
+
+            // Backdoor common paths
+            'shell.php', 'shellz.php', 'shell.aspx',
+            'c99.php', 'c100.php', 'c99shell.php',
+            'r57.php', 'r57shell.php',
+            'wso.php', 'wso2.php',
+            'alfa.php', 'alfa-shell.php',
+            'mini.php', 'b374k.php', 'p0wny.php',
+            'helper.php', 'hack.php', 'hax.php', 'bypass.php', 'pwn.php',
+            'cmd.php', 'command.php',
+            'byp.php', 'xx.php', 'xxx.php', 'shell-helper.php', 'small.php',
+
+            // PHP info / debug probes
+            'phpinfo.php', 'info.php', 'php.php', 'phpversion.php', 'ver.php',
+            'test.php', 'i.php', 'pi.php', 'ph.php',
+            'index_old.php', 'index_backup.php', 'index_bak.php', 'index.php.bak',
+            '_profiler/phpinfo',
+
+            // Other CMS probes
+            'administrator/index.php',                  // Joomla
+            'magento/admin', 'downloader', 'RELEASE_NOTES.txt',
+            'prestashop/admin',
+            'opencart/admin',
+            'typo3conf', 'typo3conf/localconf.php',
+            'moodle/admin',
+            'vbulletin/admincp',
+            'phpbb/install', 'phpbb/install/index.php',
+
+            // Cred-leak / framework probes
+            'credentials', 'credentials.txt', 'credentials.json',
+            'secrets.json', 'secret.json', 'private.key',
+            'actuator/env', 'actuator/heapdump',        // Spring Boot
+            'jolokia',                                  // Java
+            'console',                                  // PHP / Drupal
+            'server-status', 'server-info',             // Apache mod_status (not on by default in Laravel)
+            'xampp', 'lampp', 'wamp',
+            'manager/html', 'manager/status',           // Tomcat
+            'solr/admin',                               // Solr
+
+            // Misc known-bad
+            'etc/passwd', 'proc/self/environ',
+            'phpinfo', 'info',
+            'cgi-bin/test-cgi', 'cgi-bin/php5', 'cgi-bin/.env',
+            '_all_dbs',                                 // CouchDB
+            '_cat/indices',                             // Elasticsearch
         ],
-        'block_duration' => 86400,
+
+        'block_duration' => 86400,                      // 24h
     ],
 
     'redaction' => [
