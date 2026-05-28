@@ -184,6 +184,11 @@ class ShieldServiceProvider extends ServiceProvider
 
             // Diagnostics
             $router->get('diagnostics', [\OzanKurt\Shield\Http\Controllers\DiagnosticsController::class, 'index'])->name('diagnostics.index');
+
+            // Premium license
+            $router->get('license', [\OzanKurt\Shield\Http\Controllers\LicenseController::class, 'index'])->name('license.index');
+            $router->post('license/refresh', [\OzanKurt\Shield\Http\Controllers\LicenseController::class, 'refresh'])->name('license.refresh');
+            $router->post('license/clear', [\OzanKurt\Shield\Http\Controllers\LicenseController::class, 'clear'])->name('license.clear');
         });
     }
 
@@ -267,6 +272,10 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\FeedSyncCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ExportCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ImportCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\LicenseStatusCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\LicenseCheckCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\LicenseClearCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\HeartbeatCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
@@ -300,6 +309,13 @@ class ShieldServiceProvider extends ServiceProvider
                 app(Schedule::class)
                     ->command("shield:report-send {$cadence}")
                     ->cron($cfg['cron_expression'] ?? '0 8 * * 1');
+            }
+
+            if (config('shield.premium.heartbeat.enabled', true)) {
+                $minutes = max(1, (int) config('shield.premium.heartbeat.interval_minutes', 60));
+                app(Schedule::class)
+                    ->command('shield:heartbeat')
+                    ->cron($this->minutesToCron($minutes));
             }
         });
     }
@@ -399,6 +415,29 @@ class ShieldServiceProvider extends ServiceProvider
         \Spatie\MediaLibrary\MediaCollections\Models\Media::saving(function ($media) use ($listener) {
             $listener->saving($media);
         });
+    }
+
+    /**
+     * Turn an interval in minutes into a cron expression. 60 → "0 * * * *",
+     * 15 → "0,15,30,45 * * * *", 1 → "* * * * *". Values above 60 round
+     * down to hourly for simplicity (Central doesn't need finer than that).
+     */
+    protected function minutesToCron(int $minutes): string
+    {
+        if ($minutes >= 60) {
+            return '0 * * * *';
+        }
+
+        if ($minutes <= 1) {
+            return '* * * * *';
+        }
+
+        $slots = [];
+        for ($i = 0; $i < 60; $i += $minutes) {
+            $slots[] = $i;
+        }
+
+        return implode(',', $slots) . ' * * * *';
     }
 
     protected function getMigrationPathFor(string $modelKey): string

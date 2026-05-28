@@ -27,6 +27,18 @@ class LiveTrafficCapturedEvent implements ShouldBroadcast
 
     public function broadcastWhen(): bool
     {
-        return (bool) config('shield.live_traffic.real_time.enabled', false);
+        if (! (bool) config('shield.live_traffic.real_time.enabled', false)) {
+            return false;
+        }
+
+        // Realtime live-traffic broadcast is a premium feature. Free tier
+        // can poll the /shield/live-traffic page on a timer; only paid
+        // sites get the WebSocket push channel. Falls back to no-broadcast
+        // when no license is configured.
+        try {
+            return \OzanKurt\Shield\Facades\Shield::isFeatureAvailable('realtime_live_traffic');
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

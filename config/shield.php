@@ -870,4 +870,68 @@ return [
 
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Premium license
+    |--------------------------------------------------------------------------
+    |
+    | Runtime license-key check against the Central app at
+    | laravel-shield.ozankurt.com. Modelled on Wordfence's wfLicense flow:
+    | the key is validated remotely, the result is cached for 24h, and a
+    | 7-day grace period applies if the Central app is unreachable. Premium
+    | features that depend on this license must be gated via
+    | Shield::isFeatureAvailable($feature) so the free fallback applies
+    | when the license is missing, expired, or revoked.
+    |
+    | The license key is treated as a secret — it is NEVER logged into
+    | ls_audit_log, NEVER appears in telemetry, and NEVER shows up in
+    | rendered dashboard pages in clear text.
+    |
+    */
+    'premium' => [
+        'license_key' => env('LS_PREMIUM_LICENSE_KEY'),
+
+        // Central license-check API. Override only in tests / staging.
+        'check_url' => env(
+            'LS_PREMIUM_LICENSE_CHECK_URL',
+            'https://laravel-shield.ozankurt.com/api/license/check'
+        ),
+
+        // Number of days that previously-valid licenses keep working when
+        // the Central app is unreachable. After this, premium features
+        // deactivate and a banner is shown in the dashboard.
+        'grace_period_days' => (int) env('LS_PREMIUM_LICENSE_GRACE_DAYS', 7),
+
+        // Cache TTL for license-check results, in seconds.
+        'cache_ttl' => (int) env('LS_PREMIUM_LICENSE_CACHE_TTL', 86400),
+
+        // Cache key used by LicenseChecker. Change only if you operate
+        // multiple Shield-protected sites that share the same Redis db
+        // AND want them to maintain independent license-check caches.
+        'cache_key' => env('LS_PREMIUM_LICENSE_CACHE_KEY', 'shield.premium.license'),
+
+        // HTTP request timeout for the license check, in seconds.
+        'http_timeout' => (int) env('LS_PREMIUM_LICENSE_HTTP_TIMEOUT', 10),
+
+        // Webhook target on Central for event ingestion. Plugin pushes
+        // ls_audit_log entries here when this URL is set AND the license
+        // is active. Set to null to disable Central event push entirely.
+        'webhook_ingest_url' => env(
+            'LS_PREMIUM_WEBHOOK_INGEST_URL',
+            'https://laravel-shield.ozankurt.com/api/webhooks/ingest'
+        ),
+
+        // Heartbeat — once per configured interval, plugin pings Central
+        // with summary stats (request count, block count, version) so the
+        // Central dashboard can show "last seen" for each protected site.
+        'heartbeat' => [
+            'enabled' => (bool) env('LS_PREMIUM_HEARTBEAT_ENABLED', true),
+            'interval_minutes' => (int) env('LS_PREMIUM_HEARTBEAT_INTERVAL', 60),
+            'url' => env(
+                'LS_PREMIUM_HEARTBEAT_URL',
+                'https://laravel-shield.ozankurt.com/api/heartbeat'
+            ),
+        ],
+    ],
+
 ];

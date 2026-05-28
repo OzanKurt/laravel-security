@@ -3,6 +3,7 @@
 namespace OzanKurt\Shield\Console\Commands;
 
 use Illuminate\Console\Command;
+use OzanKurt\Shield\Facades\Shield;
 use OzanKurt\Shield\Services\Audit\AuditLogger;
 use OzanKurt\Shield\Services\Reports\CadenceReportGenerator;
 use Throwable;
@@ -23,6 +24,15 @@ class ReportSendCommand extends Command
 
         if (! config("shield.reports.{$cadence}.enabled", true)) {
             $this->warn("Cadence {$cadence} is disabled in config.");
+            return self::SUCCESS;
+        }
+
+        // Multi-cadence reports beyond the daily digest are premium. Free
+        // tier keeps daily_digest working; 3/7/14/30-day reports require
+        // a premium license. Soft enforcement — falls open if Central is
+        // unreachable AND the cached state hasn't been seen as valid.
+        if ($cadence !== 'daily_digest' && ! Shield::isFeatureAvailable('multi_cadence_reports')) {
+            $this->warn("Cadence {$cadence} requires a premium license — skipping. Run shield:license:status to check.");
             return self::SUCCESS;
         }
 

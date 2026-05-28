@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static bool isPremium()
  * @method static bool isFeatureAvailable(string $feature)
+ * @method static array licenseState()
  * @method static string correlationId()
  * @method static \voku\helper\AntiXSS getAntiXss()
  * @method static string|array cleanInput(string|array $input)

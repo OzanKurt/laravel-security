@@ -93,6 +93,38 @@ class Shield
     }
 
     /**
+     * Is a premium license active? Cached 24h, with a 7-day grace period
+     * if the Central license-check API is unreachable. Soft enforcement —
+     * see Services\Premium\LicenseChecker for the rationale.
+     */
+    public function isPremium(): bool
+    {
+        return app(\OzanKurt\Shield\Services\Premium\LicenseChecker::class)->isPremium();
+    }
+
+    /**
+     * Is the named feature unlocked under the current premium license?
+     * Returns false when no license key is configured, the license is
+     * expired/revoked, or the feature is not in the plan's feature list.
+     */
+    public function isFeatureAvailable(string $feature): bool
+    {
+        return app(\OzanKurt\Shield\Services\Premium\LicenseChecker::class)->isFeatureAvailable($feature);
+    }
+
+    /**
+     * Full license state for the License dashboard page. Includes plan,
+     * expiry, domain limit + count, last-checked timestamp, and grace
+     * status. License key itself is NOT exposed — use maskedKey() instead.
+     *
+     * @return array<string,mixed>
+     */
+    public function licenseState(): array
+    {
+        return app(\OzanKurt\Shield\Services\Premium\LicenseChecker::class)->state();
+    }
+
+    /**
      * Scan an UploadedFile (or any path) via the configured scanner backends.
      *
      * @param \Symfony\Component\HttpFoundation\File\UploadedFile|string $fileOrPath

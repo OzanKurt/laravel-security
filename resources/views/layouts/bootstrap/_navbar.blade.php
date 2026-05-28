@@ -68,6 +68,21 @@
                         Cache
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('license.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('license.index') }}"
+                    >
+                        License
+                        @php $st = app('shield')->licenseState()['state'] ?? null; @endphp
+                        @if($st === 'valid')
+                            <span class="badge bg-success ms-1" style="font-size: 0.65em;">PRO</span>
+                        @elseif($st === 'grace')
+                            <span class="badge bg-warning text-dark ms-1" style="font-size: 0.65em;">!</span>
+                        @elseif($st === 'invalid')
+                            <span class="badge bg-danger ms-1" style="font-size: 0.65em;">!</span>
+                        @endif
+                    </a>
+                </li>
             </ul>
             <a class="navbar-brand mx-auto p-0"
                href="{{ app('shield')->logoHref() }}"
