@@ -117,11 +117,26 @@ class Shield
      * expiry, domain limit + count, last-checked timestamp, and grace
      * status. License key itself is NOT exposed — use maskedKey() instead.
      *
+     * MAY trigger a synchronous HTTP call to Central on cache miss. Use
+     * licenseStateCached() in views/middleware/hot paths to avoid that.
+     *
      * @return array<string,mixed>
      */
     public function licenseState(): array
     {
         return app(\OzanKurt\Shield\Services\Premium\LicenseChecker::class)->state();
+    }
+
+    /**
+     * Cache-only license state for hot paths (navbar badge, every-request
+     * checks, etc.). Returns null when no cache entry exists — callers
+     * should render a neutral state, NEVER trigger a refresh from here.
+     *
+     * @return array<string,mixed>|null
+     */
+    public function licenseStateCached(): ?array
+    {
+        return app(\OzanKurt\Shield\Services\Premium\LicenseChecker::class)->cachedState();
     }
 
     /**

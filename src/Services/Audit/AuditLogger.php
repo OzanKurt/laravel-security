@@ -77,8 +77,16 @@ class AuditLogger
             return;
         }
 
+        // CRITICAL: must NOT call Shield::isPremium() here — that triggers
+        // LicenseChecker::state() which can fire a synchronous 10s HTTP
+        // call to Central on cache miss. Every audit_log write would then
+        // stall the request thread. Use the cache-only path; the cache is
+        // populated by cron-scheduled refreshes + the License dashboard
+        // page. If the cache is cold, we skip forwarding for this write —
+        // the local row is still authoritative.
         try {
-            if (! Shield::isPremium()) {
+            $checker = app(\OzanKurt\Shield\Services\Premium\LicenseChecker::class);
+            if (! $checker->isPremiumCached()) {
                 return;
             }
         } catch (\Throwable) {

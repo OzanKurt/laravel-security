@@ -87,7 +87,12 @@ class WebhookDelivery extends Model
         $completedAt = now();
         $durationMs = null;
         if ($this->dispatched_at) {
-            $durationMs = max(0, (int) $completedAt->diffInMilliseconds($this->dispatched_at));
+            // Carbon 2.62+ / 3.x: diffInMilliseconds returns a SIGNED float.
+            // Calling now->diffInMilliseconds(past) returns NEGATIVE (since
+            // past is earlier than now). The earlier code did max(0, negative)
+            // → 0, so every row had duration_ms=0. Pass the absolute flag so
+            // the result is always positive regardless of Carbon version.
+            $durationMs = (int) abs($this->dispatched_at->diffInMilliseconds($completedAt));
         }
 
         $this->update([

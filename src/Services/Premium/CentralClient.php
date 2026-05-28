@@ -112,14 +112,9 @@ class CentralClient
      */
     public function ping(): DeliveryResult
     {
-        $url = (string) config('shield.premium.test_ping_url', '');
-        if ($url === '') {
-            // Derive from heartbeat URL by default — same host, /api/test/ping.
-            $heartbeat = (string) config('shield.premium.heartbeat.url', '');
-            if ($heartbeat === '') {
-                return DeliveryResult::skipped('no_ping_url_configured');
-            }
-            $url = preg_replace('#/api/heartbeat$#', '/api/test/ping', $heartbeat);
+        $url = $this->resolvePingUrl();
+        if ($url === null) {
+            return DeliveryResult::skipped('no_ping_url_configured');
         }
 
         if (! $this->checker->hasKey()) {
@@ -130,6 +125,40 @@ class CentralClient
             'nonce' => bin2hex(random_bytes(8)),
             '_meta' => $this->meta(),
         ], 'test_ping');
+    }
+
+    /**
+     * Resolve the test/ping URL. Three sources, in precedence:
+     *   1. Explicit shield.premium.test_ping_url (or LS_PREMIUM_TEST_PING_URL)
+     *   2. Heartbeat URL via path replacement — works for the default
+     *      https://laravel-shield.ozankurt.com/api/heartbeat shape
+     *   3. License-check URL via path replacement — fallback when only
+     *      the license URL is configured
+     *
+     * Each candidate is parsed; we reconstruct scheme+host (+port if non-
+     * default) and tack on /api/test/ping. This handles trailing slashes,
+     * query strings, and non-/api paths that would have broken the previous
+     * preg_replace approach.
+     */
+    private function resolvePingUrl(): ?string
+    {
+        $explicit = (string) config('shield.premium.test_ping_url', '');
+        if ($explicit !== '') {
+            return $explicit;
+        }
+
+        foreach (['shield.premium.heartbeat.url', 'shield.premium.check_url'] as $configKey) {
+            $candidate = (string) config($configKey, '');
+            if ($candidate === '') continue;
+
+            $parts = parse_url($candidate);
+            if (empty($parts['host']) || empty($parts['scheme'])) continue;
+
+            $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+            return "{$parts['scheme']}://{$parts['host']}{$port}/api/test/ping";
+        }
+
+        return null;
     }
 
     /**
@@ -146,6 +175,14 @@ class CentralClient
      */
     public function postSigned(string $url, array $payload, string $operation, array $context = []): DeliveryResult
     {
+        // Without a signing secret, every POST gets rejected by Central as
+        // missing_signature_headers + burns 3 retries per event. Short-circuit
+        // before opening a delivery row so the audit trail shows the real
+        // reason (no_signing_secret) instead of fake "Central failure" rows.
+        if (! $this->signer->canSign()) {
+            return DeliveryResult::skipped('no_signing_secret');
+        }
+
         // Encode once — both the signature and the actual request body
         // hash THIS exact byte sequence. Re-encoding later (even with
         // the same flags) can produce different bytes for floats/etc.

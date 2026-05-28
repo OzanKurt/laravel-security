@@ -841,6 +841,14 @@ return [
         'real_time' => [
             'enabled' => env('LS_LIVE_TRAFFIC_REALTIME', false),
             'channel' => env('LS_LIVE_TRAFFIC_CHANNEL', 'shield.live-traffic'),
+
+            // Whether realtime broadcasting requires a premium license.
+            // True (default) for new installs — matches the published
+            // feature gating. False preserves v1.x behavior where any
+            // install with real_time.enabled=true got broadcasts.
+            // Set false on upgrade if you self-host Reverb and don't
+            // want a premium license dependency.
+            'require_premium' => env('LS_LIVE_TRAFFIC_REQUIRE_PREMIUM', true),
         ],
     ],
 
@@ -931,6 +939,12 @@ return [
             'LS_PREMIUM_WEBHOOK_INGEST_URL',
             'https://laravel-shield.ozankurt.com/api/webhooks/ingest'
         ),
+
+        // Connectivity-test echo endpoint. Used by shield:central-test +
+        // the License dashboard's "Test connectivity" button. Falls back
+        // to {heartbeat_host}/api/test/ping when unset — only override
+        // when running a non-standard Central deployment.
+        'test_ping_url' => env('LS_PREMIUM_TEST_PING_URL'),
 
         // Heartbeat — once per configured interval, plugin pings Central
         // with summary stats (request count, block count, version) so the

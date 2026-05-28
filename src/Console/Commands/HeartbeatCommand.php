@@ -107,6 +107,11 @@ class HeartbeatCommand extends Command
 
     private function packageVersion(): string
     {
+        // src/Console/Commands/HeartbeatCommand.php → package root is
+        // THREE directories up (../../../composer.json). This file is
+        // one level shallower than LicenseChecker, so the path is
+        // genuinely different — keep them in sync if directory depth
+        // ever changes.
         $composerJson = __DIR__ . '/../../../composer.json';
 
         if (is_file($composerJson)) {
