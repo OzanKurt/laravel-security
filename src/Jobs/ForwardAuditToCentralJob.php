@@ -90,15 +90,24 @@ class ForwardAuditToCentralJob implements ShouldQueue
                 return;
             }
 
-            WebhookDelivery::query()
+            // Find the most-recent delivery row + update on the instance.
+            // Eloquent's update() against a query builder ignores latest()
+            // and limit() — running `->update()` after `->latest()->limit(1)`
+            // generates UPDATE ... WHERE without ORDER/LIMIT in most drivers,
+            // which would rewrite EVERY delivery row for this audit event
+            // and destroy the per-attempt history.
+            $latest = WebhookDelivery::query()
                 ->where('audit_log_id', $auditLogId)
                 ->where('operation', 'webhook_ingest')
                 ->latest('id')
-                ->limit(1)
-                ->update([
+                ->first();
+
+            if ($latest !== null) {
+                $latest->update([
                     'status' => WebhookDelivery::STATUS_EXHAUSTED,
                     'reason' => 'all_retries_failed: ' . substr($exception->getMessage(), 0, 240),
                 ]);
+            }
         } catch (\Throwable) {
             // Already in a failed-job context; don't compound the failure.
         }

@@ -33,7 +33,10 @@ return new class extends Migration
             $table->string('operation', 32)->index();         // webhook_ingest | heartbeat | test_ping | webhook_ingest_batch
             $table->string('target_url', 255);
             $table->string('payload_hash', 64)->index();      // sha256 of the raw signed body
-            $table->unsignedSmallInteger('payload_bytes')->default(0);
+            // INT (max 4.2B) — single payloads can exceed 64KB with stack
+            // traces, and batch ingest pushes can be megabytes. The earlier
+            // SMALLINT either threw on strict MySQL or silently clamped.
+            $table->unsignedInteger('payload_bytes')->default(0);
             $table->unsignedSmallInteger('batch_size')->default(1);
 
             // Outcome

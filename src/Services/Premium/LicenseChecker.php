@@ -87,6 +87,11 @@ class LicenseChecker
      * Get the full cached license state, refreshing from Central if the
      * cached entry is missing or expired.
      *
+     * NOTE: this method may trigger a synchronous HTTP call to Central
+     * on a cache miss (up to http_timeout seconds). DO NOT use it in a
+     * hot path (every request, every audit log, etc.) — use cachedState()
+     * for fast, cache-only reads in those places.
+     *
      * @return array{state: string, valid: bool, reason?: string, expires_at?: string|null, plan?: string|null, features?: array<int,string>, domain_limit?: int|null, domains_used?: int|null, last_checked_at?: string, grace_until?: string|null}
      */
     public function state(): array
@@ -99,6 +104,40 @@ class LicenseChecker
         }
 
         return $this->refresh();
+    }
+
+    /**
+     * Read-only state from the cache. Returns the most-recently cached
+     * value if any, never triggers an HTTP call. Use in hot paths where
+     * a 10s synchronous Central round-trip is unacceptable: the navbar
+     * license badge, AuditLogger's per-write Central forward gate, etc.
+     *
+     * Returns null when no cache entry exists (e.g. fresh deploy, cache
+     * flush). Callers should treat null as "premium unknown — assume off
+     * for safety; refresh will happen on the next cron/Artisan call".
+     *
+     * @return array<string,mixed>|null
+     */
+    public function cachedState(): ?array
+    {
+        $cached = $this->cache->get($this->cacheKey());
+        return is_array($cached) ? $cached : null;
+    }
+
+    /**
+     * Fast cached-only premium check for hot paths. Returns false when
+     * the cache is empty rather than hitting Central — safe-by-default
+     * (premium features off until a background refresh populates the
+     * cache via cron/Artisan).
+     */
+    public function isPremiumCached(): bool
+    {
+        $cached = $this->cachedState();
+        if ($cached === null) {
+            return false;
+        }
+        return ($cached['state'] ?? null) === self::STATE_VALID
+            || ($cached['state'] ?? null) === self::STATE_GRACE;
     }
 
     /**
@@ -215,7 +254,22 @@ class LicenseChecker
         }
 
         $checkedAt = Carbon::parse((string) $cached['last_checked_at']);
-        $ageSeconds = now()->diffInSeconds($checkedAt);
+        // abs() so behavior is identical across Carbon 2.x (signed-by-default)
+        // and Carbon 3.x (signed float). Previously: now()->diffInSeconds(past)
+        // returned a value whose sign varied by Carbon version, breaking the
+        // freshness check on either side depending on the host's PHP install.
+        $ageSeconds = (int) abs(now()->diffInSeconds($checkedAt));
+
+        // A STATE_INVALID caused by an unreachable API with no prior valid
+        // check is treated as a SHORT-LIVED state (5 min) so a transient
+        // outage at install time doesn't trap a fresh customer for 24h.
+        // All other INVALID states (revoked, expired, unknown_key) honour
+        // the full cache_ttl since they're definitive answers from Central.
+        if (($cached['state'] ?? null) === self::STATE_INVALID
+            && ($cached['reason'] ?? null) === 'api_unreachable_no_prior_valid'
+        ) {
+            return $ageSeconds < 300;
+        }
 
         return match ($cached['state'] ?? null) {
             self::STATE_NO_KEY => $ageSeconds < 300,
@@ -271,13 +325,22 @@ class LicenseChecker
             'reason' => $reason,
         ]);
 
-        return $this->persist([
-            'state' => self::STATE_INVALID,
-            'valid' => false,
-            'reason' => 'api_unreachable',
-            'message' => $reason,
-            'last_checked_at' => now()->toIso8601String(),
-        ]);
+        // Fresh install OR previously-INVALID state hitting an unreachable
+        // Central — we have no prior valid check to anchor grace on. Use a
+        // short retry TTL (5 min) so a transient outage at install time
+        // doesn't trap a new buyer in STATE_INVALID for the full 24h cache_ttl.
+        // The state is still INVALID (premium features off), but the next
+        // request will re-check Central in 5 minutes, not 24 hours.
+        return $this->persistWithTtl(
+            [
+                'state' => self::STATE_INVALID,
+                'valid' => false,
+                'reason' => 'api_unreachable_no_prior_valid',
+                'message' => $reason,
+                'last_checked_at' => now()->toIso8601String(),
+            ],
+            300,
+        );
     }
 
     /**
@@ -311,12 +374,24 @@ class LicenseChecker
      */
     private function persist(array $state): array
     {
-        $this->cache->put(
-            $this->cacheKey(),
+        return $this->persistWithTtl(
             $state,
-            (int) config('shield.premium.cache_ttl', 86400)
+            (int) config('shield.premium.cache_ttl', 86400),
         );
+    }
 
+    /**
+     * Persist with an explicit TTL. Used by persistGraceOrInvalid to give
+     * a short retry window when no prior valid check exists — preventing
+     * the new-install Central-outage trap where a fresh buyer gets stuck
+     * in STATE_INVALID for 24h after a transient API blip at install time.
+     *
+     * @param array<string,mixed> $state
+     * @return array<string,mixed>
+     */
+    private function persistWithTtl(array $state, int $ttlSeconds): array
+    {
+        $this->cache->put($this->cacheKey(), $state, $ttlSeconds);
         return $state;
     }
 
@@ -340,8 +415,11 @@ class LicenseChecker
 
     private function packageVersion(): string
     {
-        // Resolved from composer.json at runtime; this avoids hardcoding
-        // and keeps Central API logs aligned with shipped packages.
+        // From src/Services/Premium/LicenseChecker.php → package root is
+        // THREE directories up (verified: __DIR__/../../../ = package
+        // root). Note: composer.json doesn't ship a "version" field in
+        // package.json (it's generated from Git tags), so this typically
+        // returns "unknown" anyway — but the path itself is correct.
         $composerJson = __DIR__ . '/../../../composer.json';
 
         if (is_file($composerJson)) {

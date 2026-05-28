@@ -80,7 +80,15 @@
                        href="{{ app('shield')->route('license.index') }}"
                     >
                         License
-                        @php $st = app('shield')->licenseState()['state'] ?? null; @endphp
+                        {{--
+                            CACHE-ONLY read — must never trigger an HTTP
+                            call to Central. licenseState() would refresh
+                            on cache miss + stall every dashboard page up
+                            to http_timeout seconds. Badge stays neutral
+                            (no PRO badge) until a cron / Artisan refresh
+                            populates the cache.
+                        --}}
+                        @php $st = app('shield')->licenseStateCached()['state'] ?? null; @endphp
                         @if($st === 'valid')
                             <span class="badge bg-success ms-1" style="font-size: 0.65em;">PRO</span>
                         @elseif($st === 'grace')

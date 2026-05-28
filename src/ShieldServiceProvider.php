@@ -328,6 +328,16 @@ class ShieldServiceProvider extends ServiceProvider
                     ->command('shield:heartbeat')
                     ->cron($this->minutesToCron($minutes));
             }
+
+            // Background license refresh — keeps the LicenseChecker cache
+            // warm so hot paths (navbar, AuditLogger) can use the cache-only
+            // path without ever triggering a synchronous HTTP call to Central.
+            // Fires once an hour; LicenseChecker still respects the per-state
+            // freshness TTLs so this isn't a hammer.
+            app(Schedule::class)
+                ->command('shield:license:check')
+                ->hourly()
+                ->withoutOverlapping();
         });
     }
 
@@ -429,9 +439,15 @@ class ShieldServiceProvider extends ServiceProvider
     }
 
     /**
-     * Turn an interval in minutes into a cron expression. 60 → "0 * * * *",
-     * 15 → "0,15,30,45 * * * *", 1 → "* * * * *". Values above 60 round
-     * down to hourly for simplicity (Central doesn't need finer than that).
+     * Turn an interval in minutes into a cron expression. Only intervals
+     * that evenly divide 60 produce a uniform schedule. For non-divisors
+     * we round UP to the next divisor — the cron syntax has no way to
+     * express "every 7 minutes" without drift at the hour boundary, and
+     * users typically prefer a slightly slower-but-uniform schedule over
+     * an irregular one (e.g. 7→10 minutes, 25→30).
+     *
+     * Examples: 60 → "0 * * * *", 15 → "0,15,30,45 * * * *", 1 → "* * * * *",
+     * 7 minutes → uses 10 (step), 25 minutes → uses 30 (step).
      */
     protected function minutesToCron(int $minutes): string
     {
@@ -443,12 +459,18 @@ class ShieldServiceProvider extends ServiceProvider
             return '* * * * *';
         }
 
-        $slots = [];
-        for ($i = 0; $i < 60; $i += $minutes) {
-            $slots[] = $i;
+        // Find the smallest divisor of 60 that is >= $minutes.
+        // 60's divisors: 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60.
+        $divisors = [1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60];
+        $chosen = 60;
+        foreach ($divisors as $d) {
+            if ($d >= $minutes) {
+                $chosen = $d;
+                break;
+            }
         }
 
-        return implode(',', $slots) . ' * * * *';
+        return "*/{$chosen} * * * *";
     }
 
     protected function getMigrationPathFor(string $modelKey): string
