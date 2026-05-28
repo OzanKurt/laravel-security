@@ -34,6 +34,12 @@
                         Clear cache
                     </button>
                 </form>
+                <form method="POST" action="{{ app('shield')->route('license.test') }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-success btn-sm" {{ $hasKey ? '' : 'disabled' }}>
+                        Test connectivity
+                    </button>
+                </form>
             </div>
         </div>
 

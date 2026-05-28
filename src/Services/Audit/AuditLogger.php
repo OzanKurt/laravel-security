@@ -107,9 +107,15 @@ class AuditLogger
         try {
             ForwardAuditToCentralJob::dispatch($payload)
                 ->onQueue((string) config('shield.premium.queue', 'default'));
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             // Queue not configured / table missing — degrade silently.
             // The local row already exists and is the source of truth.
+            // Log at info level so operators can find it if they're
+            // wondering why nothing reaches Central.
+            \Illuminate\Support\Facades\Log::info('Shield: failed to dispatch Central forward job', [
+                'error' => $e->getMessage(),
+                'audit_log_id' => $entry->id,
+            ]);
         }
     }
 

@@ -5,6 +5,7 @@ namespace OzanKurt\Shield\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use OzanKurt\Shield\Services\Premium\CentralClient;
 use OzanKurt\Shield\Services\Premium\LicenseChecker;
 
 class LicenseController extends Controller
@@ -55,5 +56,29 @@ class LicenseController extends Controller
         return redirect()
             ->route(config('shield.dashboard.route_name') . 'license.index')
             ->with('status', 'License cache cleared.');
+    }
+
+    /**
+     * Test connectivity + signing against Central by sending a signed
+     * heartbeat with a marker payload. Result flashes to the dashboard
+     * so operators can verify their setup without leaving the page.
+     */
+    public function test(Request $request, CentralClient $client): RedirectResponse
+    {
+        $result = $client->heartbeat([
+            'test' => true,
+            'sent_by' => 'dashboard.test',
+            'requested_by' => optional($request->user())->getAuthIdentifier(),
+        ]);
+
+        $status = match (true) {
+            $result->ok() => "Connectivity OK — Central returned HTTP {$result->httpStatus}.",
+            $result->outcome === 'skipped' => "Test skipped: {$result->error}.",
+            default => "Connectivity failed (status={$result->httpStatus}, reason={$result->error}). See /shield/webhook-deliveries for the captured attempt.",
+        };
+
+        return redirect()
+            ->route(config('shield.dashboard.route_name') . 'license.index')
+            ->with('status', $status);
     }
 }

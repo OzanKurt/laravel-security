@@ -26,14 +26,19 @@ class HeartbeatCommand extends Command
 
         $stats = $this->collectStats();
 
-        $ok = $client->heartbeat($stats);
+        $result = $client->heartbeat($stats);
 
-        if ($ok) {
-            $this->info('Heartbeat sent to Central.');
+        if ($result->ok()) {
+            $this->info("Heartbeat sent to Central (HTTP {$result->httpStatus}).");
             return self::SUCCESS;
         }
 
-        $this->warn('Heartbeat failed (Central unreachable or rejected) — see logs.');
+        if ($result->outcome === 'skipped') {
+            $this->warn("Heartbeat skipped: {$result->error}");
+            return self::SUCCESS;
+        }
+
+        $this->warn("Heartbeat failed (status={$result->httpStatus}, reason={$result->error}) — see logs + /shield/webhook-deliveries.");
         return self::FAILURE;
     }
 

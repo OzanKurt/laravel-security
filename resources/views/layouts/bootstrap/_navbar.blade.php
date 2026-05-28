@@ -69,6 +69,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ app('shield')->routeIsActive('webhook-deliveries.index') ? 'active' : '' }}"
+                       href="{{ app('shield')->route('webhook-deliveries.index') }}"
+                    >
+                        Webhooks
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ app('shield')->routeIsActive('license.index') ? 'active' : '' }}"
                        href="{{ app('shield')->route('license.index') }}"
                     >

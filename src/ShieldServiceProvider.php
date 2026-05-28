@@ -100,6 +100,11 @@ class ShieldServiceProvider extends ServiceProvider
     {
         $this->publishAssets();
 
+        // Auto-load all package-shipped migrations. Consumer apps no longer
+        // need to publish migration stubs to run them — they execute from
+        // the vendor directory on `php artisan migrate` like Sanctum/Telescope.
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+
         $this->registerMiddleware($router);
         $this->registerListeners();
         $this->registerTranslations();
@@ -189,6 +194,11 @@ class ShieldServiceProvider extends ServiceProvider
             $router->get('license', [\OzanKurt\Shield\Http\Controllers\LicenseController::class, 'index'])->name('license.index');
             $router->post('license/refresh', [\OzanKurt\Shield\Http\Controllers\LicenseController::class, 'refresh'])->name('license.refresh');
             $router->post('license/clear', [\OzanKurt\Shield\Http\Controllers\LicenseController::class, 'clear'])->name('license.clear');
+            $router->post('license/test', [\OzanKurt\Shield\Http\Controllers\LicenseController::class, 'test'])->name('license.test');
+
+            // Webhook deliveries audit
+            $router->get('webhook-deliveries', [\OzanKurt\Shield\Http\Controllers\WebhookDeliveriesController::class, 'index'])->name('webhook-deliveries.index');
+            $router->post('webhook-deliveries/{id}/retry', [\OzanKurt\Shield\Http\Controllers\WebhookDeliveriesController::class, 'retry'])->name('webhook-deliveries.retry');
         });
     }
 
@@ -276,6 +286,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\LicenseCheckCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\LicenseClearCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\HeartbeatCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\CentralTestCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {

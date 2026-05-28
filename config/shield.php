@@ -891,6 +891,17 @@ return [
     'premium' => [
         'license_key' => env('LS_PREMIUM_LICENSE_KEY'),
 
+        // Optional rotation secret for HMAC signing — separate from the
+        // license key so operators can rotate signing material on incident
+        // response without revoking the whole license. When unset, the
+        // license key is used as the HMAC secret.
+        'webhook_secret' => env('LS_PREMIUM_WEBHOOK_SECRET'),
+
+        // Queue name used for outbound webhook job dispatch. Reserve a
+        // dedicated queue (e.g. 'shield-webhooks') so a slow Central can
+        // never starve the main app's queue workers.
+        'queue' => env('LS_PREMIUM_QUEUE', 'default'),
+
         // Central license-check API. Override only in tests / staging.
         'check_url' => env(
             'LS_PREMIUM_LICENSE_CHECK_URL',
