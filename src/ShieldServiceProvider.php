@@ -473,22 +473,6 @@ class ShieldServiceProvider extends ServiceProvider
         return "*/{$chosen} * * * *";
     }
 
-    protected function getMigrationPathFor(string $modelKey): string
-    {
-        $prefix = '2024_01_01_000000';
-        $tableName = $this->getNameTable($modelKey);
-
-        return database_path("migrations/{$prefix}_create_{$tableName}_table.php");
-    }
-
-    protected function getNameTable(string $modelKey): string
-    {
-        $tablePrefix = config('shield.database.table_prefix', 'security_');
-        $tableName = config("shield.database.{$modelKey}.table", $modelKey);
-
-        return $tablePrefix . $tableName;
-    }
-
     public function publishAssets(): void
     {
         // config
@@ -505,13 +489,6 @@ class ShieldServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../resources/lang' => $langPath,
         ], 'shield-lang');
-
-        // migrations
-        $this->publishes([
-            __DIR__ . '/../database/migrations/create_auth_logs_table.php' => $this->getMigrationPathFor('auth_log'),
-            __DIR__ . '/../database/migrations/create_ips_table.php' => $this->getMigrationPathFor('ip'),
-            __DIR__ . '/../database/migrations/create_logs_table.php' => $this->getMigrationPathFor('log'),
-        ], 'shield-migrations');
 
         // public
         $this->publishes([

@@ -22,11 +22,10 @@ class InstallCommand extends Command
         ]);
         $this->line(' ✓ Config published');
 
-        // 2. Publish migrations + lang + assets
-        Artisan::call('vendor:publish', ['--tag' => 'shield-migrations', '--force' => $this->option('force')]);
+        // 2. Publish lang + assets (migrations run from the package, not published)
         Artisan::call('vendor:publish', ['--tag' => 'shield-lang', '--force' => $this->option('force')]);
         Artisan::call('vendor:publish', ['--tag' => 'shield-assets', '--force' => $this->option('force')]);
-        $this->line(' ✓ Migrations + lang + assets published');
+        $this->line(' ✓ Lang + assets published');
 
         // 3. Run migrations
         try {
