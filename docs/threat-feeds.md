@@ -9,6 +9,7 @@ Pull-based providers that import IP blocklists + WAF rules + GeoIP databases fro
 | `spamhaus` | Spamhaus DROP + EDROP lists (free, public) | `ls_acl` as CIDR ranges, blacklist action | none |
 | `abuseipdb` | AbuseIPDB blacklist API (free tier 1k requests/day) | `ls_acl` as IPs, block action, 24h expiry | `LS_ABUSEIPDB_KEY` |
 | `maxmind_geolite2` | MaxMind GeoLite2 Country + ASN DBs | `storage/shield/geo/*.mmdb` — activates country/ASN ACL matchers | `LS_MAXMIND_LICENSE_KEY` + `composer require geoip2/geoip2` |
+| `maxmind_geoip2_premium` | MaxMind **paid** GeoIP2 Country/City/ISP DBs (**Premium**) | `storage/shield/geo/premium/*.mmdb` — preferred over GeoLite2, adds city/region precision | valid premium license + paid MaxMind account |
 | `owasp_crs` | OWASP ModSecurity CRS rule subset (via our curated JSON mirror) | `ls_waf_rules` with source=owasp_crs | none |
 
 ## Enable a provider
@@ -24,6 +25,22 @@ LS_MAXMIND_LICENSE_KEY=your-maxmind-license-key
 ```
 
 Spamhaus + OWASP CRS are on by default — no API key required.
+
+## Premium GeoIP2 (`maxmind_geoip2_premium`)
+
+Country and ASN blocking are **free** (GeoLite2). Premium adds the paid MaxMind GeoIP2
+databases for higher accuracy and city/region precision. `GeoDatabaseResolver` makes the
+geo ACL matchers prefer `storage/shield/geo/premium/*.mmdb` over the free GeoLite2 DBs
+automatically once present, so country/region/city ACL rules use the best available data.
+
+```env
+LS_MAXMIND_PREMIUM_ENABLED=true
+LS_MAXMIND_PREMIUM_ACCOUNT_ID=your-account-id
+LS_MAXMIND_PREMIUM_LICENSE_KEY=your-paid-license-key
+```
+
+Requires `composer require geoip2/geoip2` and a paid MaxMind subscription. `FeedRunner`
+skips this provider without a valid premium license, so it is inert on free installs.
 
 ## Sync schedule
 
