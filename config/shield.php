@@ -815,6 +815,8 @@ return [
             \OzanKurt\Shield\Services\ThreatFeed\Providers\MaxMindGeoLite2Provider::class,
             \OzanKurt\Shield\Services\ThreatFeed\Providers\ShieldRealtimeProvider::class,
             \OzanKurt\Shield\Services\ThreatFeed\Providers\MaxMindGeoIp2PremiumProvider::class,
+            \OzanKurt\Shield\Services\ThreatFeed\Providers\EmergingThreatsProvider::class,
+            \OzanKurt\Shield\Services\ThreatFeed\Providers\CrowdStrikeProvider::class,
         ],
         'sync_cron' => '0 3 * * *',
 
@@ -851,6 +853,25 @@ return [
             'account_id' => env('LS_MAXMIND_PREMIUM_ACCOUNT_ID'),
             'license_key' => env('LS_MAXMIND_PREMIUM_LICENSE_KEY'),
             'editions' => ['GeoIP2-Country', 'GeoIP2-City'],
+        ],
+
+        // Commercial threat-intel feeds (Premium). Each gates the integration,
+        // not the data: the operator brings their own vendor subscription. Both
+        // import IP reputation into ls_acl as block-tier rows; FeedRunner skips
+        // them without a valid premium license.
+        'emerging_threats' => [
+            'enabled' => env('LS_ET_ENABLED', false),
+            'token' => env('LS_ET_TOKEN'),
+            'min_score' => (int) env('LS_ET_MIN_SCORE', 70),
+            'max_import' => (int) env('LS_ET_MAX_IMPORT', 50000),
+        ],
+        'crowdstrike' => [
+            'enabled' => env('LS_CROWDSTRIKE_ENABLED', false),
+            'client_id' => env('LS_CROWDSTRIKE_CLIENT_ID'),
+            'client_secret' => env('LS_CROWDSTRIKE_CLIENT_SECRET'),
+            'base_url' => env('LS_CROWDSTRIKE_BASE_URL', 'https://api.crowdstrike.com'),
+            'min_confidence' => env('LS_CROWDSTRIKE_MIN_CONFIDENCE', 'high'),
+            'max_import' => (int) env('LS_CROWDSTRIKE_MAX_IMPORT', 50000),
         ],
     ],
 

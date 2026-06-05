@@ -12,6 +12,8 @@ Pull-based providers that import IP blocklists + WAF rules + GeoIP databases fro
 | `maxmind_geoip2_premium` | MaxMind **paid** GeoIP2 Country/City/ISP DBs (**Premium**) | `storage/shield/geo/premium/*.mmdb` — preferred over GeoLite2, adds city/region precision | valid premium license + paid MaxMind account |
 | `owasp_crs` | OWASP ModSecurity CRS rule subset (via our curated JSON mirror) | `ls_waf_rules` with source=owasp_crs | none |
 | `shield_realtime` | Laravel Shield Central realtime delta feed (**Premium**) | `ls_waf_rules` + `ls_acl` with source=shield_realtime | valid premium license |
+| `emerging_threats` | Proofpoint Emerging Threats IP reputation (**Premium**) | `ls_acl` as IPs, block action, source=emerging_threats | premium license + ET token |
+| `crowdstrike` | CrowdStrike Falcon Intelligence IP IOCs (**Premium**) | `ls_acl` as IPs, block action, source=crowdstrike | premium license + Falcon OAuth creds |
 
 ## Enable a provider
 
@@ -64,6 +66,31 @@ LS_MAXMIND_PREMIUM_LICENSE_KEY=your-paid-license-key
 
 Requires `composer require geoip2/geoip2` and a paid MaxMind subscription. `FeedRunner`
 skips this provider without a valid premium license, so it is inert on free installs.
+
+## Commercial threat-intel feeds (`emerging_threats`, `crowdstrike`)
+
+Premium buyers who already license commercial threat intel can plug it in. Both feeds
+import IP reputation into `ls_acl` as block-tier rows and are gated by a valid premium
+license. Important: the license gates the *integration*; the *data* still requires the
+operator's own vendor subscription.
+
+```env
+# Proofpoint Emerging Threats (ET Pro / Intelligence)
+LS_ET_ENABLED=true
+LS_ET_TOKEN=your-et-token
+LS_ET_MIN_SCORE=70          # 0-127 reputation threshold
+
+# CrowdStrike Falcon Intelligence
+LS_CROWDSTRIKE_ENABLED=true
+LS_CROWDSTRIKE_CLIENT_ID=your-client-id
+LS_CROWDSTRIKE_CLIENT_SECRET=your-client-secret
+LS_CROWDSTRIKE_MIN_CONFIDENCE=high   # high | medium | low
+```
+
+CrowdStrike authenticates via OAuth2 client credentials; the token is cached until just
+before it expires so repeat syncs do not re-authenticate. Both feeds enforce a
+`max_import` cap and log (never silently drop) when the cap truncates a feed. Vendor
+tokens/secrets are treated as secrets and are never logged.
 
 ## Sync schedule
 
