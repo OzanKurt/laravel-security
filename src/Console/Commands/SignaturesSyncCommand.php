@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use OzanKurt\Shield\Database\Seeders\EmbeddedSignatureSeeder;
 use OzanKurt\Shield\Models\Lookups\LogLevel;
 use OzanKurt\Shield\Models\Lookups\SignatureCategory;
+use OzanKurt\Shield\Facades\Shield;
 use OzanKurt\Shield\Models\Signature;
 use OzanKurt\Shield\Services\Audit\AuditLogger;
 use OzanKurt\Shield\Services\Lookups\LookupResolver;
@@ -18,6 +19,12 @@ class SignaturesSyncCommand extends Command
 
     protected $description = 'Sync malware signatures from the GitHub Releases feed, falling back to embedded signatures when remote is unreachable.';
 
+    /**
+     * Resolved signature channel for the current run, recorded in audit meta.
+     * One of: free, premium, pinned, embedded.
+     */
+    private string $channel = 'embedded';
+
     public function handle(LookupResolver $lookups, AuditLogger $audit): int
     {
         $useEmbedded = (bool) $this->option('embedded');
@@ -27,14 +34,9 @@ class SignaturesSyncCommand extends Command
             return $this->applyEmbedded($audit);
         }
 
-        $url = (string) config('shield.scanner.signatures.url');
-        $pin = config('shield.scanner.signatures.pin');
+        $url = $this->resolveSignatureUrl();
 
-        if ($pin) {
-            $url = $this->pinnedUrl($url, (string) $pin);
-        }
-
-        $this->line("Fetching {$url}");
+        $this->line("Fetching {$url} (channel: {$this->channel})");
 
         try {
             $response = Http::timeout(15)
@@ -62,7 +64,7 @@ class SignaturesSyncCommand extends Command
 
         $audit->log('threat_feed.sync_completed', "Synced {$applied} remote signatures", [
             'severity' => 'low',
-            'meta' => ['source' => 'remote', 'count' => $applied, 'release_tag' => $payload['tag_name'] ?? null],
+            'meta' => ['source' => 'remote', 'channel' => $this->channel, 'count' => $applied, 'release_tag' => $payload['tag_name'] ?? null],
         ]);
 
         $this->info("Synced {$applied} remote signatures.");
@@ -79,12 +81,48 @@ class SignaturesSyncCommand extends Command
 
         $audit->log('threat_feed.sync_completed', "Applied embedded signatures (added {$added}, total {$afterCount})", [
             'severity' => 'low',
-            'meta' => ['source' => 'embedded', 'added' => $added, 'total' => $afterCount],
+            'meta' => ['source' => 'embedded', 'channel' => $this->channel, 'added' => $added, 'total' => $afterCount],
         ]);
 
         $this->info("Applied embedded signatures: {$afterCount} total, {$added} new.");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Resolve which signature release to fetch and record the channel.
+     *
+     * Precedence:
+     *   1. An explicit pin (LS_SIGNATURE_PIN) overrides everything -> releases/tags/<pin>.
+     *   2. Premium license active -> premium_url (releases/latest, always fresh).
+     *   3. Otherwise -> free_url (a moving "free" tag lagging latest by ~30 days),
+     *      matching Wordfence's free-tier signature delay.
+     *
+     * Back-compat: a deployment that only set the legacy single `url` falls back
+     * to it for either channel, so existing installs keep working on upgrade.
+     */
+    private function resolveSignatureUrl(): string
+    {
+        $cfg = (array) config('shield.scanner.signatures');
+        $legacy = $cfg['url'] ?? null;
+        $pin = $cfg['pin'] ?? null;
+
+        if ($pin) {
+            $this->channel = 'pinned';
+            $base = (string) ($cfg['premium_url'] ?? $legacy ?? '');
+
+            return $this->pinnedUrl($base, (string) $pin);
+        }
+
+        if (Shield::isFeatureAvailable('premium_signatures')) {
+            $this->channel = 'premium';
+
+            return (string) ($cfg['premium_url'] ?? $legacy ?? '');
+        }
+
+        $this->channel = 'free';
+
+        return (string) ($cfg['free_url'] ?? $legacy ?? '');
     }
 
     private function pinnedUrl(string $url, string $pin): string
