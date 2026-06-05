@@ -10,6 +10,8 @@ Pull-based providers that import IP blocklists + WAF rules + GeoIP databases fro
 | `abuseipdb` | AbuseIPDB blacklist API (free tier 1k requests/day) | `ls_acl` as IPs, block action, 24h expiry | `LS_ABUSEIPDB_KEY` |
 | `maxmind_geolite2` | MaxMind GeoLite2 Country + ASN DBs | `storage/shield/geo/*.mmdb` — activates country/ASN ACL matchers | `LS_MAXMIND_LICENSE_KEY` + `composer require geoip2/geoip2` |
 | `owasp_crs` | OWASP ModSecurity CRS rule subset (via our curated JSON mirror) | `ls_waf_rules` with source=owasp_crs | none |
+| `emerging_threats` | Proofpoint Emerging Threats IP reputation (**Premium**) | `ls_acl` as IPs, block action, source=emerging_threats | premium license + ET token |
+| `crowdstrike` | CrowdStrike Falcon Intelligence IP IOCs (**Premium**) | `ls_acl` as IPs, block action, source=crowdstrike | premium license + Falcon OAuth creds |
 
 ## Enable a provider
 
@@ -24,6 +26,31 @@ LS_MAXMIND_LICENSE_KEY=your-maxmind-license-key
 ```
 
 Spamhaus + OWASP CRS are on by default — no API key required.
+
+## Commercial threat-intel feeds (`emerging_threats`, `crowdstrike`)
+
+Premium buyers who already license commercial threat intel can plug it in. Both feeds
+import IP reputation into `ls_acl` as block-tier rows and are gated by a valid premium
+license. Important: the license gates the *integration*; the *data* still requires the
+operator's own vendor subscription.
+
+```env
+# Proofpoint Emerging Threats (ET Pro / Intelligence)
+LS_ET_ENABLED=true
+LS_ET_TOKEN=your-et-token
+LS_ET_MIN_SCORE=70          # 0-127 reputation threshold
+
+# CrowdStrike Falcon Intelligence
+LS_CROWDSTRIKE_ENABLED=true
+LS_CROWDSTRIKE_CLIENT_ID=your-client-id
+LS_CROWDSTRIKE_CLIENT_SECRET=your-client-secret
+LS_CROWDSTRIKE_MIN_CONFIDENCE=high   # high | medium | low
+```
+
+CrowdStrike authenticates via OAuth2 client credentials; the token is cached until just
+before it expires so repeat syncs do not re-authenticate. Both feeds enforce a
+`max_import` cap and log (never silently drop) when the cap truncates a feed. Vendor
+tokens/secrets are treated as secrets and are never logged.
 
 ## Sync schedule
 
