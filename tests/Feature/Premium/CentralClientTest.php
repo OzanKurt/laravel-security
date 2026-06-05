@@ -295,4 +295,72 @@ class CentralClientTest extends TestCase
                 && $request->hasHeader('X-Shield-Nonce');
         });
     }
+
+    public function testPullFeedSendsBearerSiteHeaderAndSinceCursor(): void
+    {
+        config([
+            'shield.premium.license_key' => 'realtime-key-123',
+            'shield.premium.feed_pull_url' => 'https://central.test/api/feeds/pull',
+            'app.url' => 'https://my-site.test',
+        ]);
+        Http::fake([
+            'central.test/api/feeds/pull*' => Http::response(['cursor' => 'c2', 'waf_rules' => [], 'acl' => []], 200),
+        ]);
+
+        $client = $this->makeClient(hasKey: true);
+        $payload = $client->pullFeed('c1');
+
+        $this->assertSame('c2', $payload['cursor']);
+        Http::assertSent(function ($request) {
+            return str_starts_with($request->url(), 'https://central.test/api/feeds/pull')
+                && str_contains($request->url(), 'since=c1')
+                && $request->hasHeader('Authorization', 'Bearer realtime-key-123')
+                && $request->hasHeader('X-Shield-Site', 'https://my-site.test');
+        });
+    }
+
+    public function testPullFeedOmitsSinceWhenCursorNull(): void
+    {
+        config([
+            'shield.premium.license_key' => 'k',
+            'shield.premium.feed_pull_url' => 'https://central.test/api/feeds/pull',
+        ]);
+        Http::fake(['central.test/*' => Http::response(['cursor' => 'c1'], 200)]);
+
+        $client = $this->makeClient(hasKey: true);
+        $client->pullFeed(null);
+
+        Http::assertSent(fn ($request) => ! str_contains($request->url(), 'since='));
+    }
+
+    public function testPullFeedThrowsWhenUrlNotConfigured(): void
+    {
+        config(['shield.premium.feed_pull_url' => '']);
+        $client = $this->makeClient(hasKey: true);
+
+        $this->expectException(\RuntimeException::class);
+        $client->pullFeed(null);
+    }
+
+    public function testPullFeedThrowsWhenNoLicenseKey(): void
+    {
+        config(['shield.premium.feed_pull_url' => 'https://central.test/api/feeds/pull']);
+        $client = $this->makeClient(hasKey: false);
+
+        $this->expectException(\RuntimeException::class);
+        $client->pullFeed(null);
+    }
+
+    public function testPullFeedThrowsOnNon2xx(): void
+    {
+        config([
+            'shield.premium.license_key' => 'k',
+            'shield.premium.feed_pull_url' => 'https://central.test/api/feeds/pull',
+        ]);
+        Http::fake(['central.test/*' => Http::response('payment required', 402)]);
+        $client = $this->makeClient(hasKey: true);
+
+        $this->expectException(\RuntimeException::class);
+        $client->pullFeed(null);
+    }
 }

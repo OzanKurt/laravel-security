@@ -128,6 +128,48 @@ class CentralClient
     }
 
     /**
+     * Pull a threat-feed delta from Central. Premium-only: the realtime feed
+     * provider (ShieldRealtimeProvider) calls this on a short interval to fetch
+     * WAF rules + ACL entries published since the last cursor.
+     *
+     * Unlike the outbound push methods this is a bearer-authenticated GET:
+     * Central gates feed access on the license key server-side, so an absent or
+     * invalid key (or a locally patched feature check) receives nothing.
+     *
+     * Throws RuntimeException on missing config, missing key, or any non-2xx /
+     * transport error so the calling provider records a SyncResult error rather
+     * than silently importing an empty delta.
+     *
+     * @return array<string,mixed> decoded feed payload
+     */
+    public function pullFeed(?string $cursor): array
+    {
+        $url = (string) config('shield.premium.feed_pull_url', '');
+        if ($url === '') {
+            throw new \RuntimeException('feed_pull_url_not_configured');
+        }
+        if (! $this->checker->hasKey()) {
+            throw new \RuntimeException('no_license_key');
+        }
+
+        $query = ($cursor !== null && $cursor !== '') ? ['since' => $cursor] : [];
+
+        $response = Http::timeout((int) config('shield.premium.http_timeout', 10))
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . (string) config('shield.premium.license_key'),
+                'Accept' => 'application/json',
+                'X-Shield-Site' => (string) config('app.url'),
+            ])
+            ->get($url, $query);
+
+        if (! $response->successful()) {
+            throw new \RuntimeException("feed_pull_http_{$response->status()}");
+        }
+
+        return (array) $response->json();
+    }
+
+    /**
      * Resolve the test/ping URL. Three sources, in precedence:
      *   1. Explicit shield.premium.test_ping_url (or LS_PREMIUM_TEST_PING_URL)
      *   2. Heartbeat URL via path replacement — works for the default

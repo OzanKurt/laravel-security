@@ -315,6 +315,17 @@ class ShieldServiceProvider extends ServiceProvider
                 ->command('shield:feed-sync')
                 ->cron(config('shield.threat_feed.sync_cron', '0 3 * * *'));
 
+            // Premium realtime feed: pull deltas from Central every few minutes.
+            // FeedRunner skips shield_realtime without a valid license, so this
+            // schedule is a no-op on free installs.
+            if (config('shield.threat_feed.shield_realtime.enabled', true)) {
+                $minutes = max(1, (int) config('shield.threat_feed.shield_realtime.interval_minutes', 5));
+                app(Schedule::class)
+                    ->command('shield:feed-sync --source=shield_realtime')
+                    ->cron($this->minutesToCron($minutes))
+                    ->withoutOverlapping();
+            }
+
             foreach ((array) config('shield.reports', []) as $cadence => $cfg) {
                 if (! ($cfg['enabled'] ?? false)) continue;
                 app(Schedule::class)
