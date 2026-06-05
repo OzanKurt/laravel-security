@@ -4,17 +4,24 @@ namespace OzanKurt\Shield\Services\Acl\Matchers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use OzanKurt\Shield\Services\Acl\GeoDatabaseResolver;
 use Throwable;
 
 /**
- * Resolves the request IP to an ISO 3166-1 alpha-2 country code via the
- * MaxMind GeoLite2-Country MMDB (synced by MaxMindGeoLite2Provider in 1.1.0).
+ * Resolves the request IP to an ISO 3166-1 alpha-2 country code via MaxMind.
  *
- * Falls back gracefully (returns false) when the DB isn't present or
- * geoip2/geoip2 isn't installed.
+ * The database path comes from GeoDatabaseResolver, which prefers the premium
+ * GeoIP2 City/Country DB when present and falls back to the free GeoLite2
+ * Country DB. Country blocking therefore stays free; premium buyers simply get
+ * higher-accuracy data automatically.
+ *
+ * Falls back gracefully (returns false) when no DB is present or geoip2/geoip2
+ * isn't installed.
  */
 class CountryMatcher implements AclMatcher
 {
+    public function __construct(private GeoDatabaseResolver $geo) {}
+
     public function matches(Request $request, string $value): bool
     {
         $code = $this->lookupCountryCode($this->resolveClientIp($request));
@@ -33,10 +40,13 @@ class CountryMatcher implements AclMatcher
             return null;
         }
 
-        return Cache::remember('shield.geo.country.' . md5($ip), 86400, function () use ($ip) {
+        $dbPath = $this->geo->countryDbPath();
+        if ($dbPath === null) {
+            return null;
+        }
+
+        return Cache::remember('shield.geo.country.' . md5($ip), 86400, function () use ($ip, $dbPath) {
             try {
-                $dbPath = storage_path('shield/geo/GeoLite2-Country.mmdb');
-                if (! is_file($dbPath)) return null;
                 $reader = new \GeoIp2\Database\Reader($dbPath);
                 return $reader->country($ip)->country->isoCode;
             } catch (Throwable) {

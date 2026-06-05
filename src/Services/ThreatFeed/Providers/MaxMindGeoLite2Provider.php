@@ -4,6 +4,7 @@ namespace OzanKurt\Shield\Services\ThreatFeed\Providers;
 
 use Illuminate\Support\Facades\Http;
 use OzanKurt\Shield\Contracts\ThreatFeedProvider;
+use OzanKurt\Shield\Services\ThreatFeed\Support\ExtractsMmdb;
 use OzanKurt\Shield\Services\ThreatFeed\SyncResult;
 
 /**
@@ -17,6 +18,8 @@ use OzanKurt\Shield\Services\ThreatFeed\SyncResult;
  */
 class MaxMindGeoLite2Provider implements ThreatFeedProvider
 {
+    use ExtractsMmdb;
+
     public function __construct() {}
 
     public function name(): string { return 'maxmind_geolite2'; }
@@ -62,26 +65,5 @@ class MaxMindGeoLite2Provider implements ThreatFeedProvider
         }
 
         return new SyncResult($this->name(), imported: $imported);
-    }
-
-    private function extractMmdb(string $tarGzPath, string $targetDir, string $expectedFilename): bool
-    {
-        $phar = new \PharData($tarGzPath);
-        $phar->decompress(); // .tar
-        $tarPath = preg_replace('/\.gz$/', '', $tarGzPath);
-        $tar = new \PharData($tarPath);
-
-        foreach ($tar as $file) {
-            if (str_ends_with($file->getFilename(), '.mmdb')) {
-                copy($file->getPathname(), $targetDir . '/' . $expectedFilename);
-                @unlink($tarGzPath);
-                @unlink($tarPath);
-                return true;
-            }
-        }
-
-        @unlink($tarGzPath);
-        @unlink($tarPath);
-        return false;
     }
 }

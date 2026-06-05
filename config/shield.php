@@ -814,6 +814,7 @@ return [
             \OzanKurt\Shield\Services\ThreatFeed\Providers\OwaspCrsProvider::class,
             \OzanKurt\Shield\Services\ThreatFeed\Providers\MaxMindGeoLite2Provider::class,
             \OzanKurt\Shield\Services\ThreatFeed\Providers\ShieldRealtimeProvider::class,
+            \OzanKurt\Shield\Services\ThreatFeed\Providers\MaxMindGeoIp2PremiumProvider::class,
         ],
         'sync_cron' => '0 3 * * *',
 
@@ -839,6 +840,17 @@ return [
         'maxmind' => [
             'enabled' => env('LS_MAXMIND_ENABLED', false),
             'license_key' => env('LS_MAXMIND_LICENSE_KEY'),
+        ],
+
+        // Premium GeoIP2 (paid MaxMind account). Downloads higher-accuracy
+        // City/Country/ISP databases to storage/shield/geo/premium/. Gated by a
+        // valid premium license in FeedRunner; country/ASN blocking stays free
+        // on GeoLite2, city/region precision is the premium upsell.
+        'maxmind_premium' => [
+            'enabled' => env('LS_MAXMIND_PREMIUM_ENABLED', false),
+            'account_id' => env('LS_MAXMIND_PREMIUM_ACCOUNT_ID'),
+            'license_key' => env('LS_MAXMIND_PREMIUM_LICENSE_KEY'),
+            'editions' => ['GeoIP2-Country', 'GeoIP2-City'],
         ],
     ],
 
