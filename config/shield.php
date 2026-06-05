@@ -598,7 +598,15 @@ return [
             'max_file_bytes' => 5 * 1024 * 1024, // 5 MB
         ],
         'signatures' => [
-            'url' => env('LS_SIGNATURE_URL', 'https://api.github.com/repos/OzanKurt/laravel-shield-signatures/releases/latest'),
+            // Premium channel: newest signatures immediately (releases/latest).
+            'premium_url' => env('LS_SIGNATURE_PREMIUM_URL', 'https://api.github.com/repos/OzanKurt/laravel-shield-signatures/releases/latest'),
+            // Free channel: same signatures on a ~30 day lag via a moving "free"
+            // release tag, matching Wordfence's free-tier signature delay.
+            'free_url' => env('LS_SIGNATURE_FREE_URL', 'https://api.github.com/repos/OzanKurt/laravel-shield-signatures/releases/tags/free'),
+            // Legacy single URL (pre-channel). Still honoured as the fallback for
+            // either channel so existing installs keep working after upgrade.
+            'url' => env('LS_SIGNATURE_URL'),
+            // Optional hard pin: overrides channel selection -> releases/tags/<pin>.
             'pin' => env('LS_SIGNATURE_PIN'),
             'sync_cron' => '0 5 * * *',
         ],
