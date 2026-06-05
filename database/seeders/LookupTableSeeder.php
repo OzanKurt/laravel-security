@@ -171,7 +171,7 @@ class LookupTableSeeder extends Seeder
             'config.drift', 'file.drift', 'composer.changed', '.env.changed',
             'acl.added', 'acl.updated', 'acl.deleted', 'acl.expired',
             'scanner.started', 'scanner.completed', 'scanner.finding', 'scanner.quarantine',
-            'threat_feed.sync_started', 'threat_feed.sync_completed', 'threat_feed.sync_failed',
+            'threat_feed.sync_started', 'threat_feed.sync_completed', 'threat_feed.sync_failed', 'threat_feed.sync_skipped',
             'notification.sent',
             'dashboard.action',
             'http.outbound',

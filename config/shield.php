@@ -805,8 +805,18 @@ return [
             \OzanKurt\Shield\Services\ThreatFeed\Providers\AbuseIpDbProvider::class,
             \OzanKurt\Shield\Services\ThreatFeed\Providers\OwaspCrsProvider::class,
             \OzanKurt\Shield\Services\ThreatFeed\Providers\MaxMindGeoLite2Provider::class,
+            \OzanKurt\Shield\Services\ThreatFeed\Providers\ShieldRealtimeProvider::class,
         ],
         'sync_cron' => '0 3 * * *',
+
+        // Premium realtime feed (shield_realtime). Pulls WAF + ACL deltas from
+        // Central on a short interval. Gated by a valid premium license in
+        // FeedRunner; inert on free installs. interval_minutes drives the
+        // dedicated short-interval schedule (separate from the daily sync_cron).
+        'shield_realtime' => [
+            'enabled' => env('LS_REALTIME_FEED_ENABLED', true),
+            'interval_minutes' => (int) env('LS_REALTIME_FEED_INTERVAL', 5),
+        ],
         'spamhaus' => [
             'enabled' => env('LS_SPAMHAUS_ENABLED', true),
         ],
@@ -938,6 +948,14 @@ return [
         'webhook_ingest_url' => env(
             'LS_PREMIUM_WEBHOOK_INGEST_URL',
             'https://laravel-shield.ozankurt.com/api/webhooks/ingest'
+        ),
+
+        // Realtime threat-feed pull endpoint on Central. The shield_realtime
+        // provider GETs this (bearer = license key) for WAF + ACL deltas since
+        // the last cursor. Central gates access by license server-side.
+        'feed_pull_url' => env(
+            'LS_PREMIUM_FEED_PULL_URL',
+            'https://laravel-shield.ozankurt.com/api/feeds/pull'
         ),
 
         // Connectivity-test echo endpoint. Used by shield:central-test +

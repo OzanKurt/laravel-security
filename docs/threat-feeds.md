@@ -10,6 +10,7 @@ Pull-based providers that import IP blocklists + WAF rules + GeoIP databases fro
 | `abuseipdb` | AbuseIPDB blacklist API (free tier 1k requests/day) | `ls_acl` as IPs, block action, 24h expiry | `LS_ABUSEIPDB_KEY` |
 | `maxmind_geolite2` | MaxMind GeoLite2 Country + ASN DBs | `storage/shield/geo/*.mmdb` — activates country/ASN ACL matchers | `LS_MAXMIND_LICENSE_KEY` + `composer require geoip2/geoip2` |
 | `owasp_crs` | OWASP ModSecurity CRS rule subset (via our curated JSON mirror) | `ls_waf_rules` with source=owasp_crs | none |
+| `shield_realtime` | Laravel Shield Central realtime delta feed (**Premium**) | `ls_waf_rules` + `ls_acl` with source=shield_realtime | valid premium license |
 
 ## Enable a provider
 
@@ -24,6 +25,28 @@ LS_MAXMIND_LICENSE_KEY=your-maxmind-license-key
 ```
 
 Spamhaus + OWASP CRS are on by default — no API key required.
+
+## Premium realtime feed (`shield_realtime`)
+
+Free providers sync once daily. The premium `shield_realtime` provider pulls WAF-rule
+and ACL deltas from the Laravel Shield Central app every few minutes, so a licensed
+site gets new firewall rules and malicious IPs within minutes instead of the next day.
+This is the Laravel Shield equivalent of Wordfence Premium's real-time rules + blocklist.
+
+```env
+# On by default; pulls every 5 minutes. No-op without a premium license.
+LS_REALTIME_FEED_ENABLED=true
+LS_REALTIME_FEED_INTERVAL=5
+# Override only for staging/self-hosted Central:
+# LS_PREMIUM_FEED_PULL_URL=https://laravel-shield.ozankurt.com/api/feeds/pull
+```
+
+`FeedRunner` skips `shield_realtime` unless a valid premium license is active
+(`Shield::isFeatureAvailable('premium_threat_feeds')`), and Central gates the pull
+endpoint on the license key server-side, so the feature is inert on free installs even
+if the local license check is patched. Deltas upsert by `source_ref` (WAF) and
+`(kind, value)` (ACL), bump on `version`, and revocations soft-disable rather than
+hard-delete. The pull cursor is cached at `shield.threat_feed.shield_realtime.cursor`.
 
 ## Sync schedule
 
