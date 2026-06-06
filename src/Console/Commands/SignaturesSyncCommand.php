@@ -40,7 +40,7 @@ class SignaturesSyncCommand extends Command
 
         try {
             $response = Http::timeout(15)
-                ->withHeaders(['Accept' => 'application/vnd.github+json'])
+                ->withHeaders($this->requestHeaders())
                 ->get($url);
         } catch (Throwable $e) {
             $this->warn("Remote unreachable ({$e->getMessage()}). Falling back to embedded signatures.");
@@ -53,7 +53,7 @@ class SignaturesSyncCommand extends Command
         }
 
         $payload = $response->json();
-        $signatures = $this->extractSignaturesFromRelease($payload);
+        $signatures = $this->extractSignatures($payload);
 
         if (empty($signatures)) {
             $this->warn('No signatures found in remote payload. Falling back to embedded signatures.');
@@ -129,6 +129,65 @@ class SignaturesSyncCommand extends Command
     {
         // /releases/latest → /releases/tags/<pin>
         return preg_replace('#/releases/latest$#', '/releases/tags/' . rawurlencode($pin), $url);
+    }
+
+    /**
+     * Headers for the signature request. Sends the premium license key as a
+     * bearer token so the Central app's /api/signatures/premium endpoint can
+     * authorize the fresh channel server-side. The public free channel ignores
+     * it. Harmless to always send when a key is configured.
+     *
+     * @return array<string,string>
+     */
+    private function requestHeaders(): array
+    {
+        $headers = ['Accept' => 'application/json'];
+
+        $key = (string) config('shield.premium.license_key', '');
+        if ($key !== '') {
+            $headers['Authorization'] = 'Bearer ' . $key;
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Normalize a signature list from a response payload. The Central app's
+     * /api/signatures/* endpoints return a direct JSON array of signatures;
+     * legacy GitHub Releases payloads (signatures.json asset, or fenced JSON in
+     * the release body) are still supported for back-compat with a pinned tag.
+     *
+     * @param  mixed  $payload
+     */
+    private function extractSignatures($payload): array
+    {
+        if (! is_array($payload)) {
+            return [];
+        }
+
+        // Direct signature array — the Central app channel response.
+        if ($this->looksLikeSignatureList($payload)) {
+            return $payload;
+        }
+
+        return $this->extractSignaturesFromRelease($payload);
+    }
+
+    /**
+     * Whether the payload is already a flat list of signature objects
+     * (each carrying a `ref`), as returned by the Central app.
+     *
+     * @param  array<mixed>  $payload
+     */
+    private function looksLikeSignatureList(array $payload): bool
+    {
+        if ($payload === [] || ! array_is_list($payload)) {
+            return false;
+        }
+
+        $first = $payload[0];
+
+        return is_array($first) && isset($first['ref']);
     }
 
     /**

@@ -6,7 +6,7 @@ Premium features ship in the **same package** as free features. There's no separ
 
 - **Real-time threat feed sync** — free tier syncs daily; premium polls every few minutes
 - **Real-time IP blocklist subscription** — same idea for blocklists
-- **Real-time malware signatures** — premium fetches `releases/latest`; free uses a moving `free` tag lagging ~30 days (matches Wordfence's free-tier signature delay). Resolved per-run via `premium_signatures`; the channel is recorded in the `threat_feed.sync_completed` audit meta
+- **Real-time malware signatures** — served by the Central app: premium hits `/api/signatures/premium` (fresh, gated server-side on `premium_signatures`, authorized with your license bearer); free hits the public `/api/signatures/free` lagging ~30 days (matches Wordfence's free-tier signature delay). Resolved per-run via `premium_signatures`; the channel is recorded in the `threat_feed.sync_completed` audit meta
 - **Hosted audit-log sink** — forward audit events to the Shield Central app for cross-site SIEM aggregation
 - **Future SIEM dashboard integration** — first-class consumer of the webhook channel
 

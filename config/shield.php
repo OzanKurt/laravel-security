@@ -598,15 +598,18 @@ return [
             'max_file_bytes' => 5 * 1024 * 1024, // 5 MB
         ],
         'signatures' => [
-            // Premium channel: newest signatures immediately (releases/latest).
-            'premium_url' => env('LS_SIGNATURE_PREMIUM_URL', 'https://api.github.com/repos/OzanKurt/laravel-shield-signatures/releases/latest'),
-            // Free channel: same signatures on a ~30 day lag via a moving "free"
-            // release tag, matching Wordfence's free-tier signature delay.
-            'free_url' => env('LS_SIGNATURE_FREE_URL', 'https://api.github.com/repos/OzanKurt/laravel-shield-signatures/releases/tags/free'),
+            // Premium channel: newest signatures immediately. Served by the
+            // Central app, gated server-side on the premium_signatures license
+            // feature (the plugin sends its license key as a bearer token).
+            'premium_url' => env('LS_SIGNATURE_PREMIUM_URL', 'https://laravel-shield.ozankurt.com/api/signatures/premium'),
+            // Free channel: same signatures on a ~30 day lag (public endpoint),
+            // matching Wordfence's free-tier signature delay.
+            'free_url' => env('LS_SIGNATURE_FREE_URL', 'https://laravel-shield.ozankurt.com/api/signatures/free'),
             // Legacy single URL (pre-channel). Still honoured as the fallback for
             // either channel so existing installs keep working after upgrade.
             'url' => env('LS_SIGNATURE_URL'),
-            // Optional hard pin: overrides channel selection -> releases/tags/<pin>.
+            // Optional hard pin for a legacy GitHub Releases tag. With the
+            // Central app channels this is unused; left for back-compat.
             'pin' => env('LS_SIGNATURE_PIN'),
             'sync_cron' => '0 5 * * *',
         ],
