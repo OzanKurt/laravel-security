@@ -99,6 +99,14 @@ class DiscordMessage
         return $this;
     }
 
+    /** Set an arbitrary embed colour (6-hex-digit string, no leading #). */
+    public function color(string $hex): self
+    {
+        $this->color = $hex;
+
+        return $this;
+    }
+
     public function fields(array $fields, bool $inline = true): self
     {
         foreach ($fields as $label => $value) {

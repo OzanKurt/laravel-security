@@ -47,6 +47,12 @@ return [
         ],
     ],
 
+    'integrity_changed' => [
+        'title' => 'File integrity scan — :disk (:time)',
+        'summary' => ':new new · :modified modified · :deleted deleted · :total files total',
+        'drift' => ':count files still differ from the approved baseline.',
+    ],
+
     'security_report' => [
         'mail' => [
             'subject' => 'Security Report for :domain',

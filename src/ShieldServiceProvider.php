@@ -249,6 +249,10 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app['events']->listen(AttackDetectedEvent::class, AttackDetectedListener::class);
         $this->app['events']->listen(AuthLoginEvent::class, SuccessfulLoginListener::class);
         $this->app['events']->listen(AuthFailedEvent::class, FailedLoginListener::class);
+        $this->app['events']->listen(
+            \OzanKurt\Shield\Events\IntegrityScanCompletedEvent::class,
+            \OzanKurt\Shield\Listeners\IntegrityScanCompletedListener::class
+        );
 
         \OzanKurt\Shield\Models\Acl::observe(\OzanKurt\Shield\Observers\AclObserver::class);
         \OzanKurt\Shield\Models\WafRule::observe(\OzanKurt\Shield\Observers\WafRuleObserver::class);
