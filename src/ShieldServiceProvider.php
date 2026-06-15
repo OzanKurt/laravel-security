@@ -175,6 +175,13 @@ class ShieldServiceProvider extends ServiceProvider
             $router->get('scanner/signatures', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'signatures'])->name('scanner.signatures');
             $router->post('scanner/run', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'startScan'])->name('scanner.run');
 
+            // File integrity
+            $router->get('integrity', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'index'])->name('integrity.index');
+            $router->get('integrity/runs', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'runs'])->name('integrity.runs');
+            $router->get('integrity/changes', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'changes'])->name('integrity.changes');
+            $router->post('integrity/scan', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'scan'])->name('integrity.scan');
+            $router->post('integrity/bless', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'bless'])->name('integrity.bless');
+
             // Threat feed
             $router->get('threat-feed', function () {
                 return app(\OzanKurt\Shield\Http\Controllers\ThreatFeedController::class)->index(
