@@ -22,11 +22,6 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     public $log;
 
     /**
-     * The notification config.
-     */
-    public array $notifications;
-
-    /**
      * Create a notification instance.
      *
      * @param  object  $log
@@ -34,21 +29,20 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     public function __construct($log)
     {
         $this->log = $log;
-        $this->notifications = config('shield.notifications');
     }
 
     /**
      * Get the notification's channels.
      *
      * @param  mixed  $notifiable
-     * @return array|string
+     * @return array
      */
-    public function via($notifiable)
+    public function via($notifiable): array
     {
         $channels = [];
 
-        foreach ($this->notifications as $channel => $settings) {
-            if (empty($settings['enabled'])) {
+        foreach (config('shield.notifications.attack_detected.channels', []) as $channel) {
+            if (! config("shield.notification_channels.{$channel}.enabled")) {
                 continue;
             }
 
@@ -59,14 +53,22 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's queues.
-     * @return array|string
+     * Map each configured channel to the queue it should be sent on.
+     *
+     * Keyed by the same channel identifier `via()` returns (the channel class
+     * for Discord, the channel name otherwise) so Laravel can resolve it.
+     *
+     * @return array
      */
     public function viaQueues(): array
     {
-        return array_map(function ($channel) {
-            return $channel['queue'] ?? 'default';
-        }, $this->notifications);
+        $queues = [];
+
+        foreach (config('shield.notifications.attack_detected.channels', []) as $channel) {
+            $queues[$this->getChannelClass($channel)] = config("shield.notification_channels.{$channel}.queue", 'default');
+        }
+
+        return $queues;
     }
 
     /**
@@ -91,7 +93,7 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
         ]);
 
         return (new MailMessage)
-            ->from($this->notifications['mail']['from'], $this->notifications['mail']['name'])
+            ->from(config('shield.notification_channels.mail.from'), config('shield.notification_channels.mail.name'))
             ->subject($subject)
             ->line($message);
     }
@@ -110,8 +112,8 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
 
         return (new SlackMessage)
             ->error()
-            ->from($this->notifications['slack']['from'], $this->notifications['slack']['emoji'])
-            ->to($this->notifications['slack']['channel'])
+            ->from(config('shield.notification_channels.slack.from'), config('shield.notification_channels.slack.emoji'))
+            ->to(config('shield.notification_channels.slack.channel'))
             ->content($message)
             ->attachment(function ($attachment) {
                 $attachment->fields([
@@ -129,29 +131,24 @@ class AttackDetectedNotification extends Notification implements ShouldQueue
             'domain' => request()->getHttpHost(),
         ]);
 
-        try {
-            $url = $this->log->url;
-            $url = preg_replace('/^https?:\/\/[^\/]+/', '', $url);
+        $url = preg_replace('/^https?:\/\/[^\/]+/', '', (string) $this->log->url);
 
-            return (new DiscordMessage)
-                ->from(config('shield.notifications.discord.from'), config('shield.notifications.discord.from_img'))
-                ->url(config('shield.notifications.discord.route'))
-                ->title(config('shield.notifications.discord.title'))
-                ->description($body)
-                ->fields([
-                    'IP' => $this->log->ip,
-                    'Type' => ucfirst($this->log->middleware),
-                    'User ID' => $this->log->user_id === 0 ? 'Guest' : $this->log->user_id,
-                ], true)
-                ->fields([
-                    'URL' => $url,
-                ], false)
-                ->timestamp(now())
-                ->footer(config('shield.notifications.discord.footer'), config('shield.notifications.discord.footer_img'))
-                ->warning();
-        } catch (\Throwable $exception) {
-            report($exception);
-        }
+        return (new DiscordMessage)
+            ->from(config('shield.notification_channels.discord.from'), config('shield.notification_channels.discord.from_img'))
+            ->url(config('shield.notification_channels.discord.route'))
+            ->title(config('shield.notification_channels.discord.title'))
+            ->description($body)
+            ->fields([
+                'IP' => $this->log->ip,
+                'Type' => ucfirst($this->log->middleware),
+                'User ID' => $this->log->user_id === 0 ? 'Guest' : $this->log->user_id,
+            ], true)
+            ->fields([
+                'URL' => $url,
+            ], false)
+            ->timestamp(now())
+            ->footer(config('shield.notification_channels.discord.footer'), config('shield.notification_channels.discord.footer_img'))
+            ->warning();
     }
 
     public function getChannelClass(string $channel): string

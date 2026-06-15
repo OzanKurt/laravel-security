@@ -16,54 +16,58 @@ class SecurityReportNotification extends Notification implements ShouldQueue
     use Queueable;
 
     /**
-     * The notification config.
+     * The configured event key this notification is delivered under.
      */
-    public array $notifications = [];
+    protected string $event = 'security_report';
 
     /**
      * Create a notification instance.
-     *
-     * @param  object  $log
      */
     public function __construct(
-        public $recentlyModifiedFiles = [],
+        public array $recentlyModifiedFiles,
         public Carbon $start,
         public Carbon $end,
-    )
-    {
+    ) {
     }
 
     /**
      * Get the notification's channels.
      *
      * @param  mixed  $notifiable
-     * @return array|string
+     * @return array
      */
-    public function via($notifiable)
+    public function via($notifiable): array
     {
         $channels = [];
 
-//        foreach ($this->notifications as $channel => $settings) {
-//            if (empty($settings['enabled'])) {
-//                continue;
-//            }
-//
-//            $channels[] = $this->getChannelClass($channel);
-//        }
-        $channels = ['mail'];
+        foreach (config("shield.notifications.{$this->event}.channels", []) as $channel) {
+            if (! config("shield.notification_channels.{$channel}.enabled")) {
+                continue;
+            }
+
+            $channels[] = $this->getChannelClass($channel);
+        }
 
         return $channels;
     }
 
     /**
-     * Get the notification's queues.
-     * @return array|string
+     * Map each configured channel to the queue it should be sent on.
+     *
+     * Keyed by the same channel identifier `via()` returns (the channel class
+     * for Discord, the channel name otherwise) so Laravel can resolve it.
+     *
+     * @return array
      */
     public function viaQueues(): array
     {
-        return array_map(function ($channel) {
-            return $channel['queue'] ?? 'default';
-        }, $this->notifications);
+        $queues = [];
+
+        foreach (config("shield.notifications.{$this->event}.channels", []) as $channel) {
+            $queues[$this->getChannelClass($channel)] = config("shield.notification_channels.{$channel}.queue", 'default');
+        }
+
+        return $queues;
     }
 
     /**
@@ -75,6 +79,11 @@ class SecurityReportNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         $domain = request()->getSchemeAndHttpHost();
+
+        $subject = trans('shield::notifications.security_report.mail.subject', [
+            'domain' => $domain,
+        ]);
+
         $message = trans('shield::notifications.security_report.mail.message', [
             'domain' => "**[$domain]($domain)**",
             'start' => "**{$this->start->format('d/m/Y')}**",
@@ -87,8 +96,8 @@ class SecurityReportNotification extends Notification implements ShouldQueue
                 'message' => $message,
                 'recentlyModifiedFiles' => $this->recentlyModifiedFiles,
             ])
-//            ->from($this->notifications['mail']['from'], $this->notifications['mail']['name'])
-            ->subject($subject ?? 'Security Report')
+            ->from(config('shield.notification_channels.mail.from'), config('shield.notification_channels.mail.name'))
+            ->subject($subject)
             ->action('View Security Dashboard', app('shield')->route('dashboard.index'));
     }
 
@@ -100,52 +109,34 @@ class SecurityReportNotification extends Notification implements ShouldQueue
      */
     public function toSlack($notifiable)
     {
-        $message = trans('shield::notifications.slack.message', [
+        $message = trans('shield::notifications.security_report.slack.message', [
             'domain' => request()->getHttpHost(),
+            'start' => $this->start->format('d/m/Y'),
+            'end' => $this->end->format('d/m/Y'),
         ]);
 
         return (new SlackMessage)
-            ->error()
-            ->from($this->notifications['slack']['from'], $this->notifications['slack']['emoji'])
-            ->to($this->notifications['slack']['channel'])
-            ->content($message)
-            ->attachment(function ($attachment) {
-                $attachment->fields([
-                    'IP' => $this->log->ip,
-                    'Type' => ucfirst($this->log->middleware),
-                    'User ID' => $this->log->user_id,
-                    'URL' => $this->log->url,
-                ]);
-            });
+            ->from(config('shield.notification_channels.slack.from'), config('shield.notification_channels.slack.emoji'))
+            ->to(config('shield.notification_channels.slack.channel'))
+            ->content($message);
     }
 
     public function toDiscord()
     {
-        $body = trans('shield::notifications.discord.message', [
+        $body = trans('shield::notifications.security_report.discord.message', [
             'domain' => request()->getHttpHost(),
+            'start' => $this->start->format('d/m/Y'),
+            'end' => $this->end->format('d/m/Y'),
         ]);
 
         return (new DiscordMessage)
-            ->from('test', 'https://ozankurt.com/images/min/ozan_kurt.png')
-            ->url('https://ozankurt.com/images/min/ozan_kurt.png')
-            ->title('title')
-            ->description('description')
-            ->fields([
-                'label1' => 'test',
-                'label2' => 'test',
-                'label3' => 'test',
-            ], true)
-            ->fields([
-                'label4' => 'test',
-                'label5' => 'test',
-            ], true)
-            ->fields([
-                'label6' => 'test',
-            ], false)
-            ->timestamp(now()->addWeek())
-            ->footer('footer')
-            ->success()
-            ;
+            ->from(config('shield.notification_channels.discord.from'), config('shield.notification_channels.discord.from_img'))
+            ->url(config('shield.notification_channels.discord.route'))
+            ->title(config('shield.notification_channels.discord.title'))
+            ->description($body)
+            ->timestamp(now())
+            ->footer(config('shield.notification_channels.discord.footer'), config('shield.notification_channels.discord.footer_img'))
+            ->success();
     }
 
     public function getChannelClass(string $channel): string
