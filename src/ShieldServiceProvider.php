@@ -273,6 +273,8 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\ScanCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ScanStatusCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ScanCancelCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityScanCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityBlessCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineListCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineRestoreCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ClamavStatusCommand::class);
@@ -305,6 +307,13 @@ class ShieldServiceProvider extends ServiceProvider
                 app(Schedule::class)
                     ->command('shield:audit-drift')
                     ->cron(config('shield.audit.drift.cron', '0 4 * * *'));
+            }
+
+            if (config('shield.integrity.schedule.enabled', false)) {
+                app(Schedule::class)
+                    ->command('shield:integrity')
+                    ->cron(config('shield.integrity.schedule.cron', '0 * * * *'))
+                    ->withoutOverlapping();
             }
 
             app(Schedule::class)

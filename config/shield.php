@@ -105,6 +105,14 @@ return [
                 'discord',
             ],
         ],
+
+        'integrity_changed' => [
+            'enabled' => env('FIREWALL_NOTIFICATIONS_INTEGRITY_CHANGED_ENABLED', false),
+            'channels' => [
+                'mail',
+                'discord',
+            ],
+        ],
     ],
 
     'notification_channels' => [
@@ -624,6 +632,71 @@ return [
             'enabled' => env('LS_WATCH_ENABLED', false),
             'paths' => [],
             'poll_interval_ms' => env('LS_WATCH_POLL_MS', 3000),
+        ],
+    ],
+
+    'integrity' => [
+        'enabled' => env('LS_INTEGRITY_ENABLED', false),
+
+        'disks' => [
+            'app' => [
+                'roots' => [base_path()],
+                'include' => ['**/*'],
+                'exclude' => [
+                    'vendor/**', 'node_modules/**', '.git/**',
+                    'storage/framework/**', 'storage/logs/**', 'bootstrap/cache/**',
+                    'storage/shield/**', // the baseline artifact lives here
+                ],
+                'follow_symlinks' => false,
+                'max_file_size' => 50 * 1024 * 1024, // size-only above this, EXCEPT script extensions
+            ],
+        ],
+
+        'hash_algo' => 'sha256',
+        'queue' => env('LS_INTEGRITY_QUEUE', 'shield-integrity'),
+
+        'schedule' => [
+            'enabled' => env('LS_INTEGRITY_SCHEDULE_ENABLED', false),
+            'cron' => env('LS_INTEGRITY_SCAN_CRON', '0 * * * *'),
+        ],
+
+        'baseline' => [
+            'auto_bless_on_first_run' => false,
+            'sign_artifact' => true,
+            // A key FILE outside the scan root is preferred; falls back to the env value.
+            'hmac_key_path' => env('LS_INTEGRITY_HMAC_KEY_PATH'),
+            'hmac_key' => env('LS_INTEGRITY_HMAC_KEY'),
+        ],
+
+        'limits' => [
+            'max_files' => 500000,
+            'max_iterations' => 1000000,
+            'max_runtime' => 3600,
+            'max_persisted_changes_per_run' => 5000,
+        ],
+
+        'notify' => [
+            'suppress_when_no_changes' => true,
+            'send_all_clear' => false,
+            'max_paths_per_group' => 15,
+            'timezone' => 'UTC',
+            'disclose_paths_to_external_channels' => false,
+        ],
+
+        'retention' => [
+            'runs_days' => 90,
+            'changes_days' => 30,
+        ],
+
+        // Ordered, first match wins. {public_docroot} expands to the resolved public root.
+        'severity_rules' => [
+            ['when' => ['path_any' => ['public/**', 'storage/app/public/**', '{public_docroot}/**'], 'ext_any' => ['php', 'phtml', 'phar', 'phps', 'inc', 'pht']], 'severity' => 'critical', 'non_suppressible' => true],
+            ['when' => ['change_type_any' => ['deleted']], 'severity' => 'high'],
+            ['when' => ['path_any' => ['app/**', 'routes/**', 'config/**'], 'ext_any' => ['php']], 'severity' => 'high'],
+            ['when' => ['path_any' => ['vendor/**']], 'severity' => 'high'],
+            ['when' => ['path_any' => ['.env', '.env.*', '**/.htaccess', '**/.user.ini']], 'severity' => 'medium'],
+            ['when' => ['change_type_any' => ['became_unreadable']], 'severity' => 'medium'],
+            ['when' => ['always' => true], 'severity' => 'low'],
         ],
     ],
 

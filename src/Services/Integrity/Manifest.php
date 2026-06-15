@@ -290,19 +290,23 @@ class Manifest
 
     private function included(string $key): bool
     {
-        foreach ($this->include as $pattern) {
-            if (preg_match($this->globToRegex($pattern), $key)) {
-                return true;
-            }
-        }
-
-        return false;
+        return self::matchesAnyGlob($key, $this->include);
     }
 
     private function excluded(string $key): bool
     {
-        foreach ($this->exclude as $pattern) {
-            if (preg_match($this->globToRegex($pattern), $key)) {
+        return self::matchesAnyGlob($key, $this->exclude);
+    }
+
+    /**
+     * True when $key matches any of the given `**`/`*`/`?` glob patterns.
+     *
+     * @param  string[]  $globs
+     */
+    public static function matchesAnyGlob(string $key, array $globs): bool
+    {
+        foreach ($globs as $pattern) {
+            if (preg_match(self::globToRegex($pattern), $key)) {
                 return true;
             }
         }
@@ -334,7 +338,7 @@ class Manifest
         return rtrim(str_replace('\\', '/', $path), '/');
     }
 
-    private function globToRegex(string $glob): string
+    private static function globToRegex(string $glob): string
     {
         $escaped = preg_quote($glob, '#');
 
