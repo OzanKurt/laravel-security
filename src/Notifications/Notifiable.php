@@ -10,17 +10,17 @@ class Notifiable
 
     public function routeNotificationForMail()
     {
-        return config('shield.notifications.mail.to');
+        return config('shield.notification_channels.mail.to');
     }
 
     public function routeNotificationForSlack()
     {
-        return config('shield.notifications.slack.to');
+        return config('shield.notification_channels.slack.to'); // incoming webhook URL
     }
 
     public function routeNotificationForDiscord()
     {
-        return config('shield.notifications.discord.webhook_url');
+        return config('shield.notification_channels.discord.webhook_url');
     }
 
     public function getKey()
