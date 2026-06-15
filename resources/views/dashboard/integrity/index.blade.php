@@ -9,7 +9,7 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <div class="text-muted small">Latest run</div>
-                        <div class="fs-4">{{ $stats['latest_run'] ? '#'.$stats['latest_run']->id : '—' }}</div>
+                        <div class="fs-4">{{ $stats['latest_run'] ? '#'.$stats['latest_run']->id : '-' }}</div>
                         <div class="small text-muted">{{ $stats['latest_run_status'] ?? '' }}</div>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <div class="text-muted small">Baseline</div>
-                        <div class="fs-4">{{ $stats['baseline'] ? ($stats['baseline']->signed ? 'Approved' : 'Provisional') : '—' }}</div>
+                        <div class="fs-4">{{ $stats['baseline'] ? ($stats['baseline']->signed ? 'Approved' : 'Provisional') : '-' }}</div>
                         <div class="small text-muted">{{ $stats['baseline'] ? $stats['baseline']->files_total.' files' : 'not established' }}</div>
                     </div>
                 </div>

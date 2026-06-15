@@ -2,6 +2,7 @@
 
 namespace OzanKurt\Shield\Services\Integrity;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
 use OzanKurt\Shield\Events\IntegrityScanCompletedEvent;
@@ -137,62 +138,82 @@ class IntegrityScanner
             'current_root_hash' => $rootHash,
         ] + $counters);
 
-        $evaluator = new SeverityRuleEvaluator(
-            config('shield.integrity.severity_rules', []),
-            ['public_docroot' => $this->publicDocroot($keyBase)]
-        );
-        $maps = $this->lookupMaps();
-        $maxChanges = (int) config('shield.integrity.limits.max_persisted_changes_per_run', 5000);
+        try {
+            $evaluator = new SeverityRuleEvaluator(
+                config('shield.integrity.severity_rules', []),
+                ['public_docroot' => $this->publicDocroot($keyBase)]
+            );
+            $maps = $this->lookupMaps();
+            $maxChanges = (int) config('shield.integrity.limits.max_persisted_changes_per_run', 5000);
 
-        $persisted = 0;
-        $maxSeverity = 'low';
+            // When there is no previous run, the delta was computed against the
+            // known-good manifest, so it is identical to the drift. Persist it once
+            // (as last_run) to avoid duplicate rows.
+            $bases = ['last_run' => $delta];
+            if ($lastRun !== null) {
+                $bases['known_good'] = $drift;
+            }
 
-        foreach (['last_run' => $delta, 'known_good' => $drift] as $basis => $diff) {
-            foreach (['new', 'modified', 'deleted'] as $bucket) {
-                foreach ($diff[$bucket] as $path => $entry) {
-                    if ($persisted >= $maxChanges) {
-                        break 3;
+            $persisted = 0;
+            $maxSeverity = 'low';
+
+            foreach ($bases as $basis => $diff) {
+                foreach (['new', 'modified', 'deleted'] as $bucket) {
+                    foreach ($diff[$bucket] as $path => $entry) {
+                        if ($persisted >= $maxChanges) {
+                            break 3;
+                        }
+
+                        $changeType = $this->classify($bucket, $entry, $scopeChanged);
+                        $severity = $evaluator->evaluate($path, $changeType);
+                        $maxSeverity = $this->maxSeverity($maxSeverity, $severity);
+
+                        IntegrityChange::create([
+                            'integrity_run_id' => $run->id,
+                            'change_type_id' => $maps['change_type'][$changeType] ?? $maps['change_type']['modified'],
+                            'compared_to_id' => $maps['comparison'][$basis],
+                            'severity_id' => $maps['severity'][$severity] ?? null,
+                            'path' => mb_substr($path, 0, 1024),
+                            'old_hash' => $bucket === 'deleted' ? ($entry['sha256'] ?? null) : null,
+                            'new_hash' => $bucket === 'deleted' ? null : ($entry['sha256'] ?? null),
+                            'size_bytes' => $entry['size'] ?? null,
+                            'file_mtime' => empty($entry['mtime']) ? null : Carbon::createFromTimestamp($entry['mtime']),
+                            'symlink_target' => $entry['target'] ?? null,
+                        ]);
+
+                        $persisted++;
                     }
-
-                    $changeType = $this->classify($bucket, $entry, $scopeChanged);
-                    $severity = $evaluator->evaluate($path, $changeType);
-                    $maxSeverity = $this->maxSeverity($maxSeverity, $severity);
-
-                    IntegrityChange::create([
-                        'integrity_run_id' => $run->id,
-                        'change_type_id' => $maps['change_type'][$changeType] ?? $maps['change_type']['modified'],
-                        'compared_to_id' => $maps['comparison'][$basis],
-                        'severity_id' => $maps['severity'][$severity] ?? null,
-                        'path' => mb_substr($path, 0, 1024),
-                        'old_hash' => $bucket === 'deleted' ? ($entry['sha256'] ?? null) : null,
-                        'new_hash' => $bucket === 'deleted' ? null : ($entry['sha256'] ?? null),
-                        'size_bytes' => $entry['size'] ?? null,
-                        'symlink_target' => $entry['target'] ?? null,
-                    ]);
-
-                    $persisted++;
                 }
             }
+
+            $driftTotal = count($drift['new']) + count($drift['modified']) + count($drift['deleted']);
+
+            $run->update([
+                'status_id' => $this->statusId('completed'),
+                'severity_id' => $maps['severity'][$maxSeverity] ?? null,
+                'count_new' => count($delta['new']),
+                'count_modified' => count($delta['modified']),
+                'count_deleted' => count($delta['deleted']),
+                'count_scope_changed' => $scopeChanged ? $driftTotal : 0,
+                'count_vs_known_good' => $driftTotal,
+                'finished_at' => now(),
+                'duration_ms' => (int) now()->diffInMilliseconds($startedAt),
+            ]);
+
+            // The current state becomes the previous-run reference for next time.
+            $baseline->write($lastRunPath, $current, [
+                'disk' => $diskName, 'scope_fingerprint' => $scopeFingerprint, 'root_hash' => $rootHash, 'files_total' => count($current),
+            ]);
+        } catch (Throwable $e) {
+            // Never leave the run stuck in 'running'.
+            $run->update([
+                'status_id' => $this->statusId('failed'),
+                'finished_at' => now(),
+                'error_message' => $e->getMessage(),
+            ]);
+
+            throw $e;
         }
-
-        $driftTotal = count($drift['new']) + count($drift['modified']) + count($drift['deleted']);
-
-        $run->update([
-            'status_id' => $this->statusId('completed'),
-            'severity_id' => $maps['severity'][$maxSeverity] ?? null,
-            'count_new' => count($delta['new']),
-            'count_modified' => count($delta['modified']),
-            'count_deleted' => count($delta['deleted']),
-            'count_scope_changed' => $scopeChanged ? ($driftTotal) : 0,
-            'count_vs_known_good' => $driftTotal,
-            'finished_at' => now(),
-            'duration_ms' => (int) (now()->diffInMilliseconds($startedAt)),
-        ]);
-
-        // The current state becomes the previous-run reference for next time.
-        $baseline->write($lastRunPath, $current, [
-            'disk' => $diskName, 'scope_fingerprint' => $scopeFingerprint, 'root_hash' => $rootHash, 'files_total' => count($current),
-        ]);
 
         $run = $run->fresh();
         IntegrityScanCompletedEvent::dispatch($run);

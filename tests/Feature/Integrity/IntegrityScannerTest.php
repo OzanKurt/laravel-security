@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Event;
 use OzanKurt\Shield\Events\IntegrityScanCompletedEvent;
 use OzanKurt\Shield\Models\IntegrityBaseline;
 use OzanKurt\Shield\Models\IntegrityChange;
+use OzanKurt\Shield\Models\Lookups\IntegrityChangeType;
 use OzanKurt\Shield\Services\Integrity\IntegrityScanner;
 use OzanKurt\Shield\Tests\TestCase;
 
@@ -122,6 +123,72 @@ class IntegrityScannerTest extends TestCase
         $this->assertTrue($baseline->signed);
         $this->assertSame('test', $baseline->disk);
         $this->assertSame(1, IntegrityBaseline::where('disk', 'test')->count()); // old row replaced
+    }
+
+    public function test_deleted_file_is_high_severity(): void
+    {
+        $this->scanner()->run('test', 'manual'); // baseline includes app/Service.php
+
+        unlink($this->src . '/app/Service.php');
+
+        $run = $this->scanner()->run('test', 'manual');
+
+        $this->assertSame('high', $run->severity->name);
+
+        $change = IntegrityChange::where('integrity_run_id', $run->id)
+            ->where('path', 'app/Service.php')
+            ->first();
+        $this->assertNotNull($change);
+        $this->assertSame('deleted', $change->changeType->name);
+        $this->assertSame('high', $change->severity->name);
+    }
+
+    public function test_scope_change_is_classified_not_treated_as_deletion(): void
+    {
+        $this->scanner()->run('test', 'manual'); // baseline includes app/Service.php
+
+        // Narrow the scope so app/** leaves the watched set.
+        config(['shield.integrity.disks.test.exclude' => ['app/**']]);
+
+        $run = $this->scanner()->run('test', 'manual');
+
+        $this->assertGreaterThan(0, $run->count_scope_changed);
+
+        $scopeChangedId = IntegrityChangeType::where('name', 'scope_changed')->value('id');
+        $this->assertTrue(
+            IntegrityChange::where('integrity_run_id', $run->id)
+                ->where('change_type_id', $scopeChangedId)
+                ->exists()
+        );
+    }
+
+    public function test_missing_baseline_signature_fails_the_run(): void
+    {
+        $this->scanner()->run('test', 'manual'); // creates baseline + .sig
+
+        unlink(storage_path('shield/integrity/test/baseline.ndjson.gz.sig'));
+
+        $run = $this->scanner()->run('test', 'manual');
+
+        $this->assertSame('failed', $run->status->name);
+    }
+
+    public function test_missing_last_run_artifact_does_not_duplicate_change_rows(): void
+    {
+        $this->scanner()->run('test', 'manual'); // writes baseline + last-run
+
+        // Remove only the previous-run reference (baseline survives).
+        @unlink(storage_path('shield/integrity/test/last-run.ndjson.gz'));
+        @unlink(storage_path('shield/integrity/test/last-run.ndjson.gz.sig'));
+
+        file_put_contents($this->src . '/app/New.php', '<?php // new');
+
+        $run = $this->scanner()->run('test', 'manual');
+
+        // Without a last-run, delta == drift; the change must be recorded once, not twice.
+        $this->assertSame(1, IntegrityChange::where('integrity_run_id', $run->id)
+            ->where('path', 'app/New.php')
+            ->count());
     }
 
     private function cleanArtifacts(): void

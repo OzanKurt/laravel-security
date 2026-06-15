@@ -11,7 +11,7 @@ class SeverityColor
     public const MAP = [
         'critical' => '8b0000',  // dark red
         'high' => 'e32929',      // red
-        'medium' => 'fd6a02',    // orange
+        'medium' => 'fd6a02', // orange
         'low' => '2b6cb0',       // blue
         'all_clear' => '0b6623', // green
         'info' => '6c757d',      // gray

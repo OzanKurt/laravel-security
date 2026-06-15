@@ -23,8 +23,8 @@ class IntegrityStatusCommand extends Command
         } else {
             $this->table(['Field', 'Value'], [
                 ['Run', '#' . $run->id],
-                ['Status', $run->status->name ?? '—'],
-                ['Severity', $run->severity->name ?? '—'],
+                ['Status', $run->status->name ?? '-'],
+                ['Severity', $run->severity->name ?? '-'],
                 ['Files total', $run->files_total],
                 ['New / Modified / Deleted', "{$run->count_new} / {$run->count_modified} / {$run->count_deleted}"],
                 ['Differs from baseline', $run->count_vs_known_good],

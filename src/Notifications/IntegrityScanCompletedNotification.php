@@ -64,7 +64,7 @@ class IntegrityScanCompletedNotification extends Notification implements ShouldQ
     {
         $mail = (new MailMessage)
             ->from(config('shield.notification_channels.mail.from'), config('shield.notification_channels.mail.name'))
-            ->subject($this->title() . ' — ' . $this->summary());
+            ->subject($this->title() . ' - ' . $this->summary());
 
         $mail->line('**' . $this->summary() . '**');
 
@@ -193,11 +193,22 @@ class IntegrityScanCompletedNotification extends Notification implements ShouldQ
             ->all();
     }
 
+    private function disclosePaths(): bool
+    {
+        return (bool) config('shield.integrity.notify.disclose_paths_to_external_channels', true);
+    }
+
     private function discordBlock(string $type): string
     {
+        if (! $this->disclosePaths()) {
+            $n = $this->count($type);
+
+            return $n > 0 ? "{$n} change(s), view in dashboard" : '-';
+        }
+
         $paths = $this->pathsFor($type);
         if (empty($paths)) {
-            return '—';
+            return '-';
         }
 
         $text = implode("\n", array_map(fn ($p) => '`' . $p . '`', $paths));
@@ -212,9 +223,15 @@ class IntegrityScanCompletedNotification extends Notification implements ShouldQ
 
     private function slackBlock(string $type): string
     {
+        if (! $this->disclosePaths()) {
+            $n = $this->count($type);
+
+            return $n > 0 ? "{$n} change(s), view in dashboard" : '-';
+        }
+
         $paths = $this->pathsFor($type);
         if (empty($paths)) {
-            return '—';
+            return '-';
         }
 
         $text = implode("\n", $paths);

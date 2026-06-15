@@ -109,7 +109,7 @@ class IntegrityController extends Controller
             'uuid' => $r->uuid,
             'disk' => $r->disk,
             'status' => $lookups->name(IntegrityStatus::class, $r->status_id),
-            'severity' => $r->severity_id ? $lookups->name(LogLevel::class, $r->severity_id) : '—',
+            'severity' => $r->severity_id ? $lookups->name(LogLevel::class, $r->severity_id) : '-',
             'new' => $r->count_new,
             'modified' => $r->count_modified,
             'deleted' => $r->count_deleted,
@@ -150,7 +150,7 @@ class IntegrityController extends Controller
             'path' => $r->path,
             'change_type' => $lookups->name(IntegrityChangeType::class, $r->change_type_id),
             'compared_to' => $lookups->name(IntegrityComparisonBasis::class, $r->compared_to_id),
-            'severity' => $r->severity_id ? $lookups->name(LogLevel::class, $r->severity_id) : '—',
+            'severity' => $r->severity_id ? $lookups->name(LogLevel::class, $r->severity_id) : '-',
         ]);
 
         return response()->json([

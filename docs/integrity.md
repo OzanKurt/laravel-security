@@ -5,7 +5,7 @@ Scan the filesystem, diff it against an approved baseline, and post a grouped
 integrity check, for Laravel.
 
 ```
-File integrity scan — app (2026-06-15 12:07 UTC)
+File integrity scan: app (2026-06-15 12:07 UTC)
 8 new · 2 modified · 0 deleted · 92106 files total
 🚩 New (8): public/cache/ff/3776/footer.php · ...
 ✏️ Modified (2): public/error_log · ...
@@ -66,7 +66,7 @@ scores each change. The defaults:
 
 | Severity | Matches |
 |---|---|
-| **critical** | new/modified script file (`.php`, `.phtml`, ...) under a web-reachable docroot (`public/`) — the classic dropped webshell |
+| **critical** | new/modified script file (`.php`, `.phtml`, ...) under a web-reachable docroot (`public/`), the classic dropped webshell |
 | **high** | new/modified `.php` in `app/ routes/ config/`; any deletion; any change under `vendor/` |
 | **medium** | `.env` / `.htaccess` / `.user.ini` changes; a file that became unreadable |
 | **low** | everything else |

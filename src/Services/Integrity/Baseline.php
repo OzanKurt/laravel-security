@@ -3,6 +3,7 @@
 namespace OzanKurt\Shield\Services\Integrity;
 
 use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Reads and writes the pinned known-good baseline as a signed, atomically
@@ -57,18 +58,21 @@ class Baseline
         $signature = $this->sign($ndjson);
 
         $dir = dirname($path);
-        if (! is_dir($dir)) {
-            @mkdir($dir, 0775, true);
+        if (! is_dir($dir) && ! @mkdir($dir, 0775, true) && ! is_dir($dir)) {
+            throw new RuntimeException("Could not create baseline directory {$dir} (not writable?).");
         }
 
         $tmp = $path . '.tmp';
-        file_put_contents($tmp, gzencode($ndjson, 6));
-        file_put_contents($path . '.sig.tmp', $signature);
+        if (@file_put_contents($tmp, gzencode($ndjson, 6)) === false
+            || @file_put_contents($path . '.sig.tmp', $signature) === false) {
+            throw new RuntimeException("Could not write baseline artifact under {$dir} (not writable?).");
+        }
 
         // Rename is atomic on the same filesystem; the .sig flips first so a
         // reader never sees a new artifact paired with a stale signature.
-        rename($path . '.sig.tmp', $path . '.sig');
-        rename($tmp, $path);
+        if (! @rename($path . '.sig.tmp', $path . '.sig') || ! @rename($tmp, $path)) {
+            throw new RuntimeException("Could not finalize baseline artifact at {$path}.");
+        }
     }
 
     /**

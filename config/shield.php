@@ -110,6 +110,7 @@ return [
             'enabled' => env('FIREWALL_NOTIFICATIONS_INTEGRITY_CHANGED_ENABLED', false),
             'channels' => [
                 'mail',
+                'slack',
                 'discord',
             ],
         ],
@@ -680,7 +681,10 @@ return [
             'send_all_clear' => false,
             'max_paths_per_group' => 15,
             'timezone' => 'UTC',
-            'disclose_paths_to_external_channels' => false,
+            // Whether the changed file paths are listed in Slack/Discord payloads
+            // (which traverse third-party webhooks). Default on to match the card;
+            // set false to redact paths from external channels and link to the dashboard instead.
+            'disclose_paths_to_external_channels' => true,
         ],
 
         'retention' => [
