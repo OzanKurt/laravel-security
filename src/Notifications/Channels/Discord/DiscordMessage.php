@@ -9,6 +9,7 @@ class DiscordMessage
     public const COLOR_SUCCESS = '0b6623';
     public const COLOR_WARNING = 'fD6a02';
     public const COLOR_ERROR = 'e32929';
+    public const COLOR_DEFAULT = '6c757d'; // gray, used when no severity color is set
 
     protected string $username = 'Laravel Security';
 
@@ -114,7 +115,7 @@ class DiscordMessage
     public function toArray(): array
     {
         return [
-            'username' => $this->username ?? 'Laravel Backup',
+            'username' => $this->username,
             'avatar_url' => $this->avatarUrl,
             'embeds' => [
                 [
@@ -123,12 +124,12 @@ class DiscordMessage
                     'type' => 'rich',
                     'description' => $this->description,
                     'fields' => $this->fields,
-                    'color' => hexdec($this->color),
+                    'color' => hexdec($this->color ?? self::COLOR_DEFAULT),
                     'footer' => [
                         'text' => $this->footer ?? '',
-                        'icon_url' => $this->footerImg ?? '',
+                        'icon_url' => $this->footerUrl ?? '',
                     ],
-                    'timestamp' => $this->timestamp ?? now(),
+                    'timestamp' => $this->timestamp ?? now()->toIso8601String(),
                 ],
             ],
         ];
