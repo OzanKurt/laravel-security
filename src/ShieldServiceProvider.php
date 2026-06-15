@@ -286,6 +286,9 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\ScanCancelCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityScanCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityBlessCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityStatusCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityPruneCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityHeartbeatCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineListCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineRestoreCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ClamavStatusCommand::class);
@@ -325,6 +328,17 @@ class ShieldServiceProvider extends ServiceProvider
                     ->command('shield:integrity')
                     ->cron(config('shield.integrity.schedule.cron', '0 * * * *'))
                     ->withoutOverlapping();
+
+                app(Schedule::class)
+                    ->command('shield:integrity-prune')
+                    ->daily();
+
+                if (config('shield.integrity.heartbeat.enabled', true)) {
+                    app(Schedule::class)
+                        ->command('shield:integrity-heartbeat')
+                        ->hourly()
+                        ->withoutOverlapping();
+                }
             }
 
             app(Schedule::class)

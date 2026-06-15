@@ -688,6 +688,11 @@ return [
             'changes_days' => 30,
         ],
 
+        'heartbeat' => [
+            'enabled' => env('LS_INTEGRITY_HEARTBEAT_ENABLED', true),
+            'max_age_hours' => env('LS_INTEGRITY_HEARTBEAT_MAX_AGE_HOURS', 26),
+        ],
+
         // Ordered, first match wins. {public_docroot} expands to the resolved public root.
         'severity_rules' => [
             ['when' => ['path_any' => ['public/**', 'storage/app/public/**', '{public_docroot}/**'], 'ext_any' => ['php', 'phtml', 'phar', 'phps', 'inc', 'pht']], 'severity' => 'critical', 'non_suppressible' => true],

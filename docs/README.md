@@ -24,6 +24,7 @@ Comprehensive Laravel security suite — WAF, malware scanner, ACL, audit log, l
 |---|---|
 | [Audit log](audit-log.md) | HMAC-chained tamper-evident audit trail with file/config/composer drift detection |
 | [Scanner](scanner.md) | Native + ClamAV + composer-audit backends, signature sync, quarantine + restore |
+| [File integrity](integrity.md) | Baseline diff + grouped New/Modified/Deleted summary to mail/Slack/Discord |
 | [File watcher](security-watch.md) | `shield:watch` long-running command for real-time file-change detection |
 | [Dashboard](dashboard.md) | Bootstrap dashboard page tour + the cache management page |
 
