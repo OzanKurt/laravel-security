@@ -8,8 +8,8 @@ Pull-based providers that import IP blocklists + WAF rules + GeoIP databases fro
 |---|---|---|---|
 | `spamhaus` | Spamhaus DROP + EDROP lists (free, public) | `ls_acl` as CIDR ranges, blacklist action | none |
 | `abuseipdb` | AbuseIPDB blacklist API (free tier 1k requests/day) | `ls_acl` as IPs, block action, 24h expiry | `LS_ABUSEIPDB_KEY` |
-| `maxmind_geolite2` | MaxMind GeoLite2 Country + ASN DBs | `storage/shield/geo/*.mmdb` — activates country/ASN ACL matchers | `LS_MAXMIND_LICENSE_KEY` + `composer require geoip2/geoip2` |
-| `maxmind_geoip2_premium` | MaxMind **paid** GeoIP2 Country/City/ISP DBs (**Premium**) | `storage/shield/geo/premium/*.mmdb` — preferred over GeoLite2, adds city/region precision | valid premium license + paid MaxMind account |
+| `maxmind_geolite2` | MaxMind GeoLite2 Country + ASN DBs | `storage/shield/geo/*.mmdb`, activates country/ASN ACL matchers | `LS_MAXMIND_LICENSE_KEY` + `composer require geoip2/geoip2` |
+| `maxmind_geoip2_premium` | MaxMind **paid** GeoIP2 Country/City/ISP DBs (**Premium**) | `storage/shield/geo/premium/*.mmdb`, preferred over GeoLite2, adds city/region precision | valid premium license + paid MaxMind account |
 | `owasp_crs` | OWASP ModSecurity CRS rule subset (via our curated JSON mirror) | `ls_waf_rules` with source=owasp_crs | none |
 | `shield_realtime` | Laravel Shield Central realtime delta feed (**Premium**) | `ls_waf_rules` + `ls_acl` with source=shield_realtime | valid premium license |
 | `emerging_threats` | Proofpoint Emerging Threats IP reputation (**Premium**) | `ls_acl` as IPs, block action, source=emerging_threats | premium license + ET token |
@@ -27,7 +27,7 @@ LS_MAXMIND_ENABLED=true
 LS_MAXMIND_LICENSE_KEY=your-maxmind-license-key
 ```
 
-Spamhaus + OWASP CRS are on by default — no API key required.
+Spamhaus + OWASP CRS are on by default, no API key required.
 
 ## Premium realtime feed (`shield_realtime`)
 
@@ -112,8 +112,8 @@ The command audit-logs each sync run with `threat_feed.sync_started` / `threat_f
 ### Spamhaus DROP / EDROP
 
 Pulls two text lists from Spamhaus:
-- `https://www.spamhaus.org/drop/drop.txt` — confirmed-bad CIDR ranges
-- `https://www.spamhaus.org/drop/edrop.txt` — confirmed-bad CIDR ranges, extended
+- `https://www.spamhaus.org/drop/drop.txt`, confirmed-bad CIDR ranges
+- `https://www.spamhaus.org/drop/edrop.txt`, confirmed-bad CIDR ranges, extended
 
 Each CIDR becomes a row in `ls_acl` with:
 - `kind = cidr`
@@ -122,7 +122,7 @@ Each CIDR becomes a row in `ls_acl` with:
 - `reason = "Spamhaus drop"` (or `edrop`)
 - `meta.list` = `drop` or `edrop`
 
-Permanent — no expiry. Re-running doesn't duplicate rows (upsert on `(kind, value)`).
+Permanent, no expiry. Re-running doesn't duplicate rows (upsert on `(kind, value)`).
 
 ### AbuseIPDB
 
@@ -133,7 +133,7 @@ Each IP becomes a row in `ls_acl` with:
 - `action = block`
 - `source = abuseipdb`
 - `reason = "AbuseIPDB confidence 95"` (varies)
-- `expires_at = now()+1d` (rolling — refreshed each sync)
+- `expires_at = now()+1d` (rolling, refreshed each sync)
 - `meta.confidence`, `meta.last_reported_at`
 
 Rate limit: free tier is 5 requests/day for blacklist endpoint. Daily cron stays well under.
@@ -160,7 +160,7 @@ The matchers cache resolved country/ASN per IP for 24h in `shield.geo.*` cache k
 
 Pulls a curated subset of OWASP ModSecurity CRS rules (currently ~200 patterns; mirrored at `raw.githubusercontent.com/OzanKurt/laravel-shield-signatures/main/owasp-crs/rules.json`).
 
-Each rule lands in `ls_waf_rules` with `source = owasp_crs`. Versioned via `version` column — bumps when the upstream pattern changes.
+Each rule lands in `ls_waf_rules` with `source = owasp_crs`. Versioned via `version` column, bumps when the upstream pattern changes.
 
 When the mirror is unreachable, an embedded fallback of ~5 critical CRS rules ships in `OwaspCrsProvider`.
 
@@ -187,7 +187,7 @@ See [architecture.md#adding-a-custom-threat-feed-provider](architecture.md#addin
 - Last run timestamp
 - Last run status (`sync_completed` / `sync_failed`)
 
-The page reads the most-recent audit log entry per provider — no separate state table.
+The page reads the most-recent audit log entry per provider, no separate state table.
 
 ## Troubleshooting
 

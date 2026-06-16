@@ -45,7 +45,7 @@ class EnvAuditor
         }
 
         if (! config('app.url') || config('app.url') === 'http://localhost') {
-            $findings[] = ['key' => 'APP_URL', 'severity' => 'low', 'message' => 'APP_URL is set to the default — set to your real domain for correct URL generation.'];
+            $findings[] = ['key' => 'APP_URL', 'severity' => 'low', 'message' => 'APP_URL is set to the default, set to your real domain for correct URL generation.'];
         }
 
         return $findings;

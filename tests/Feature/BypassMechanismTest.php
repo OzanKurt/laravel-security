@@ -100,7 +100,7 @@ class BypassMechanismTest extends TestCase
 
         $this->artisan('shield:bypass-remove', ['ip' => '10.0.0.2'])->assertSuccessful();
 
-        // Acl uses SoftDeletes — the row is retained but deleted_at is set
+        // Acl uses SoftDeletes, the row is retained but deleted_at is set
         $this->assertDatabaseMissing('ls_acl', ['value' => '10.0.0.2', 'source' => 'bypass', 'deleted_at' => null]);
     }
 

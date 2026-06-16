@@ -60,7 +60,7 @@ Each cadence builds a uniform payload via `CadenceReportGenerator::build($cadenc
 ]
 ```
 
-Sections can be toggled on/off per-cadence via `shield.reports.<cadence>.sections` (planned — currently all sections render if data exists).
+Sections can be toggled on/off per-cadence via `shield.reports.<cadence>.sections` (planned, currently all sections render if data exists).
 
 ## Wordfence-style executive email
 
@@ -136,7 +136,7 @@ Reports are scheduled summaries. **Individual attack events** route through the 
     'critical' => ['mail', 'discord', 'webhook'],
     'high'     => ['mail', 'slack'],
     'medium'   => ['slack'],
-    'low'      => [],     // digest only — rolled into the daily_digest cadence
+    'low'      => [],     // digest only, rolled into the daily_digest cadence
 ],
 ```
 
@@ -177,7 +177,7 @@ The webhook channel emits a versioned JSON payload designed for consumption by t
   "links": {
     "dashboard": "https://your-app.com/shield"
   },
-  "data": { /* full payload — same shape as shield:report-test output */ }
+  "data": { /* full payload, same shape as shield:report-test output */ }
 }
 ```
 
@@ -185,7 +185,7 @@ The webhook channel emits a versioned JSON payload designed for consumption by t
 
 ## Telegram channel quirks
 
-Telegram messages have a 4096-character body limit. Long reports get truncated with a "[…N more]" suffix. For full reports, use mail or webhook channels — Telegram is best for high-severity individual events.
+Telegram messages have a 4096-character body limit. Long reports get truncated with a "[…N more]" suffix. For full reports, use mail or webhook channels, Telegram is best for high-severity individual events.
 
 ## Testing your report template
 
@@ -204,6 +204,6 @@ Combine with Mailtrap or `MAIL_MAILER=log` to preview the rendered HTML without 
 | Symptom | Cause | Fix |
 |---|---|---|
 | Scheduled report doesn't fire | Laravel scheduler not running | Add `* * * * * cd /path && php artisan schedule:run >> /dev/null 2>&1` to crontab |
-| Report email is empty | Window had 0 events | Expected — no email is sent when all sections are empty unless `shield.reports.<cadence>.send_when_empty` is true |
+| Report email is empty | Window had 0 events | Expected, no email is sent when all sections are empty unless `shield.reports.<cadence>.send_when_empty` is true |
 | Recipients receive duplicate reports | Multiple cron entries OR Horizon retrying a failed dispatch | Check `php artisan schedule:list` for duplicates; check `failed_jobs` table for retried sends |
 | Webhook payload missing `data` section | Payload schema_version mismatch with consumer | Consumer needs to handle `schema_version >= 1.0` flexibly; do not require unknown fields |

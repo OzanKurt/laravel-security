@@ -3,11 +3,11 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ozankurt/laravel-shield.svg?style=flat-square)](https://packagist.org/packages/ozankurt/laravel-shield)
 [![License](https://img.shields.io/packagist/l/ozankurt/laravel-shield.svg?style=flat-square)](LICENSE.md)
 
-**Comprehensive security suite for Laravel — the Wordfence equivalent.**
+**Comprehensive security suite for Laravel, the Wordfence equivalent.**
 
 WAF + scanner + ACL + audit log + live traffic + notifications, all configurable, all auditable, all Laravel-native.
 
-> **Brand site:** [laravel-shield.ozankurt.com](https://laravel-shield.ozankurt.com) — docs, pricing, license activation.
+> **Brand site:** [laravel-shield.ozankurt.com](https://laravel-shield.ozankurt.com), docs, pricing, license activation.
 
 ---
 
@@ -16,7 +16,7 @@ WAF + scanner + ACL + audit log + live traffic + notifications, all configurable
 | Need | What Shield gives you |
 |---|---|
 | Block malicious requests | 15+ WAF middlewares (XSS, SQLi, LFI, RFI, PHP wrappers, sessions, agents, geo, bots, keyword path filters) + DB-backed rule engine |
-| Manage allow/deny lists | Unified `ls_acl` table — IP / CIDR / ASN / country / regex / hostname, first-match-wins evaluation, Redis-cached |
+| Manage allow/deny lists | Unified `ls_acl` table, IP / CIDR / ASN / country / regex / hostname, first-match-wins evaluation, Redis-cached |
 | Detect malware | Scanner with native engine + ClamAV + composer audit; quarantine + restore; signature feed sync |
 | Audit-log everything | HMAC-chained `ls_audit_log`, file/config/composer drift detection, `HasAuditLog` trait for model events |
 | See live traffic | Sampled `ls_live_traffic` table with optional real-time broadcasting (Reverb / Pusher / Ably) |
@@ -107,13 +107,13 @@ Premium unlocks:
 - Hosted audit-log sink (forward audit events to the Shield Central app for cross-site aggregation)
 - Future SIEM dashboard integration
 
-The license check is honest soft-enforcement (see [docs/premium.md](docs/premium.md) — the real moat is the API services Ozan hosts, which patching the local check can't unlock).
+The license check is honest soft-enforcement (see [docs/premium.md](docs/premium.md), the real moat is the API services Ozan hosts, which patching the local check can't unlock).
 
 ## Companion packages
 
-- **`ozankurt/laravel-shield-filament`** — Filament panel adapter. v1.x for Filament 3 + 4, v2.x for Filament 5+. (Ships post-1.0.)
-- **`ozankurt/laravel-shield-signatures`** — Public GitHub repo of malware signatures. `shield:signatures-sync` pulls from here.
+- **`ozankurt/laravel-shield-filament`**, Filament panel adapter. v1.x for Filament 3 + 4, v2.x for Filament 5+. (Ships post-1.0.)
+- **`ozankurt/laravel-shield-signatures`**, Public GitHub repo of malware signatures. `shield:signatures-sync` pulls from here.
 
 ## License
 
-MIT — see [LICENSE.md](LICENSE.md).
+MIT, see [LICENSE.md](LICENSE.md).

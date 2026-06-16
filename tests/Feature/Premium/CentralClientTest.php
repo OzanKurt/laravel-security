@@ -27,7 +27,7 @@ class CentralClientTest extends TestCase
             private bool $hasKey;
             public function __construct(bool $hasKey)
             {
-                // Skip parent constructor — we don't need a cache repo.
+                // Skip parent constructor, we don't need a cache repo.
                 $this->hasKey = $hasKey;
             }
             public function hasKey(): bool

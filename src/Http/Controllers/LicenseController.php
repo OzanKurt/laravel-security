@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use OzanKurt\Shield\Services\Premium\CentralClient;
@@ -34,7 +34,7 @@ class LicenseController extends Controller
 
         $flash = match ($state['state'] ?? null) {
             'valid' => 'License refreshed successfully.',
-            'grace' => 'Central unreachable — grace period active until ' . ($state['grace_until'] ?? 'unknown') . '.',
+            'grace' => 'Central unreachable, grace period active until ' . ($state['grace_until'] ?? 'unknown') . '.',
             'invalid' => 'License is invalid: ' . ($state['reason'] ?? 'unknown reason') . '.',
             'no_key' => 'No license key configured. Add LS_PREMIUM_LICENSE_KEY to .env.',
             default => 'License refresh completed.',
@@ -72,7 +72,7 @@ class LicenseController extends Controller
         ]);
 
         $status = match (true) {
-            $result->ok() => "Connectivity OK — Central returned HTTP {$result->httpStatus}.",
+            $result->ok() => "Connectivity OK, Central returned HTTP {$result->httpStatus}.",
             $result->outcome === 'skipped' => "Test skipped: {$result->error}.",
             default => "Connectivity failed (status={$result->httpStatus}, reason={$result->error}). See /shield/webhook-deliveries for the captured attempt.",
         };

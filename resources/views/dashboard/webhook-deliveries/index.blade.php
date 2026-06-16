@@ -6,7 +6,7 @@
             <div>
                 <h2 class="mb-0">Webhook deliveries</h2>
                 <p class="text-muted small mb-0">
-                    Outbound calls to Central — webhook ingest, heartbeat, test pings.
+                    Outbound calls to Central, webhook ingest, heartbeat, test pings.
                 </p>
             </div>
             <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
@@ -89,12 +89,12 @@
                                 <td class="ps-3 text-muted small">{{ $d->dispatched_at?->format('Y-m-d H:i:s') }}</td>
                                 <td><code class="small">{{ $d->operation }}</code></td>
                                 <td><span class="badge {{ $color }}">{{ $d->status }}</span></td>
-                                <td>{{ $d->http_status ?: '—' }}</td>
+                                <td>{{ $d->http_status ?: '-' }}</td>
                                 <td>{{ $d->attempt_number }}/{{ $d->max_attempts }}</td>
                                 <td>{{ $d->payload_bytes }}</td>
-                                <td>{{ $d->duration_ms !== null ? $d->duration_ms . 'ms' : '—' }}</td>
+                                <td>{{ $d->duration_ms !== null ? $d->duration_ms . 'ms' : '-' }}</td>
                                 <td class="text-muted small" style="max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $d->reason }}">
-                                    {{ $d->reason ?? ($d->response_excerpt ? substr($d->response_excerpt, 0, 80) : '—') }}
+                                    {{ $d->reason ?? ($d->response_excerpt ? substr($d->response_excerpt, 0, 80) : '-') }}
                                 </td>
                                 <td class="pe-3">
                                     @if(in_array($d->status, ['failure','exhausted']) && $d->operation === 'webhook_ingest')
@@ -107,7 +107,7 @@
                             </tr>
                         @empty
                             <tr><td colspan="9" class="text-center text-muted py-4">
-                                No deliveries yet — make sure premium is active + a queue worker is running.
+                                No deliveries yet, make sure premium is active + a queue worker is running.
                             </td></tr>
                         @endforelse
                     </tbody>

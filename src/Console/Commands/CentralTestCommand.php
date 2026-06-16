@@ -12,9 +12,9 @@ use OzanKurt\Shield\Services\Premium\WebhookSigner;
  *
  * Runs three checks in sequence + reports a clear pass/fail summary:
  *
- *   1. License check     — does Central recognise our key + return valid?
- *   2. Signed heartbeat  — can we POST a signed request + get 2xx?
- *   3. Test ping         — does the signed echo endpoint roundtrip?
+ *   1. License check    , does Central recognise our key + return valid?
+ *   2. Signed heartbeat , can we POST a signed request + get 2xx?
+ *   3. Test ping        , does the signed echo endpoint roundtrip?
  *
  * Anything other than 3/3 PASS means the install is misconfigured.
  * The dashboard "Test connectivity" button calls the same code path,
@@ -37,17 +37,17 @@ class CentralTestCommand extends Command
         // 1. License check
         $this->line(' [1/3] License check…');
         if (! $checker->hasKey()) {
-            $this->line('       <fg=red>SKIP</> — no LS_PREMIUM_LICENSE_KEY configured.');
+            $this->line('       <fg=red>SKIP</>, no LS_PREMIUM_LICENSE_KEY configured.');
         } else {
             $state = $checker->refresh();
             if (in_array($state['state'] ?? null, ['valid', 'grace'], true)) {
                 $plan = $state['plan'] ?? 'unknown';
                 $exp = $state['expires_at'] ?? 'no expiry';
-                $this->line("       <fg=green>PASS</> — plan={$plan}, expires={$exp}");
+                $this->line("       <fg=green>PASS</>, plan={$plan}, expires={$exp}");
                 $passed++;
             } else {
                 $reason = $state['reason'] ?? 'unknown';
-                $this->line("       <fg=red>FAIL</> — state={$state['state']}, reason={$reason}");
+                $this->line("       <fg=red>FAIL</>, state={$state['state']}, reason={$reason}");
             }
         }
 
@@ -55,14 +55,14 @@ class CentralTestCommand extends Command
         $this->newLine();
         $this->line(' [2/3] Webhook signing capability…');
         if (! $signer->canSign()) {
-            $this->line('       <fg=red>FAIL</> — no signing secret resolvable (set LS_PREMIUM_LICENSE_KEY or LS_PREMIUM_WEBHOOK_SECRET).');
+            $this->line('       <fg=red>FAIL</>, no signing secret resolvable (set LS_PREMIUM_LICENSE_KEY or LS_PREMIUM_WEBHOOK_SECRET).');
         } else {
             $sampleBody = '{"test":1}';
             $headers = $signer->sign($sampleBody);
             if (! isset($headers['X-Shield-Signature'], $headers['X-Shield-Timestamp'], $headers['X-Shield-Nonce'])) {
-                $this->line('       <fg=red>FAIL</> — signer returned incomplete header set.');
+                $this->line('       <fg=red>FAIL</>, signer returned incomplete header set.');
             } else {
-                $this->line('       <fg=green>PASS</> — signature header present + 3-tuple complete.');
+                $this->line('       <fg=green>PASS</>, signature header present + 3-tuple complete.');
                 $passed++;
             }
         }
@@ -76,13 +76,13 @@ class CentralTestCommand extends Command
             'php_version' => PHP_VERSION,
         ]);
         if ($result->ok()) {
-            $this->line("       <fg=green>PASS</> — HTTP {$result->httpStatus} from {$result->url}");
+            $this->line("       <fg=green>PASS</>, HTTP {$result->httpStatus} from {$result->url}");
             $passed++;
         } elseif ($result->outcome === 'skipped') {
-            $this->line("       <fg=yellow>SKIP</> — {$result->error}");
+            $this->line("       <fg=yellow>SKIP</>, {$result->error}");
         } else {
             $status = $result->httpStatus ?: 'no response';
-            $this->line("       <fg=red>FAIL</> — status={$status}, reason={$result->error}");
+            $this->line("       <fg=red>FAIL</>, status={$status}, reason={$result->error}");
             if ($result->responseExcerpt) {
                 $this->line('       Response: ' . substr($result->responseExcerpt, 0, 200));
             }

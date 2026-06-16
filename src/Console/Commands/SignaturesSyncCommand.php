@@ -165,7 +165,7 @@ class SignaturesSyncCommand extends Command
             return [];
         }
 
-        // Direct signature array — the Central app channel response.
+        // Direct signature array, the Central app channel response.
         if ($this->looksLikeSignatureList($payload)) {
             return $payload;
         }
@@ -215,7 +215,7 @@ class SignaturesSyncCommand extends Command
             }
         }
 
-        // Strategy 2: inline JSON in the release body — look for a fenced ```json block
+        // Strategy 2: inline JSON in the release body, look for a fenced ```json block
         $body = (string) ($payload['body'] ?? '');
         if (preg_match('/```json\s*([\s\S]+?)\s*```/', $body, $match)) {
             $decoded = json_decode($match[1], true);

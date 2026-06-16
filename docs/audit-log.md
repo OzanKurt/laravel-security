@@ -1,4 +1,4 @@
-# Audit log — Tamper-evident security audit trail
+# Audit log, Tamper-evident security audit trail
 
 The `ls_audit_log` table captures admin/security-sensitive state changes. Every record stores an HMAC of its content + the previous record's HMAC, forming a chain. Modifying or deleting a record breaks the chain, and `shield:audit-verify` reports the first broken link.
 
@@ -21,8 +21,8 @@ The `ls_audit_log` table captures admin/security-sensitive state changes. Every 
 ## Tamper evidence
 
 Each record stores:
-- `prev_hash` — the previous record's `hmac` (or null for the first row)
-- `hmac` — HMAC-SHA256 of canonicalized record JSON + prev_hash, signed with `LS_AUDIT_HMAC_SECRET`
+- `prev_hash`, the previous record's `hmac` (or null for the first row)
+- `hmac`, HMAC-SHA256 of canonicalized record JSON + prev_hash, signed with `LS_AUDIT_HMAC_SECRET`
 
 Modifying any field of any record changes its HMAC; subsequent records' HMACs are now misaligned with what `prev_hash` says they should be.
 

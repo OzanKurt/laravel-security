@@ -1,4 +1,4 @@
-# `shield:watch` — Continuous File Change Monitor
+# `shield:watch`, Continuous File Change Monitor
 
 `shield:watch` runs as a long-running process that detects file changes in real time (when `spatie/file-system-watcher` is installed) or via a polling loop (fallback for shared hosts without Node.js / chokidar).
 
@@ -21,7 +21,7 @@ echo "LS_WATCH_ENABLED=true" >> .env
 #       ],
 #   ],
 
-# Optional — install spatie/file-system-watcher for chokidar-backed mode
+# Optional, install spatie/file-system-watcher for chokidar-backed mode
 composer require spatie/file-system-watcher
 npm install chokidar
 

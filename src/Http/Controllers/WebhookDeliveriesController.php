@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use OzanKurt\Shield\Jobs\ForwardAuditToCentralJob;
@@ -49,7 +49,7 @@ class WebhookDeliveriesController extends Controller
         $delivery = WebhookDelivery::query()->findOrFail($id);
 
         if ($delivery->isPending()) {
-            return back()->with('status', "Delivery #{$id} is still pending — wait for it to finish.");
+            return back()->with('status', "Delivery #{$id} is still pending, wait for it to finish.");
         }
 
         if ($delivery->operation !== 'webhook_ingest') {
@@ -57,12 +57,12 @@ class WebhookDeliveriesController extends Controller
         }
 
         if (! $delivery->audit_log_id) {
-            return back()->with('status', "Delivery #{$id} has no linked audit log — cannot reconstruct payload for retry.");
+            return back()->with('status', "Delivery #{$id} has no linked audit log, cannot reconstruct payload for retry.");
         }
 
         $entry = AuditLog::query()->find($delivery->audit_log_id);
         if (! $entry) {
-            return back()->with('status', "Audit log #{$delivery->audit_log_id} no longer exists — retry impossible.");
+            return back()->with('status', "Audit log #{$delivery->audit_log_id} no longer exists, retry impossible.");
         }
 
         ForwardAuditToCentralJob::dispatch([

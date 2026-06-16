@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
- * Terminable middleware — records the request after the response is sent
+ * Terminable middleware, records the request after the response is sent
  * so the capture cost stays off the request path.
  *
  * Sampling:

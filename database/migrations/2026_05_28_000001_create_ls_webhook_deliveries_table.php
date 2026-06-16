@@ -12,7 +12,7 @@ use OzanKurt\Shield\Support\Migrations\ShieldBlueprint;
  * retry permanent failures from the dashboard.
  *
  * This table is the on-site equivalent of Stripe's "Webhook attempt"
- * timeline — without it, an operator faced with "events aren't reaching
+ * timeline, without it, an operator faced with "events aren't reaching
  * Central" has no way to tell whether the plugin sent + got rejected,
  * sent + got nothing, or never sent at all.
  */
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('operation', 32)->index();         // webhook_ingest | heartbeat | test_ping | webhook_ingest_batch
             $table->string('target_url', 255);
             $table->string('payload_hash', 64)->index();      // sha256 of the raw signed body
-            // INT (max 4.2B) — single payloads can exceed 64KB with stack
+            // INT (max 4.2B), single payloads can exceed 64KB with stack
             // traces, and batch ingest pushes can be megabytes. The earlier
             // SMALLINT either threw on strict MySQL or silently clamped.
             $table->unsignedInteger('payload_bytes')->default(0);
@@ -45,16 +45,16 @@ return new class extends Migration
             $table->unsignedSmallInteger('http_status')->default(0);
             $table->string('response_excerpt', 512)->nullable();
 
-            // Retry tracking — populated by the queued job's middleware
+            // Retry tracking, populated by the queued job's middleware
             $table->unsignedTinyInteger('attempt_number')->default(1);
             $table->unsignedTinyInteger('max_attempts')->default(3);
 
-            // Timing — start vs completion for latency analytics
+            // Timing, start vs completion for latency analytics
             $table->timestamp('dispatched_at')->index();
             $table->timestamp('completed_at')->nullable();
             $table->unsignedInteger('duration_ms')->nullable();
 
-            // Source linkage — when this is forwarding a specific audit
+            // Source linkage, when this is forwarding a specific audit
             // log row, store the local id for cross-reference
             $table->unsignedBigInteger('audit_log_id')->nullable()->index();
 

@@ -26,7 +26,7 @@ class FeedSyncCommand extends Command
             $r->success() ? 'OK' : 'FAIL',
             $r->imported,
             $r->updated,
-            $r->error ?? '—',
+            $r->error ?? '-',
         ], $results);
 
         $this->table(['Provider', 'Status', 'Imported', 'Updated', 'Error'], $rows);

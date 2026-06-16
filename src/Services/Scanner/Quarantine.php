@@ -13,15 +13,15 @@ use RuntimeException;
  * Moves and restores files based on per-target quarantine policy.
  *
  * Policy is one of:
- *   'move_and_stub'  — moves the file to the quarantine dir, writes an empty stub at the
+ *   'move_and_stub' , moves the file to the quarantine dir, writes an empty stub at the
  *                       original path so subsequent scans see "the file" exists but has no
  *                       executable content. Reversible via restore().
- *   'log_only'        — never touches the file. Used for app_files / vendor where mutation
+ *   'log_only'       , never touches the file. Used for app_files / vendor where mutation
  *                       would break the running app.
  *
  * Storage layout:
- *   storage/shield/quarantine/<finding-uuid>.bin       — the original file contents
- *   storage/shield/quarantine/<finding-uuid>.json      — sidecar metadata (original path, mtime, perms)
+ *   storage/shield/quarantine/<finding-uuid>.bin      , the original file contents
+ *   storage/shield/quarantine/<finding-uuid>.json     , sidecar metadata (original path, mtime, perms)
  */
 class Quarantine
 {

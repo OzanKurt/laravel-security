@@ -5,7 +5,7 @@ composer require ozankurt/laravel-shield
 php artisan shield:install
 ```
 
-`shield:install` is idempotent — safe to re-run.
+`shield:install` is idempotent, safe to re-run.
 
 ## What the install command does
 
@@ -47,12 +47,12 @@ php artisan queue:work --queue=shield
 
 ## Schedule
 
-Add Shield's scheduled tasks to your scheduler. Shield self-registers when `shield.audit.drift.enabled` etc. are true — if your scheduler is `php artisan schedule:run` (cron every minute), there's nothing else to do.
+Add Shield's scheduled tasks to your scheduler. Shield self-registers when `shield.audit.drift.enabled` etc. are true, if your scheduler is `php artisan schedule:run` (cron every minute), there's nothing else to do.
 
 Common scheduled commands:
-- `shield:audit-drift` (daily 4am) — re-checksum monitored files
-- `shield:signatures-sync` (daily 5am) — pull latest signatures from GitHub releases
-- `shield:unblock-ips` — ACL expiry sweep
+- `shield:audit-drift` (daily 4am), re-checksum monitored files
+- `shield:signatures-sync` (daily 5am), pull latest signatures from GitHub releases
+- `shield:unblock-ips`, ACL expiry sweep
 
 ## Optional dependencies (composer suggests)
 

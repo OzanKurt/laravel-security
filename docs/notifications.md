@@ -9,8 +9,8 @@ Five channels. Severity-routed. Throttled. Multi-cadence reports.
 | `mail` | Built-in |
 | `slack` | Built-in |
 | `discord` | Built-in (custom channel) |
-| `telegram` | Built-in (1.0+) — Bot API, MarkdownV2 |
-| `webhook` | Built-in (1.0+) — generic POST + stable payload for the future Central app |
+| `telegram` | Built-in (1.0+), Bot API, MarkdownV2 |
+| `webhook` | Built-in (1.0+), generic POST + stable payload for the future Central app |
 
 ## Routing matrix
 

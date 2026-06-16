@@ -15,7 +15,7 @@
                                 <div class="col-md-3">
                                     <label class="form-label small">@lang('shield::dashboard.columns.kind')</label>
                                     <select id="filterKind" name="filter_kind_id" class="form-select form-select-sm">
-                                        <option value="">— All —</option>
+                                        <option value="">- All -</option>
                                         @foreach($kinds as $kind)
                                             <option value="{{ $kind->id }}">{{ $kind->label }}</option>
                                         @endforeach
@@ -24,7 +24,7 @@
                                 <div class="col-md-2">
                                     <label class="form-label small">@lang('shield::dashboard.columns.severity')</label>
                                     <select id="filterSeverity" name="filter_severity_id" class="form-select form-select-sm">
-                                        <option value="">— All —</option>
+                                        <option value="">- All -</option>
                                         @foreach($severities as $sev)
                                             <option value="{{ $sev->id }}">{{ $sev->label }}</option>
                                         @endforeach
@@ -33,7 +33,7 @@
                                 <div class="col-md-2">
                                     <label class="form-label small">@lang('shield::dashboard.columns.actor_type')</label>
                                     <select id="filterActorType" name="filter_actor_type" class="form-select form-select-sm">
-                                        <option value="">— All —</option>
+                                        <option value="">- All -</option>
                                         <option value="user">user</option>
                                         <option value="system">system</option>
                                         <option value="cli">cli</option>

@@ -6,9 +6,9 @@ namespace OzanKurt\Shield\Support;
  * Redact sensitive fields from request data before persistence.
  *
  * Config:
- *   shield.redaction.keys         — list of key patterns (supports wildcards)
- *   shield.redaction.placeholder  — replacement value (default '[redacted]')
- *   shield.redaction.use_regex    — when true, '*' in a key is treated as ".*" regex
+ *   shield.redaction.keys        , list of key patterns (supports wildcards)
+ *   shield.redaction.placeholder , replacement value (default '[redacted]')
+ *   shield.redaction.use_regex   , when true, '*' in a key is treated as ".*" regex
  */
 class RequestDataRedactor
 {

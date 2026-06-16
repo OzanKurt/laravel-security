@@ -94,7 +94,7 @@ class Shield
 
     /**
      * Is a premium license active? Cached 24h, with a 7-day grace period
-     * if the Central license-check API is unreachable. Soft enforcement —
+     * if the Central license-check API is unreachable. Soft enforcement -
      * see Services\Premium\LicenseChecker for the rationale.
      */
     public function isPremium(): bool
@@ -115,7 +115,7 @@ class Shield
     /**
      * Full license state for the License dashboard page. Includes plan,
      * expiry, domain limit + count, last-checked timestamp, and grace
-     * status. License key itself is NOT exposed — use maskedKey() instead.
+     * status. License key itself is NOT exposed, use maskedKey() instead.
      *
      * MAY trigger a synchronous HTTP call to Central on cache miss. Use
      * licenseStateCached() in views/middleware/hot paths to avoid that.
@@ -129,7 +129,7 @@ class Shield
 
     /**
      * Cache-only license state for hot paths (navbar badge, every-request
-     * checks, etc.). Returns null when no cache entry exists — callers
+     * checks, etc.). Returns null when no cache entry exists, callers
      * should render a neutral state, NEVER trigger a refresh from here.
      *
      * @return array<string,mixed>|null

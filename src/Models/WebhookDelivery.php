@@ -13,12 +13,12 @@ use OzanKurt\Shield\Concerns\HasUuid;
  *
  *   dispatch → pending  (job picked up, about to POST)
  *   pending → success   (2xx response)
- *   pending → failure   (4xx — permanent, no retry)
- *   pending → failure   (5xx or connection error — retried by queue)
+ *   pending → failure   (4xx, permanent, no retry)
+ *   pending → failure   (5xx or connection error, retried by queue)
  *   pending → exhausted (all retries failed; job will not retry)
  *   pending → skipped   (no license / no URL / circuit open)
  *
- * Updates are append-only to a single row per attempt — the queue's
+ * Updates are append-only to a single row per attempt, the queue's
  * retry counter creates a new row for each retry, so the row trail
  * tells the full story of one logical event's delivery.
  */

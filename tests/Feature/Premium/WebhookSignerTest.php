@@ -103,7 +103,7 @@ class WebhookSignerTest extends TestCase
         ]);
         $sigWithBoth = (new WebhookSigner())->sign($body);
 
-        // Sign with only the webhook secret — must produce same signature
+        // Sign with only the webhook secret, must produce same signature
         // bytes for the same ts+nonce; since those vary, instead compare
         // by deriving from headers + the EXPECTED secret manually.
         $ts = $sigWithBoth['X-Shield-Timestamp'];

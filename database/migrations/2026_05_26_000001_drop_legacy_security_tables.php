@@ -21,6 +21,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        // No reverse — these tables are obsolete in v1.0
+        // No reverse, these tables are obsolete in v1.0
     }
 };

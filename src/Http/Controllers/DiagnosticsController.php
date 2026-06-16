@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use OzanKurt\Shield\Models\ScannerRun;
 use OzanKurt\Shield\Models\Signature;
 use OzanKurt\Shield\Services\Audit\EnvAuditor;

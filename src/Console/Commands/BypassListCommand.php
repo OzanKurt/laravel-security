@@ -32,8 +32,8 @@ class BypassListCommand extends Command
             $entries->map(fn ($e) => [
                 $e->id,
                 $e->value,
-                $e->reason ?? '—',
-                $e->created_at?->toDateTimeString() ?? '—',
+                $e->reason ?? '-',
+                $e->created_at?->toDateTimeString() ?? '-',
             ])->toArray(),
         );
 

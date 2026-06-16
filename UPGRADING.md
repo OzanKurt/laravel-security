@@ -2,11 +2,11 @@
 
 ## From 0.x to 1.0.0-beta.1
 
-This is a **breaking** release — all tables, config keys, and namespaces change. There is no automated migration; perform a fresh install.
+This is a **breaking** release, all tables, config keys, and namespaces change. There is no automated migration; perform a fresh install.
 
 ### Steps
 
-1. **Update composer.json** — change requirement from `ozankurt/laravel-security` to `ozankurt/laravel-shield`. The new package's `replace` clause handles the conflict:
+1. **Update composer.json**, change requirement from `ozankurt/laravel-security` to `ozankurt/laravel-shield`. The new package's `replace` clause handles the conflict:
 
    ```bash
    composer require ozankurt/laravel-shield:^1.0.0-beta

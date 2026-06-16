@@ -190,7 +190,7 @@ class HasUserstampsTest extends TestCase
         // deleted_by_id should be user B (2)
         $this->assertSame(2, $record->deleted_by_id);
 
-        // updated_by_id must still be user A (1) — no cascade through updating event
+        // updated_by_id must still be user A (1), no cascade through updating event
         $fresh = $model->newQuery()->withTrashed()->find($inserted);
         $this->assertSame(1, $fresh->updated_by_id);
         $this->assertSame(2, $fresh->deleted_by_id);

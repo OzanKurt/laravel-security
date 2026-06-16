@@ -23,7 +23,7 @@ The `ShieldDashboardMiddleware` calls `Gate::allows('viewShieldDashboard')` on e
 |---|---|---|
 | `/shield` | Dashboard | Stats cards (attacks, ACL active, recent events), recently modified files widget |
 | `/shield/acl` | ACL | Unified allow/deny entries with kind/value/action/source filters, per-row whitelist/blacklist/delete |
-| `/shield/logs` | Attack logs | Every `AttackDetectedEvent` row from the firewall middlewares — searchable, paginated |
+| `/shield/logs` | Attack logs | Every `AttackDetectedEvent` row from the firewall middlewares, searchable, paginated |
 | `/shield/auth-logs` | Auth logs | Login attempts (success + failure) emitted by Laravel `Auth::Login` / `Auth::Failed` events |
 | `/shield/audit-log` | Audit log | HMAC-chained admin/state-change trail, filterable by kind + severity + actor + correlation_id |
 | `/shield/live-traffic` | Live traffic | Sampled traffic stream with 5–10s polling (or real-time when broadcasting enabled) |
@@ -67,7 +67,7 @@ Supported `type` values:
 | `confirmDialog` | Open a confirm dialog before the action commits (planned) |
 | `redirect` | Redirect to a new URL (planned) |
 
-Custom controllers in your app can return the same shape — the dashboard's `ajaxComplete` handler will process the actions automatically when called via the standard ajax pattern.
+Custom controllers in your app can return the same shape, the dashboard's `ajaxComplete` handler will process the actions automatically when called via the standard ajax pattern.
 
 ## Mobile responsiveness
 
@@ -81,7 +81,7 @@ Every table uses DataTables.net's `responsive: true` mode. Columns collapse into
 - An auto-block isn't firing and you suspect the per-IP decision cache is stale
 - After a deploy, signature/rule changes aren't visible in the dashboard
 
-The "Clear all" button purges every `shield.*` key in one go — useful after a major schema migration.
+The "Clear all" button purges every `shield.*` key in one go, useful after a major schema migration.
 
 ## Theme switcher
 

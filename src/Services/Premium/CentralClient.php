@@ -84,7 +84,7 @@ class CentralClient
     }
 
     /**
-     * Heartbeat ping — summary stats so Central can show "last seen" +
+     * Heartbeat ping, summary stats so Central can show "last seen" +
      * per-site activity for license holders.
      *
      * @param array<string,mixed> $stats
@@ -106,7 +106,7 @@ class CentralClient
     }
 
     /**
-     * Connectivity test — Central echoes the timestamp back signed
+     * Connectivity test, Central echoes the timestamp back signed
      * with the same secret. Lets the operator confirm both directions
      * of the signing scheme are wired correctly.
      */
@@ -172,9 +172,9 @@ class CentralClient
     /**
      * Resolve the test/ping URL. Three sources, in precedence:
      *   1. Explicit shield.premium.test_ping_url (or LS_PREMIUM_TEST_PING_URL)
-     *   2. Heartbeat URL via path replacement — works for the default
+     *   2. Heartbeat URL via path replacement, works for the default
      *      https://laravel-shield.ozankurt.com/api/heartbeat shape
-     *   3. License-check URL via path replacement — fallback when only
+     *   3. License-check URL via path replacement, fallback when only
      *      the license URL is configured
      *
      * Each candidate is parsed; we reconstruct scheme+host (+port if non-
@@ -225,7 +225,7 @@ class CentralClient
             return DeliveryResult::skipped('no_signing_secret');
         }
 
-        // Encode once — both the signature and the actual request body
+        // Encode once, both the signature and the actual request body
         // hash THIS exact byte sequence. Re-encoding later (even with
         // the same flags) can produce different bytes for floats/etc.
         $body = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -269,7 +269,7 @@ class CentralClient
      * Open a WebhookDelivery row in pending status BEFORE the HTTP call
      * fires. If the process crashes mid-request (timeout, OOM, etc),
      * the row stays in 'pending' as a permanent record that something
-     * went wrong — invisible failures are debugging hell.
+     * went wrong, invisible failures are debugging hell.
      *
      * Falls back to null silently if the table doesn't exist yet
      * (fresh install pre-migration) so we don't block the actual POST.
@@ -298,7 +298,7 @@ class CentralClient
     }
 
     /**
-     * Update the pending row with the final outcome. Best-effort —
+     * Update the pending row with the final outcome. Best-effort -
      * if the row is missing we still return the result unchanged.
      */
     private function finalize(?WebhookDelivery $delivery, DeliveryResult $result): DeliveryResult
@@ -319,7 +319,7 @@ class CentralClient
                 $result->responseExcerpt,
             );
         } catch (\Throwable) {
-            // Cosmetic — don't break the actual delivery on a logging miss.
+            // Cosmetic, don't break the actual delivery on a logging miss.
         }
 
         return $result;

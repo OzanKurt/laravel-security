@@ -101,7 +101,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->publishAssets();
 
         // Auto-load all package-shipped migrations. Consumer apps no longer
-        // need to publish migration stubs to run them — they execute from
+        // need to publish migration stubs to run them, they execute from
         // the vendor directory on `php artisan migrate` like Sanctum/Telescope.
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
@@ -374,7 +374,7 @@ class ShieldServiceProvider extends ServiceProvider
                     ->cron($this->minutesToCron($minutes));
             }
 
-            // Background license refresh — keeps the LicenseChecker cache
+            // Background license refresh, keeps the LicenseChecker cache
             // warm so hot paths (navbar, AuditLogger) can use the cache-only
             // path without ever triggering a synchronous HTTP call to Central.
             // Fires once an hour; LicenseChecker still respects the per-state
@@ -406,8 +406,8 @@ class ShieldServiceProvider extends ServiceProvider
      * like /wp-admin, /.env, /phpmyadmin etc.
      *
      * Each configured path registers TWO routes:
-     *   1. Exact match  — /wp-admin
-     *   2. Subpath match — /wp-admin/{any} where {any} matches anything
+     *   1. Exact match , /wp-admin
+     *   2. Subpath match, /wp-admin/{any} where {any} matches anything
      *
      * Both fire the same controller. Subpath match catches probes like
      * /wp-admin/install.php, /.git/HEAD, /phpmyadmin/scripts/setup.php.
@@ -427,7 +427,7 @@ class ShieldServiceProvider extends ServiceProvider
             // Exact path
             $router->any('/' . $trimmed, [$controller, 'trap']);
 
-            // Subpath wildcard — /<path>/<anything>
+            // Subpath wildcard, /<path>/<anything>
             $router->any('/' . $trimmed . '/{any}', [$controller, 'trap'])
                 ->where('any', '.*');
         }
@@ -486,7 +486,7 @@ class ShieldServiceProvider extends ServiceProvider
     /**
      * Turn an interval in minutes into a cron expression. Only intervals
      * that evenly divide 60 produce a uniform schedule. For non-divisors
-     * we round UP to the next divisor — the cron syntax has no way to
+     * we round UP to the next divisor, the cron syntax has no way to
      * express "every 7 minutes" without drift at the hour boundary, and
      * users typically prefer a slightly slower-but-uniform schedule over
      * an irregular one (e.g. 7→10 minutes, 25→30).

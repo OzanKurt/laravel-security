@@ -1,6 +1,6 @@
 {
   "name": "ozankurt/laravel-shield",
-  "description": "Comprehensive Laravel security suite — WAF, malware scanner, ACL, audit log, live traffic, and notifications. The Wordfence-equivalent for Laravel.",
+  "description": "Comprehensive Laravel security suite, WAF, malware scanner, ACL, audit log, live traffic, and notifications. The Wordfence-equivalent for Laravel.",
   "keywords": [
     "laravel",
     "shield",

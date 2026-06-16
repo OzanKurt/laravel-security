@@ -54,7 +54,7 @@ class MediaScanListener
                 ],
             ]);
 
-            throw new RuntimeException('Shield: media file rejected — suspicious content detected.');
+            throw new RuntimeException('Shield: media file rejected, suspicious content detected.');
         }
     }
 

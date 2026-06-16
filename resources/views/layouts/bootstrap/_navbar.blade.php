@@ -88,7 +88,7 @@
                     >
                         License
                         {{--
-                            CACHE-ONLY read — must never trigger an HTTP
+                            CACHE-ONLY read, must never trigger an HTTP
                             call to Central. licenseState() would refresh
                             on cache miss + stall every dashboard page up
                             to http_timeout seconds. Badge stays neutral

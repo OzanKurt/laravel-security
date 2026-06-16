@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use OzanKurt\Shield\Contracts\ThreatFeedProvider;
 use OzanKurt\Shield\Models\AuditLog;
 use OzanKurt\Shield\Models\Lookups\AuditLogKind;
@@ -32,8 +32,8 @@ class ThreatFeedController extends Controller
                 'name' => $provider->name(),
                 'label' => $provider->label(),
                 'available' => $provider->isAvailable(),
-                'last_run' => (string) ($latest?->created_at ?? '—'),
-                'last_status' => $latest?->description ?? '—',
+                'last_run' => (string) ($latest?->created_at ?? '-'),
+                'last_status' => $latest?->description ?? '-',
             ];
         }
 

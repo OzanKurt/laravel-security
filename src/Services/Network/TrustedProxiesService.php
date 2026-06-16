@@ -31,7 +31,7 @@ class TrustedProxiesService
                 $proxies = array_merge($proxies, $this->fetchCloudflareRanges());
             }
 
-            // AWS and GCP loaders are placeholders — pulling official JSON
+            // AWS and GCP loaders are placeholders, pulling official JSON
             // can be implemented when needed.
 
             $extra = (array) config('shield.trusted_proxies.extra', []);
@@ -53,7 +53,7 @@ class TrustedProxiesService
                 $out = array_merge($out, array_filter(array_map('trim', preg_split('/\r?\n/', $v6->body()) ?: [])));
             }
         } catch (Throwable) {
-            // ignore — fallback to whatever's already in config
+            // ignore, fallback to whatever's already in config
         }
         return $out;
     }

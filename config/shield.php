@@ -11,7 +11,7 @@ return [
     |
     | LS_BYPASS_KEY is intentionally read via env() inside the middleware (not
     | here) so it is never baked into the config cache. Add IPs here (or via
-    | LS_BYPASS_IPS) to whitelist them permanently — they cannot be removed via
+    | LS_BYPASS_IPS) to whitelist them permanently, they cannot be removed via
     | the dashboard UI.
     |
     */
@@ -741,12 +741,12 @@ return [
          * the hit + auto-blocks the source IP for shield.honeypot.block_duration
          * seconds.
          *
-         * Wildcard subpaths are matched automatically — adding "wp-admin" also
+         * Wildcard subpaths are matched automatically, adding "wp-admin" also
          * catches /wp-admin, /wp-admin/, /wp-admin/install.php, etc.
          *
          * Paths below are high-confidence probes that have ZERO legitimate use
          * in a Laravel app. Do NOT add /api, /robots.txt, /favicon.ico,
-         * /.well-known/*, /sitemap.xml, /health, /up — those are legitimate.
+         * /.well-known/*, /sitemap.xml, /health, /up, those are legitimate.
          */
         'paths' => [
             // WordPress core probes
@@ -979,7 +979,7 @@ return [
             'channel' => env('LS_LIVE_TRAFFIC_CHANNEL', 'shield.live-traffic'),
 
             // Whether realtime broadcasting requires a premium license.
-            // True (default) for new installs — matches the published
+            // True (default) for new installs, matches the published
             // feature gating. False preserves v1.x behavior where any
             // install with real_time.enabled=true got broadcasts.
             // Set false on upgrade if you self-host Reverb and don't
@@ -1027,7 +1027,7 @@ return [
     | Shield::isFeatureAvailable($feature) so the free fallback applies
     | when the license is missing, expired, or revoked.
     |
-    | The license key is treated as a secret — it is NEVER logged into
+    | The license key is treated as a secret, it is NEVER logged into
     | ls_audit_log, NEVER appears in telemetry, and NEVER shows up in
     | rendered dashboard pages in clear text.
     |
@@ -1035,7 +1035,7 @@ return [
     'premium' => [
         'license_key' => env('LS_PREMIUM_LICENSE_KEY'),
 
-        // Optional rotation secret for HMAC signing — separate from the
+        // Optional rotation secret for HMAC signing, separate from the
         // license key so operators can rotate signing material on incident
         // response without revoking the whole license. When unset, the
         // license key is used as the HMAC secret.
@@ -1086,11 +1086,11 @@ return [
 
         // Connectivity-test echo endpoint. Used by shield:central-test +
         // the License dashboard's "Test connectivity" button. Falls back
-        // to {heartbeat_host}/api/test/ping when unset — only override
+        // to {heartbeat_host}/api/test/ping when unset, only override
         // when running a non-standard Central deployment.
         'test_ping_url' => env('LS_PREMIUM_TEST_PING_URL'),
 
-        // Heartbeat — once per configured interval, plugin pings Central
+        // Heartbeat, once per configured interval, plugin pings Central
         // with summary stats (request count, block count, version) so the
         // Central dashboard can show "last seen" for each protected site.
         'heartbeat' => [
