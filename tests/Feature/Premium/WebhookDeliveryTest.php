@@ -45,7 +45,7 @@ class WebhookDeliveryTest extends TestCase
 
         $delivery->refresh();
         $this->assertGreaterThan(0, $delivery->duration_ms);
-        // Must be positive (the abs() fix) — should be roughly 5000 (±tolerance for test exec time)
+        // Must be positive (the abs() fix), should be roughly 5000 (±tolerance for test exec time)
         $this->assertGreaterThanOrEqual(4900, $delivery->duration_ms);
     }
 

@@ -4,18 +4,18 @@ Premium features ship in the **same package** as free features. There's no separ
 
 ## What premium unlocks
 
-- **Real-time threat feed sync** — free tier syncs daily; premium polls every few minutes
-- **Real-time IP blocklist subscription** — same idea for blocklists
-- **Real-time malware signatures** — served by the Central app: premium hits `/api/signatures/premium` (fresh, gated server-side on `premium_signatures`, authorized with your license bearer); free hits the public `/api/signatures/free` lagging ~30 days (matches Wordfence's free-tier signature delay). Resolved per-run via `premium_signatures`; the channel is recorded in the `threat_feed.sync_completed` audit meta
-- **Hosted audit-log sink** — forward audit events to the Shield Central app for cross-site SIEM aggregation
-- **Future SIEM dashboard integration** — first-class consumer of the webhook channel
+- **Real-time threat feed sync**, free tier syncs daily; premium polls every few minutes
+- **Real-time IP blocklist subscription**, same idea for blocklists
+- **Real-time malware signatures**, served by the Central app: premium hits `/api/signatures/premium` (fresh, gated server-side on `premium_signatures`, authorized with your license bearer); free hits the public `/api/signatures/free` lagging ~30 days (matches Wordfence's free-tier signature delay). Resolved per-run via `premium_signatures`; the channel is recorded in the `threat_feed.sync_completed` audit meta
+- **Hosted audit-log sink**, forward audit events to the Shield Central app for cross-site SIEM aggregation
+- **Future SIEM dashboard integration**, first-class consumer of the webhook channel
 
-Local-only features (dashboard polish, advanced report templates, extra middlewares) are NOT premium-gated — those ship for everyone in the free release.
+Local-only features (dashboard polish, advanced report templates, extra middlewares) are NOT premium-gated, those ship for everyone in the free release.
 
 ## Setup
 
 1. Buy a license at [laravel-shield.ozankurt.com](https://laravel-shield.ozankurt.com)
-2. Receive your key — `ls-prem-xxxxxxxxxxxx`
+2. Receive your key, `ls-prem-xxxxxxxxxxxx`
 3. Add to `.env`:
 
 ```env
@@ -39,9 +39,9 @@ If the license API is unreachable for >24h, premium stays active for an addition
 
 This prevents an outage on Ozan's side from killing buyer sites.
 
-## Honest threat model — soft enforcement, not DRM
+## Honest threat model, soft enforcement, not DRM
 
-The local `LicenseChecker::isFeatureAvailable()` check is **patchable**. Any buyer can open `vendor/ozankurt/laravel-shield/src/Premium/LicenseChecker.php` and change `isFeatureAvailable()` to always return true. This is true for every open-source-distributed premium plugin — Wordfence, Yoast, ACF Pro, EDD, etc.
+The local `LicenseChecker::isFeatureAvailable()` check is **patchable**. Any buyer can open `vendor/ozankurt/laravel-shield/src/Premium/LicenseChecker.php` and change `isFeatureAvailable()` to always return true. This is true for every open-source-distributed premium plugin, Wordfence, Yoast, ACF Pro, EDD, etc.
 
 The license check is NOT designed to defeat crackers. It's designed to:
 - Give honest buyers a clean "license expired, please renew" UI signal
@@ -55,21 +55,21 @@ The real premium *value* lives server-side:
 
 | Premium feature | Where the value lives | Crack-able locally? |
 |---|---|---|
-| Real-time threat feed | `laravel-shield.ozankurt.com` API gates feed access by license key | No — patcher gets stale free signatures |
+| Real-time threat feed | `laravel-shield.ozankurt.com` API gates feed access by license key | No, patcher gets stale free signatures |
 | Real-time IP blocklist | Same API | No |
 | Hosted audit-log sink | Hosted ingestion endpoint | No |
 | SIEM dashboard | The Shield Central app | No |
 
 Patching `isFeatureAvailable()` doesn't unlock the API. The API still demands a valid key. Without one, the patched plugin works the same as the free package.
 
-**We do NOT implement:** encrypted code blobs (IonCube / SourceGuardian), Composer post-install validators, runtime file checksums. These hurt honest buyers and don't defeat crackers — not worth it.
+**We do NOT implement:** encrypted code blobs (IonCube / SourceGuardian), Composer post-install validators, runtime file checksums. These hurt honest buyers and don't defeat crackers, not worth it.
 
 ## Anti-abuse
 
 - API knows `site_url` per check → same key from many sites is visible to Ozan
 - `domain_limit` enforced API-side (returns `domain_limit_exceeded` past N domains)
 - Revocation is immediate (cached up to 24h on buyer side)
-- License key is treated as a secret — never logged, redacted via the standard sensitive-field redaction list
+- License key is treated as a secret, never logged, redacted via the standard sensitive-field redaction list
 
 ## Configuration
 

@@ -8,6 +8,9 @@ use OzanKurt\Shield\Models\Lookups\AclKind;
 use OzanKurt\Shield\Models\Lookups\ActionKind;
 use OzanKurt\Shield\Models\Lookups\AuditLogKind;
 use OzanKurt\Shield\Models\Lookups\AuthEventKind;
+use OzanKurt\Shield\Models\Lookups\IntegrityChangeType;
+use OzanKurt\Shield\Models\Lookups\IntegrityComparisonBasis;
+use OzanKurt\Shield\Models\Lookups\IntegrityStatus;
 use OzanKurt\Shield\Models\Lookups\LogKind;
 use OzanKurt\Shield\Models\Lookups\LogLevel;
 use OzanKurt\Shield\Models\Lookups\ScannerBackend;
@@ -42,6 +45,9 @@ class LookupTableSeeder extends Seeder
         $this->seedScannerStatuses();
         $this->seedScannerFindingStatuses();
         $this->seedScannerTriggers();
+        $this->seedIntegrityStatuses();
+        $this->seedIntegrityChangeTypes();
+        $this->seedIntegrityComparisonBases();
     }
 
     private function seedAclKinds(): void
@@ -374,6 +380,68 @@ class LookupTableSeeder extends Seeder
 
         foreach ($triggers as [$name, $label, $description, $sort]) {
             ScannerTrigger::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
+        }
+    }
+
+    private function seedIntegrityStatuses(): void
+    {
+        $statuses = [
+            ['running', 'Running', 'Integrity scan in progress', 10],
+            ['completed', 'Completed', 'Scan finished successfully', 20],
+            ['failed', 'Failed', 'Scan terminated due to error', 30],
+            ['baseline_established', 'Baseline Established', 'Provisional baseline created on first run, not yet trusted', 40],
+            ['tamper_suspected', 'Tamper Suspected', 'Baseline signature verification failed', 50],
+            ['incomplete', 'Incomplete', 'Remote read degraded; results not trustworthy', 60],
+            ['timed_out', 'Timed Out', 'Scan exceeded the max runtime budget', 70],
+            ['skipped', 'Skipped', 'Another run held the lock', 80],
+            ['aborted_limit', 'Aborted (limit)', 'File or iteration cap exceeded', 90],
+            ['cancelled', 'Cancelled', 'Scan cancelled by user', 100],
+        ];
+
+        foreach ($statuses as [$name, $label, $description, $sort]) {
+            IntegrityStatus::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
+        }
+    }
+
+    private function seedIntegrityChangeTypes(): void
+    {
+        $types = [
+            ['new', 'New', 'File present now but not in the comparison set', 10],
+            ['modified', 'Modified', 'File content hash changed', 20],
+            ['deleted', 'Deleted', 'File was tracked but is now absent', 30],
+            ['scope_changed', 'Scope Changed', 'File entered or left scope due to a config change', 40],
+            ['became_unreadable', 'Became Unreadable', 'Tracked file is present but could not be read', 50],
+            ['vanished', 'Vanished', 'File disappeared mid-scan', 60],
+            ['volatile', 'Volatile', 'File changed again during the scan; excluded from escalation', 70],
+            ['symlink_new', 'New Symlink', 'A symlink that did not exist in the comparison set', 80],
+        ];
+
+        foreach ($types as [$name, $label, $description, $sort]) {
+            IntegrityChangeType::updateOrCreate(['name' => $name], [
+                'label' => $label,
+                'description' => $description,
+                'sort_order' => $sort,
+            ]);
+        }
+    }
+
+    private function seedIntegrityComparisonBases(): void
+    {
+        $bases = [
+            ['last_run', 'Last Run', 'Compared against the previous scan run (per-run delta)', 10],
+            ['known_good', 'Known Good', 'Compared against the pinned approved baseline', 20],
+        ];
+
+        foreach ($bases as [$name, $label, $description, $sort]) {
+            IntegrityComparisonBasis::updateOrCreate(['name' => $name], [
                 'label' => $label,
                 'description' => $description,
                 'sort_order' => $sort,

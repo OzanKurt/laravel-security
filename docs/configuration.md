@@ -1,6 +1,6 @@
 # Configuration
 
-Every behavior is exposed in `config/shield.php`. After `composer require` + `shield:install`, you have a published copy in your app — edit it directly. This page is the authoritative reference.
+Every behavior is exposed in `config/shield.php`. After `composer require` + `shield:install`, you have a published copy in your app, edit it directly. This page is the authoritative reference.
 
 ## Top-level keys
 
@@ -49,9 +49,9 @@ Every behavior is exposed in `config/shield.php`. After `composer require` + `sh
 ],
 ```
 
-- `sync` — every write is a synchronous Eloquent save. Default. Fine for low-medium traffic.
-- `queue` — every write dispatches a job. Requires a queue worker (`php artisan queue:work --queue=shield`). Use for medium-high traffic.
-- `redis_batch` — buffers in Redis sorted set, flushes every `batch_interval` seconds. Highest throughput. Requires Redis.
+- `sync`, every write is a synchronous Eloquent save. Default. Fine for low-medium traffic.
+- `queue`, every write dispatches a job. Requires a queue worker (`php artisan queue:work --queue=shield`). Use for medium-high traffic.
+- `redis_batch`, buffers in Redis sorted set, flushes every `batch_interval` seconds. Highest throughput. Requires Redis.
 
 Sampling applies to live_traffic non-attack rows. Attacks always 100%.
 
@@ -94,7 +94,7 @@ Gate::define('viewShieldDashboard', fn ($user) => $user && $user->is_admin);
 
 ## Bypass mechanism
 
-See [bypass.md](bypass.md) — three layers:
+See [bypass.md](bypass.md), three layers:
 
 1. `LS_BYPASS_KEY` env (32+ char random string, sent as `X-Security-Bypass` header)
 2. `LS_BYPASS_IPS` env (comma-separated IP/CIDR list)

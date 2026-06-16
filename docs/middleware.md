@@ -46,7 +46,7 @@ Customize the order in `config/shield.php`:
 | `firewall.correlation` | `Http\Middleware\AttachCorrelationId` | Generates UUID7 per request; sets `X-Correlation-Id` response header. Accepts an existing incoming UUID via `X-Correlation-Id` request header. |
 | `firewall.bypass` | `Firewall\Middleware\Bypass` | Checks `X-Security-Bypass` header against `LS_BYPASS_KEY` + checks client IP against `shield.bypass.ips`. On match, sets `shield.bypassed` attribute → later middlewares short-circuit. Audit-logs every bypass. |
 | `firewall.acl` | `Firewall\Middleware\Acl` | Evaluates `ls_acl` first-match-wins (allow > blacklist > block > pass). 403 on deny. |
-| `firewall.live_traffic` | `Http\Middleware\LiveTrafficCapture` | Terminable middleware — records the request after response is sent. Sampling per `shield.live_traffic.sample_rate`. |
+| `firewall.live_traffic` | `Http\Middleware\LiveTrafficCapture` | Terminable middleware, records the request after response is sent. Sampling per `shield.live_traffic.sample_rate`. |
 
 ### WAF detectors (port-from-config in beta.1)
 
@@ -54,7 +54,7 @@ Each loads patterns from `ls_waf_rules` filtered by category. On match: blocks (
 
 | Alias | Category | Detects |
 |---|---|---|
-| `firewall.ip` | n/a | DB-tracked block/blacklist entries (older `security_ips` model — being deprecated in favor of `firewall.acl`) |
+| `firewall.ip` | n/a | DB-tracked block/blacklist entries (older `security_ips` model, being deprecated in favor of `firewall.acl`) |
 | `firewall.agent` | `agent` | Browser/platform/device/property allow-block + malicious UA patterns |
 | `firewall.bot` | `bot` | Crawler allow-block (Googlebot, Bingbot, scrapers) |
 | `firewall.geo` | n/a | Continent/country/region/city filtering via configurable provider (`ipapi`, `ipstack`, etc.) |
@@ -108,7 +108,7 @@ Every detector middleware accepts a uniform shape under `shield.middleware.<name
             'period' => 1800,             // block duration in seconds
         ],
         'patterns' => [
-            // legacy — beta.1 migrates this list into ls_waf_rules
+            // legacy, beta.1 migrates this list into ls_waf_rules
             '#[\d\W]union select#i',
         ],
     ],

@@ -20,7 +20,7 @@ use OzanKurt\Shield\Services\Premium\CentralClient;
  *   - 5xx (Central having a bad day)                          → retry
  *   - Connection failure (timeout, DNS, refused)              → retry
  *
- * Exponential backoff with jitter (configurable via $backoff()) — 30s,
+ * Exponential backoff with jitter (configurable via $backoff()), 30s,
  * 90s, 270s on default 3-attempt setting. Total max delay ~6 minutes
  * before exhaustion, well within reason for transient Central outages.
  *
@@ -92,7 +92,7 @@ class ForwardAuditToCentralJob implements ShouldQueue
 
             // Find the most-recent delivery row + update on the instance.
             // Eloquent's update() against a query builder ignores latest()
-            // and limit() — running `->update()` after `->latest()->limit(1)`
+            // and limit(), running `->update()` after `->latest()->limit(1)`
             // generates UPDATE ... WHERE without ORDER/LIMIT in most drivers,
             // which would rewrite EVERY delivery row for this audit event
             // and destroy the per-attempt history.

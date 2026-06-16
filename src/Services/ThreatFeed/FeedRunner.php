@@ -67,11 +67,11 @@ class FeedRunner
     }
 
     /**
-     * Gate check — providers in PREMIUM_ONLY_PROVIDERS require a valid
+     * Gate check, providers in PREMIUM_ONLY_PROVIDERS require a valid
      * premium license. Other providers always run if they report
      * isAvailable() = true.
      *
-     * Falls open if isFeatureAvailable() throws — better to skip a
+     * Falls open if isFeatureAvailable() throws, better to skip a
      * premium provider than to crash the cron job.
      */
     private function isProviderUnlocked(ThreatFeedProvider $provider): bool

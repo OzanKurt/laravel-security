@@ -9,7 +9,7 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <div class="text-muted small">Latest run</div>
-                        <div class="fs-4">{{ $stats['latest_run'] ? '#'.$stats['latest_run']->id : '—' }}</div>
+                        <div class="fs-4">{{ $stats['latest_run'] ? '#'.$stats['latest_run']->id : '-' }}</div>
                         <div class="small text-muted">{{ $stats['latest_run_status'] ?? '' }}</div>
                     </div>
                 </div>

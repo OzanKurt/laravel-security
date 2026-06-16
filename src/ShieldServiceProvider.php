@@ -101,7 +101,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->publishAssets();
 
         // Auto-load all package-shipped migrations. Consumer apps no longer
-        // need to publish migration stubs to run them — they execute from
+        // need to publish migration stubs to run them, they execute from
         // the vendor directory on `php artisan migrate` like Sanctum/Telescope.
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
@@ -174,6 +174,13 @@ class ShieldServiceProvider extends ServiceProvider
             $router->get('scanner/findings', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'findings'])->name('scanner.findings');
             $router->get('scanner/signatures', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'signatures'])->name('scanner.signatures');
             $router->post('scanner/run', [\OzanKurt\Shield\Http\Controllers\ScannerController::class, 'startScan'])->name('scanner.run');
+
+            // File integrity
+            $router->get('integrity', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'index'])->name('integrity.index');
+            $router->get('integrity/runs', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'runs'])->name('integrity.runs');
+            $router->get('integrity/changes', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'changes'])->name('integrity.changes');
+            $router->post('integrity/scan', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'scan'])->name('integrity.scan');
+            $router->post('integrity/bless', [\OzanKurt\Shield\Http\Controllers\IntegrityController::class, 'bless'])->name('integrity.bless');
 
             // Threat feed
             $router->get('threat-feed', function () {
@@ -249,6 +256,10 @@ class ShieldServiceProvider extends ServiceProvider
         $this->app['events']->listen(AttackDetectedEvent::class, AttackDetectedListener::class);
         $this->app['events']->listen(AuthLoginEvent::class, SuccessfulLoginListener::class);
         $this->app['events']->listen(AuthFailedEvent::class, FailedLoginListener::class);
+        $this->app['events']->listen(
+            \OzanKurt\Shield\Events\IntegrityScanCompletedEvent::class,
+            \OzanKurt\Shield\Listeners\IntegrityScanCompletedListener::class
+        );
 
         \OzanKurt\Shield\Models\Acl::observe(\OzanKurt\Shield\Observers\AclObserver::class);
         \OzanKurt\Shield\Models\WafRule::observe(\OzanKurt\Shield\Observers\WafRuleObserver::class);
@@ -273,6 +284,11 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\ScanCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ScanStatusCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ScanCancelCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityScanCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityBlessCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityStatusCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityPruneCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\IntegrityHeartbeatCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineListCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\QuarantineRestoreCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ClamavStatusCommand::class);
@@ -305,6 +321,24 @@ class ShieldServiceProvider extends ServiceProvider
                 app(Schedule::class)
                     ->command('shield:audit-drift')
                     ->cron(config('shield.audit.drift.cron', '0 4 * * *'));
+            }
+
+            if (config('shield.integrity.schedule.enabled', false)) {
+                app(Schedule::class)
+                    ->command('shield:integrity')
+                    ->cron(config('shield.integrity.schedule.cron', '0 * * * *'))
+                    ->withoutOverlapping();
+
+                app(Schedule::class)
+                    ->command('shield:integrity-prune')
+                    ->daily();
+
+                if (config('shield.integrity.heartbeat.enabled', true)) {
+                    app(Schedule::class)
+                        ->command('shield:integrity-heartbeat')
+                        ->hourly()
+                        ->withoutOverlapping();
+                }
             }
 
             app(Schedule::class)
@@ -340,7 +374,7 @@ class ShieldServiceProvider extends ServiceProvider
                     ->cron($this->minutesToCron($minutes));
             }
 
-            // Background license refresh — keeps the LicenseChecker cache
+            // Background license refresh, keeps the LicenseChecker cache
             // warm so hot paths (navbar, AuditLogger) can use the cache-only
             // path without ever triggering a synchronous HTTP call to Central.
             // Fires once an hour; LicenseChecker still respects the per-state
@@ -372,8 +406,8 @@ class ShieldServiceProvider extends ServiceProvider
      * like /wp-admin, /.env, /phpmyadmin etc.
      *
      * Each configured path registers TWO routes:
-     *   1. Exact match  — /wp-admin
-     *   2. Subpath match — /wp-admin/{any} where {any} matches anything
+     *   1. Exact match , /wp-admin
+     *   2. Subpath match, /wp-admin/{any} where {any} matches anything
      *
      * Both fire the same controller. Subpath match catches probes like
      * /wp-admin/install.php, /.git/HEAD, /phpmyadmin/scripts/setup.php.
@@ -393,7 +427,7 @@ class ShieldServiceProvider extends ServiceProvider
             // Exact path
             $router->any('/' . $trimmed, [$controller, 'trap']);
 
-            // Subpath wildcard — /<path>/<anything>
+            // Subpath wildcard, /<path>/<anything>
             $router->any('/' . $trimmed . '/{any}', [$controller, 'trap'])
                 ->where('any', '.*');
         }
@@ -452,7 +486,7 @@ class ShieldServiceProvider extends ServiceProvider
     /**
      * Turn an interval in minutes into a cron expression. Only intervals
      * that evenly divide 60 produce a uniform schedule. For non-divisors
-     * we round UP to the next divisor — the cron syntax has no way to
+     * we round UP to the next divisor, the cron syntax has no way to
      * express "every 7 minutes" without drift at the hour boundary, and
      * users typically prefer a slightly slower-but-uniform schedule over
      * an irregular one (e.g. 7→10 minutes, 25→30).

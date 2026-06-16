@@ -42,7 +42,7 @@ class BuiltinWafRuleSeeder extends Seeder
     private function ruleDefinitions(): array
     {
         return [
-            // XSS — extracted from old config/security.php
+            // XSS, extracted from old config/security.php
             ['ref' => 'xss.evil_attributes',         'category' => 'xss',  'name' => 'Evil starting attributes',
              'pattern' => '#(<[^>]+[\x00-\x20\"\'\/])(form|formaction|on\w*|style|xmlns|xlink:href)[^>]*>?#iUu', 'severity' => 'high'],
             ['ref' => 'xss.protocols',               'category' => 'xss',  'name' => 'javascript:/livescript:/vbscript:/mocha:/feed:/data: protocols',

@@ -8,7 +8,7 @@ use OzanKurt\Shield\Models\AuditLog;
 use OzanKurt\Shield\Models\Lookups\AuditLogKind;
 use OzanKurt\Shield\Tests\TestCase;
 
-// Named stub model — avoids the anonymous-class basename weirdness in tests
+// Named stub model, avoids the anonymous-class basename weirdness in tests
 class AuditableWidget extends Model
 {
     use HasAuditLog;

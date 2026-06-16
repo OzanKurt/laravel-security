@@ -11,7 +11,7 @@ return [
     |
     | LS_BYPASS_KEY is intentionally read via env() inside the middleware (not
     | here) so it is never baked into the config cache. Add IPs here (or via
-    | LS_BYPASS_IPS) to whitelist them permanently — they cannot be removed via
+    | LS_BYPASS_IPS) to whitelist them permanently, they cannot be removed via
     | the dashboard UI.
     |
     */
@@ -99,6 +99,15 @@ return [
 
         'failed_login' => [
             'enabled' => env('FIREWALL_NOTIFICATIONS_FAILED_LOGIN_ENABLED', false),
+            'channels' => [
+                'mail',
+                'slack',
+                'discord',
+            ],
+        ],
+
+        'integrity_changed' => [
+            'enabled' => env('FIREWALL_NOTIFICATIONS_INTEGRITY_CHANGED_ENABLED', false),
             'channels' => [
                 'mail',
                 'slack',
@@ -627,6 +636,79 @@ return [
         ],
     ],
 
+    'integrity' => [
+        'enabled' => env('LS_INTEGRITY_ENABLED', false),
+
+        'disks' => [
+            'app' => [
+                'roots' => [base_path()],
+                'include' => ['**/*'],
+                'exclude' => [
+                    'vendor/**', 'node_modules/**', '.git/**',
+                    'storage/framework/**', 'storage/logs/**', 'bootstrap/cache/**',
+                    'storage/shield/**', // the baseline artifact lives here
+                ],
+                'follow_symlinks' => false,
+                'max_file_size' => 50 * 1024 * 1024, // size-only above this, EXCEPT script extensions
+            ],
+        ],
+
+        'hash_algo' => 'sha256',
+        'queue' => env('LS_INTEGRITY_QUEUE', 'shield-integrity'),
+
+        'schedule' => [
+            'enabled' => env('LS_INTEGRITY_SCHEDULE_ENABLED', false),
+            'cron' => env('LS_INTEGRITY_SCAN_CRON', '0 * * * *'),
+        ],
+
+        'baseline' => [
+            'auto_bless_on_first_run' => false,
+            'sign_artifact' => true,
+            // A key FILE outside the scan root is preferred; falls back to the env value.
+            'hmac_key_path' => env('LS_INTEGRITY_HMAC_KEY_PATH'),
+            'hmac_key' => env('LS_INTEGRITY_HMAC_KEY'),
+        ],
+
+        'limits' => [
+            'max_files' => 500000,
+            'max_iterations' => 1000000,
+            'max_runtime' => 3600,
+            'max_persisted_changes_per_run' => 5000,
+        ],
+
+        'notify' => [
+            'suppress_when_no_changes' => true,
+            'send_all_clear' => false,
+            'max_paths_per_group' => 15,
+            'timezone' => 'UTC',
+            // Whether the changed file paths are listed in Slack/Discord payloads
+            // (which traverse third-party webhooks). Default on to match the card;
+            // set false to redact paths from external channels and link to the dashboard instead.
+            'disclose_paths_to_external_channels' => true,
+        ],
+
+        'retention' => [
+            'runs_days' => 90,
+            'changes_days' => 30,
+        ],
+
+        'heartbeat' => [
+            'enabled' => env('LS_INTEGRITY_HEARTBEAT_ENABLED', true),
+            'max_age_hours' => env('LS_INTEGRITY_HEARTBEAT_MAX_AGE_HOURS', 26),
+        ],
+
+        // Ordered, first match wins. {public_docroot} expands to the resolved public root.
+        'severity_rules' => [
+            ['when' => ['path_any' => ['public/**', 'storage/app/public/**', '{public_docroot}/**'], 'ext_any' => ['php', 'phtml', 'phar', 'phps', 'inc', 'pht']], 'severity' => 'critical', 'non_suppressible' => true],
+            ['when' => ['change_type_any' => ['deleted']], 'severity' => 'high'],
+            ['when' => ['path_any' => ['app/**', 'routes/**', 'config/**'], 'ext_any' => ['php']], 'severity' => 'high'],
+            ['when' => ['path_any' => ['vendor/**']], 'severity' => 'high'],
+            ['when' => ['path_any' => ['.env', '.env.*', '**/.htaccess', '**/.user.ini']], 'severity' => 'medium'],
+            ['when' => ['change_type_any' => ['became_unreadable']], 'severity' => 'medium'],
+            ['when' => ['always' => true], 'severity' => 'low'],
+        ],
+    ],
+
     'headers' => [
         'enabled' => env('LS_HEADERS_ENABLED', true),
         'hsts' => [
@@ -659,12 +741,12 @@ return [
          * the hit + auto-blocks the source IP for shield.honeypot.block_duration
          * seconds.
          *
-         * Wildcard subpaths are matched automatically — adding "wp-admin" also
+         * Wildcard subpaths are matched automatically, adding "wp-admin" also
          * catches /wp-admin, /wp-admin/, /wp-admin/install.php, etc.
          *
          * Paths below are high-confidence probes that have ZERO legitimate use
          * in a Laravel app. Do NOT add /api, /robots.txt, /favicon.ico,
-         * /.well-known/*, /sitemap.xml, /health, /up — those are legitimate.
+         * /.well-known/*, /sitemap.xml, /health, /up, those are legitimate.
          */
         'paths' => [
             // WordPress core probes
@@ -897,7 +979,7 @@ return [
             'channel' => env('LS_LIVE_TRAFFIC_CHANNEL', 'shield.live-traffic'),
 
             // Whether realtime broadcasting requires a premium license.
-            // True (default) for new installs — matches the published
+            // True (default) for new installs, matches the published
             // feature gating. False preserves v1.x behavior where any
             // install with real_time.enabled=true got broadcasts.
             // Set false on upgrade if you self-host Reverb and don't
@@ -945,7 +1027,7 @@ return [
     | Shield::isFeatureAvailable($feature) so the free fallback applies
     | when the license is missing, expired, or revoked.
     |
-    | The license key is treated as a secret — it is NEVER logged into
+    | The license key is treated as a secret, it is NEVER logged into
     | ls_audit_log, NEVER appears in telemetry, and NEVER shows up in
     | rendered dashboard pages in clear text.
     |
@@ -953,7 +1035,7 @@ return [
     'premium' => [
         'license_key' => env('LS_PREMIUM_LICENSE_KEY'),
 
-        // Optional rotation secret for HMAC signing — separate from the
+        // Optional rotation secret for HMAC signing, separate from the
         // license key so operators can rotate signing material on incident
         // response without revoking the whole license. When unset, the
         // license key is used as the HMAC secret.
@@ -1004,11 +1086,11 @@ return [
 
         // Connectivity-test echo endpoint. Used by shield:central-test +
         // the License dashboard's "Test connectivity" button. Falls back
-        // to {heartbeat_host}/api/test/ping when unset — only override
+        // to {heartbeat_host}/api/test/ping when unset, only override
         // when running a non-standard Central deployment.
         'test_ping_url' => env('LS_PREMIUM_TEST_PING_URL'),
 
-        // Heartbeat — once per configured interval, plugin pings Central
+        // Heartbeat, once per configured interval, plugin pings Central
         // with summary stats (request count, block count, version) so the
         // Central dashboard can show "last seen" for each protected site.
         'heartbeat' => [

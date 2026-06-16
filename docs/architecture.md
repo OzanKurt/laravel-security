@@ -173,10 +173,10 @@ All in `ShieldServiceProvider::register()`:
 | Binding | Resolves to |
 |---|---|
 | `Shield::class` + `'shield'` alias | The main `Shield` facade target |
-| `LookupResolver::class` | Singleton — cached name→id lookups |
+| `LookupResolver::class` | Singleton, cached name→id lookups |
 | `AclEvaluator::class` | Singleton |
 | `WafRuleResolver::class` | Singleton |
-| `HmacChain::class` | Singleton — wraps `LS_AUDIT_HMAC_SECRET` |
+| `HmacChain::class` | Singleton, wraps `LS_AUDIT_HMAC_SECRET` |
 | `AuditLogger::class` | Singleton |
 | `Scanner::class` | Singleton, backends array assembled from contract bindings |
 | `SuspicionScorer::class` | Singleton |
@@ -224,9 +224,9 @@ Event::listen(\OzanKurt\Shield\Events\AttackDetectedEvent::class, function ($eve
 
 | Table | Schema purpose |
 |---|---|
-| `ls_logs` | Attack/firewall-hit records — IP, middleware, URL, request_data |
+| `ls_logs` | Attack/firewall-hit records, IP, middleware, URL, request_data |
 | `ls_auth_logs` | Login attempts |
-| `ls_acl` | Unified allow/deny list — kind_id, value, action_id, expires_at |
+| `ls_acl` | Unified allow/deny list, kind_id, value, action_id, expires_at |
 | `ls_audit_log` | HMAC-chained admin/state-change trail |
 | `ls_waf_rules` | DB-backed firewall rules (replaces `config/security.php` regex arrays) |
 | `ls_signatures` | Malware signatures from the GitHub-Releases feed |
@@ -241,7 +241,7 @@ Every model implements `HasUuid` + `HasUserstamps` + `SoftDeletes` and is bound 
 The FK-to-lookup-table pattern beats `EnumCasts::class` because:
 - Lookup values can be added at runtime by feed providers (e.g. ClamAV signature categories) without code changes
 - Cross-DB compatibility (MySQL ENUM differs from Postgres ENUM)
-- Visibility — every value exists as a queryable row, surfaceable in the dashboard
+- Visibility, every value exists as a queryable row, surfaceable in the dashboard
 
 `LookupResolver` caches the name↔id mapping forever (invalidated only by manual `cache:clear`), so the FK joins cost nothing in the hot path.
 
@@ -251,4 +251,4 @@ The package was renamed from `ozankurt/laravel-security` to `ozankurt/laravel-sh
 
 ## Octane / Reverb compatibility
 
-Singletons that hold per-request state (`CorrelationId`, `CspNonce`, `Shield::$ipWhitelistedInDatabase`) need to be reset between requests under Octane. Shield's `ShieldServiceProvider::boot()` registers a Laravel `RequestHandled` listener (or Octane equivalent) to reset these — verify yours is firing before deploying under Octane in production.
+Singletons that hold per-request state (`CorrelationId`, `CspNonce`, `Shield::$ipWhitelistedInDatabase`) need to be reset between requests under Octane. Shield's `ShieldServiceProvider::boot()` registers a Laravel `RequestHandled` listener (or Octane equivalent) to reset these, verify yours is firing before deploying under Octane in production.

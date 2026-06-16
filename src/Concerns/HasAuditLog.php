@@ -16,9 +16,9 @@ use OzanKurt\Shield\Services\Lookups\LookupResolver;
  *   }
  *
  * Overridable hooks (define on the model to customise behaviour):
- *   - auditLogChanges(): array   — what goes in the `changes` column (default: getDirty())
- *   - auditLogMeta(): array      — additional metadata stored in `meta`
- *   - auditLogShouldLog(string $event): bool — return false to suppress specific events
+ *   - auditLogChanges(): array  , what goes in the `changes` column (default: getDirty())
+ *   - auditLogMeta(): array     , additional metadata stored in `meta`
+ *   - auditLogShouldLog(string $event): bool, return false to suppress specific events
  */
 trait HasAuditLog
 {

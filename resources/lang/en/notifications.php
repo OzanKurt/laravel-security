@@ -32,10 +32,39 @@ return [
         ],
     ],
 
+    'failed_login' => [
+        'mail' => [
+            'subject' => 'Failed login attempt on :domain',
+            'message' => 'A failed login attempt was detected on :domain.',
+        ],
+
+        'slack' => [
+            'message' => 'Failed login attempt on :domain',
+        ],
+
+        'discord' => [
+            'message' => 'Failed login attempt on :domain',
+        ],
+    ],
+
+    'integrity_changed' => [
+        'title' => 'File integrity scan: :disk (:time)',
+        'summary' => ':new new · :modified modified · :deleted deleted · :total files total',
+        'drift' => ':count files still differ from the approved baseline.',
+    ],
+
     'security_report' => [
         'mail' => [
             'subject' => 'Security Report for :domain',
             'message' => 'This email was sent by your :domain site and contains a security report for the period :start - :end.',
+        ],
+
+        'slack' => [
+            'message' => 'Security report for :domain (:start - :end).',
+        ],
+
+        'discord' => [
+            'message' => 'Security report for :domain (:start - :end).',
         ],
 
         // Section titles

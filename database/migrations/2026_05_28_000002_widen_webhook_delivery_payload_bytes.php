@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Schema;
  * (wrong byte count in dashboard).
  *
  * batch_size already maxes at the controller-side limit (500), so SMALLINT
- * stays fine there — no widening needed for that column.
+ * stays fine there, no widening needed for that column.
  */
 return new class extends Migration
 {
@@ -27,7 +27,7 @@ return new class extends Migration
     {
         // Laravel 11+ no longer needs doctrine/dbal for ->change() but
         // this package still supports L9/L10. Use raw ALTER per driver
-        // for portability — and to skip the doctrine requirement.
+        // for portability, and to skip the doctrine requirement.
         $driver = DB::connection($this->connection)->getDriverName();
 
         match ($driver) {

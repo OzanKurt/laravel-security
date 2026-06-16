@@ -63,11 +63,11 @@ class AuditLogger
      *   - shield.premium.webhook_ingest_url is configured (non-null), AND
      *   - the site holds an active premium license, AND
      *   - the local Laravel queue connection is set up (no sync queues
-     *     in production, please — we DON'T want each audit row to make
+     *     in production, please, we DON'T want each audit row to make
      *     a synchronous HTTP call to Central).
      *
      * Job is queued on the configured queue with retry/backoff. Failures
-     * are best-effort and never bubble up to break the audit-log write —
+     * are best-effort and never bubble up to break the audit-log write -
      * the local row is the source of truth.
      */
     private function maybeForwardToCentral(AuditLog $entry, string $kindName, string $severity): void
@@ -77,12 +77,12 @@ class AuditLogger
             return;
         }
 
-        // CRITICAL: must NOT call Shield::isPremium() here — that triggers
+        // CRITICAL: must NOT call Shield::isPremium() here, that triggers
         // LicenseChecker::state() which can fire a synchronous 10s HTTP
         // call to Central on cache miss. Every audit_log write would then
         // stall the request thread. Use the cache-only path; the cache is
         // populated by cron-scheduled refreshes + the License dashboard
-        // page. If the cache is cold, we skip forwarding for this write —
+        // page. If the cache is cold, we skip forwarding for this write -
         // the local row is still authoritative.
         try {
             $checker = app(\OzanKurt\Shield\Services\Premium\LicenseChecker::class);
@@ -116,7 +116,7 @@ class AuditLogger
             ForwardAuditToCentralJob::dispatch($payload)
                 ->onQueue((string) config('shield.premium.queue', 'default'));
         } catch (\Throwable $e) {
-            // Queue not configured / table missing — degrade silently.
+            // Queue not configured / table missing, degrade silently.
             // The local row already exists and is the source of truth.
             // Log at info level so operators can find it if they're
             // wondering why nothing reaches Central.

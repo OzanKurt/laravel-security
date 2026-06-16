@@ -68,7 +68,7 @@ class ForwardAuditToCentralJobTest extends TestCase
 
         $job->handle($this->makeClient());
 
-        $this->assertTrue(true); // 4xx is permanent — no exception thrown
+        $this->assertTrue(true); // 4xx is permanent, no exception thrown
     }
 
     public function testHandleWithFiveXxPushEventThrowsToTriggerRetry(): void
@@ -116,7 +116,7 @@ class ForwardAuditToCentralJobTest extends TestCase
 
     public function testFailedUpdatesOnlyLatestDeliveryForAuditLogId(): void
     {
-        // Seed multiple WebhookDelivery rows for the same audit_log_id —
+        // Seed multiple WebhookDelivery rows for the same audit_log_id -
         // simulating retries that each opened a fresh "pending" row.
         // The previous bug rewrote ALL rows; failed() must only touch the
         // most-recent one so per-attempt history is preserved.

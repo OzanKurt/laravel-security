@@ -2,110 +2,147 @@
 
 namespace OzanKurt\Shield\Notifications;
 
-use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\SlackMessage;
 use Illuminate\Notifications\Notification;
 use OzanKurt\Shield\Models\AuthLog;
+use OzanKurt\Shield\Notifications\Channels\Discord\DiscordChannel;
+use OzanKurt\Shield\Notifications\Channels\Discord\DiscordMessage;
 
 class SuccessfulLoginNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public array $config;
+    /**
+     * The configured event key this notification is delivered under.
+     */
+    protected string $event = 'successful_login';
 
     public function __construct(
         public AuthLog $authLog
-    )
-    {
-        $this->config = config('shield.notifications.successful_login');
+    ) {
     }
 
     /**
      * Get the notification's channels.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return array
      */
     public function via($notifiable): array
     {
         $channels = [];
 
-        foreach ($this->config['channels'] as $channel => $settings) {
-            if (empty($settings['enabled'])) {
+        foreach (config("shield.notifications.{$this->event}.channels", []) as $channel) {
+            if (! config("shield.notification_channels.{$channel}.enabled")) {
                 continue;
             }
 
-            $channels[] = $channel;
+            $channels[] = $this->getChannelClass($channel);
         }
 
         return $channels;
     }
 
     /**
-     * Get the notification's queues.
+     * Map each configured channel to the queue it should be sent on.
+     *
+     * Keyed by the same channel identifier `via()` returns (the channel class
+     * for Discord, the channel name otherwise) so Laravel can resolve it.
      *
      * @return array
      */
     public function viaQueues(): array
     {
-        return array_map(static function ($channel) {
-            return $channel['queue'] ?? 'default';
-        }, $this->$this->config['channels']);
+        $queues = [];
+
+        foreach (config("shield.notifications.{$this->event}.channels", []) as $channel) {
+            $queues[$this->getChannelClass($channel)] = config("shield.notification_channels.{$channel}.queue", 'default');
+        }
+
+        return $queues;
     }
 
     /**
      * Build the mail representation of the notification.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable)
     {
         $domain = request()->getHttpHost();
 
-        $subject = trans('shield::notifications.mail.subject', [
+        $subject = trans('shield::notifications.successful_login.mail.subject', [
             'domain' => $domain,
         ]);
 
-        $message = trans('shield::notifications.mail.message', [
+        $message = trans('shield::notifications.successful_login.mail.message', [
             'domain' => $domain,
-            'middleware' => ucfirst($this->log->middleware),
-            'ip' => $this->log->ip,
-            'url' => $this->log->url,
         ]);
 
         return (new MailMessage)
-            ->from($this->notifications['mail']['from'], $this->notifications['mail']['name'])
+            ->from(config('shield.notification_channels.mail.from'), config('shield.notification_channels.mail.name'))
             ->subject($subject)
-            ->line($message);
+            ->line($message)
+            ->line('Email: '.$this->authLog->email)
+            ->line('IP: '.$this->authLog->ip);
     }
 
     /**
      * Get the Slack representation of the notification.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return SlackMessage
      */
     public function toSlack($notifiable)
     {
-        $message = trans('shield::notifications.slack.message', [
+        $message = trans('shield::notifications.successful_login.slack.message', [
             'domain' => request()->getHttpHost(),
         ]);
 
         return (new SlackMessage)
-            ->error()
-            ->from($this->notifications['slack']['from'], $this->notifications['slack']['emoji'])
-            ->to($this->notifications['slack']['channel'])
+            ->success()
+            ->from(config('shield.notification_channels.slack.from'), config('shield.notification_channels.slack.emoji'))
+            ->to(config('shield.notification_channels.slack.channel'))
             ->content($message)
             ->attachment(function ($attachment) {
                 $attachment->fields([
-                    'IP' => $this->log->ip,
-                    'Type' => ucfirst($this->log->middleware),
-                    'User ID' => $this->log->user_id,
-                    'URL' => $this->log->url,
+                    'Email' => $this->authLog->email,
+                    'IP' => $this->authLog->ip,
+                    'User ID' => $this->authLog->user_id ?? 'Guest',
                 ]);
             });
+    }
+
+    public function toDiscord()
+    {
+        $body = trans('shield::notifications.successful_login.discord.message', [
+            'domain' => request()->getHttpHost(),
+        ]);
+
+        return (new DiscordMessage)
+            ->from(config('shield.notification_channels.discord.from'), config('shield.notification_channels.discord.from_img'))
+            ->url(config('shield.notification_channels.discord.route'))
+            ->title(config('shield.notification_channels.discord.title'))
+            ->description($body)
+            ->fields([
+                'Email' => $this->authLog->email,
+                'IP' => $this->authLog->ip,
+                'User ID' => $this->authLog->user_id ?? 'Guest',
+            ], true)
+            ->timestamp(now())
+            ->footer(config('shield.notification_channels.discord.footer'), config('shield.notification_channels.discord.footer_img'))
+            ->success();
+    }
+
+    public function getChannelClass(string $channel): string
+    {
+        return match ($channel) {
+            'discord' => DiscordChannel::class,
+            default => $channel,
+        };
     }
 }

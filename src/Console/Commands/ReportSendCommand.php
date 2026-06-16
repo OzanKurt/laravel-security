@@ -29,10 +29,10 @@ class ReportSendCommand extends Command
 
         // Multi-cadence reports beyond the daily digest are premium. Free
         // tier keeps daily_digest working; 3/7/14/30-day reports require
-        // a premium license. Soft enforcement — falls open if Central is
+        // a premium license. Soft enforcement, falls open if Central is
         // unreachable AND the cached state hasn't been seen as valid.
         if ($cadence !== 'daily_digest' && ! Shield::isFeatureAvailable('multi_cadence_reports')) {
-            $this->warn("Cadence {$cadence} requires a premium license — skipping. Run shield:license:status to check.");
+            $this->warn("Cadence {$cadence} requires a premium license, skipping. Run shield:license:status to check.");
             return self::SUCCESS;
         }
 
@@ -46,7 +46,7 @@ class ReportSendCommand extends Command
             // The actual channel dispatch logic lives in the existing notification stack;
             // for the immediate 1.0.0 release the email template is the canonical sink.
             $this->info("Report generated: {$cadence}");
-            $this->table(['Section', 'Count'], collect($payload['sections'])->map(fn ($v, $k) => [$k, is_countable($v) ? count($v) : '—'])->values()->all());
+            $this->table(['Section', 'Count'], collect($payload['sections'])->map(fn ($v, $k) => [$k, is_countable($v) ? count($v) : '-'])->values()->all());
         } catch (Throwable $e) {
             $this->error("Report generation failed: {$e->getMessage()}");
             return self::FAILURE;

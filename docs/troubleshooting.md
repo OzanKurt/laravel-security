@@ -8,7 +8,7 @@ Common issues with concrete fixes. If your symptom isn't here, open an issue: <h
 You added an ACL block (or scoring auto-blocked you) and now every request returns 403.
 
 ### Fix
-You have three independent bypass mechanisms — see [bypass.md](bypass.md). Quickest:
+You have three independent bypass mechanisms, see [bypass.md](bypass.md). Quickest:
 
 ```bash
 # From CLI on the server:
@@ -28,9 +28,9 @@ Attacks are logged in `/shield/logs` but no `ls_acl` block row appears.
 
 ### Causes + fixes
 
-1. **`auto_block` not configured for that middleware.** Check `config/shield.php` under `shield.middleware.<name>.auto_block` — needs `attempts`, `frequency`, `period` keys.
+1. **`auto_block` not configured for that middleware.** Check `config/shield.php` under `shield.middleware.<name>.auto_block`, needs `attempts`, `frequency`, `period` keys.
 2. **Window not exceeded yet.** Auto-block requires `attempts` attacks within `frequency` seconds. Lower the threshold if needed.
-3. **Logs aren't writing to the new `ls_logs` table.** Check `SELECT COUNT(*) FROM ls_logs WHERE created_at > NOW() - INTERVAL 1 HOUR` — if 0, you're hitting the legacy `BlockIpListener` that targets the dropped `security_ips` table. Workaround until the listener is ported: add manual ACL rows or use the suspicion scorer instead.
+3. **Logs aren't writing to the new `ls_logs` table.** Check `SELECT COUNT(*) FROM ls_logs WHERE created_at > NOW() - INTERVAL 1 HOUR`, if 0, you're hitting the legacy `BlockIpListener` that targets the dropped `security_ips` table. Workaround until the listener is ported: add manual ACL rows or use the suspicion scorer instead.
 
 ## Dashboard returns 403
 
@@ -109,7 +109,7 @@ These are scheduled for porting in a follow-up patch. Workaround: comment out th
 GitHub API rate limit (60 req/h for unauthenticated). Sync falls back to embedded signatures automatically.
 
 ### Fix
-Optionally authenticate the GitHub API call by setting `GITHUB_TOKEN` in `.env` — `LS_SIGNATURE_URL` requests will include the token.
+Optionally authenticate the GitHub API call by setting `GITHUB_TOKEN` in `.env`, `LS_SIGNATURE_URL` requests will include the token.
 
 ## Audit log chain breaks ("chain mismatch at id N")
 
@@ -118,7 +118,7 @@ Optionally authenticate the GitHub API call by setting `GITHUB_TOKEN` in `.env` 
 
 ### Causes + fixes
 
-1. **Someone manually edited a row.** Quote the audit log row, restore the original data, and re-verify. The chain is tamper-evident — a verification failure is the alarm working.
+1. **Someone manually edited a row.** Quote the audit log row, restore the original data, and re-verify. The chain is tamper-evident, a verification failure is the alarm working.
 2. **Race condition on parallel writes.** Concurrent `AuditLogger::log()` calls can race on reading the previous row. Switch storage driver to `queue` so writes serialize:
 
    ```env
@@ -136,7 +136,7 @@ You're hitting the app but `/shield/live-traffic` is empty.
 
 1. **Sampling discarded the requests.** Default sample rate is 0.1 (1 in 10). Hit the page 20+ times to see entries, or set `LS_LIVE_TRAFFIC_SAMPLE_RATE=1.0` temporarily.
 2. **`firewall.live_traffic` isn't in your middleware stack.** It's auto-included in `firewall.all` but if you wired middlewares à la carte, add `firewall.live_traffic` to your route group.
-3. **Skip pattern is too broad.** Check `shield.live_traffic.skip_paths` — default skips `shield/*`, `_debugbar/*`, asset paths, health checks.
+3. **Skip pattern is too broad.** Check `shield.live_traffic.skip_paths`, default skips `shield/*`, `_debugbar/*`, asset paths, health checks.
 
 ## Premium features not activating
 
@@ -147,7 +147,7 @@ You set `LS_PREMIUM_LICENSE_KEY` but `Shield::isPremium()` returns false.
 
 1. **Cache hasn't expired yet.** License check is cached 24h. Run `php artisan cache:forget shield.premium.license` to force re-check.
 2. **License-check API unreachable.** During the 7-day grace period after unreachability, the cached "valid" status persists. After the grace expires, features deactivate. Check `php artisan shield:license` for grace state.
-3. **Domain limit exceeded.** Each license activates on a fixed number of domains. The dashboard's "License" page shows `domains_used / domain_limit` — contact support to extend if needed.
+3. **Domain limit exceeded.** Each license activates on a fixed number of domains. The dashboard's "License" page shows `domains_used / domain_limit`, contact support to extend if needed.
 
 ## CSP nonce isn't working
 

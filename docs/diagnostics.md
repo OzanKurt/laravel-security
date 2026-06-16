@@ -41,12 +41,12 @@ Runs `EnvAuditor::audit()` which checks:
 
 A weighted score across the env audit findings produces a grade A–F:
 
-- **A** — no findings
-- **B** — score ≤ 2 (low-severity items only)
-- **C** — score ≤ 5
-- **D** — score ≤ 10
-- **E** — score ≤ 20
-- **F** — score > 20
+- **A**, no findings
+- **B**, score ≤ 2 (low-severity items only)
+- **C**, score ≤ 5
+- **D**, score ≤ 10
+- **E**, score ≤ 20
+- **F**, score > 20
 
 Weights: critical = 10, high = 5, medium = 2, low = 1.
 
@@ -102,9 +102,9 @@ The "Required updates" section of every multi-cadence report (daily digest, 7-da
 
 ## Operator workflow
 
-1. **After every dependency update** — run `shield:scan --backend=composer_audit` (or wait for the scheduled run) to refresh CVE state
-2. **Before going to production** — visit `/shield/diagnostics` and aim for grade A or B
-3. **On a stale install** — visit `/shield/composer-audit` for CVEs that accumulated since last `composer update`
+1. **After every dependency update**, run `shield:scan --backend=composer_audit` (or wait for the scheduled run) to refresh CVE state
+2. **Before going to production**, visit `/shield/diagnostics` and aim for grade A or B
+3. **On a stale install**, visit `/shield/composer-audit` for CVEs that accumulated since last `composer update`
 
 ## CLI shortcuts
 
@@ -119,7 +119,7 @@ php artisan shield:diag
 php artisan shield:composer-audit
 ```
 
-`shield:diag` is the right command to ask users to run when filing a bug — it captures everything the diagnostics page shows, plus version pins from `composer.lock`.
+`shield:diag` is the right command to ask users to run when filing a bug, it captures everything the diagnostics page shows, plus version pins from `composer.lock`.
 
 ## Troubleshooting
 

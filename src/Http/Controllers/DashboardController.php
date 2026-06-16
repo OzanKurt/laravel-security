@@ -2,7 +2,7 @@
 
 namespace OzanKurt\Shield\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use OzanKurt\Shield\Enums\IpEntryType;
 use OzanKurt\Shield\Http\Middleware\ShieldDashboardMiddleware;
 use OzanKurt\Shield\Models\Ip;

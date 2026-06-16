@@ -12,7 +12,7 @@ use OzanKurt\Shield\Services\ThreatFeed\SyncResult;
  * storage/shield/geo/. Requires LS_MAXMIND_LICENSE_KEY (free signup
  * required at maxmind.com).
  *
- * Doesn't write any ACL/WAF rows itself — once the DBs are in place,
+ * Doesn't write any ACL/WAF rows itself, once the DBs are in place,
  * the CountryMatcher / AsnMatcher stubs from beta.1 swap to real
  * implementations driven by geoip2/geoip2 reader.
  */

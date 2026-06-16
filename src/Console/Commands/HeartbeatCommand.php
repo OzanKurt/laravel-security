@@ -15,12 +15,12 @@ class HeartbeatCommand extends Command
     public function handle(LicenseChecker $checker, CentralClient $client): int
     {
         if (! $checker->hasKey()) {
-            $this->warn('No premium license key configured — heartbeat skipped.');
+            $this->warn('No premium license key configured, heartbeat skipped.');
             return self::SUCCESS;
         }
 
         if (! $checker->isPremium() && ! $this->option('force')) {
-            $this->warn('Premium license inactive — heartbeat skipped (use --force to override).');
+            $this->warn('Premium license inactive, heartbeat skipped (use --force to override).');
             return self::SUCCESS;
         }
 
@@ -38,7 +38,7 @@ class HeartbeatCommand extends Command
             return self::SUCCESS;
         }
 
-        $this->warn("Heartbeat failed (status={$result->httpStatus}, reason={$result->error}) — see logs + /shield/webhook-deliveries.");
+        $this->warn("Heartbeat failed (status={$result->httpStatus}, reason={$result->error}), see logs + /shield/webhook-deliveries.");
         return self::FAILURE;
     }
 
@@ -110,7 +110,7 @@ class HeartbeatCommand extends Command
         // src/Console/Commands/HeartbeatCommand.php → package root is
         // THREE directories up (../../../composer.json). This file is
         // one level shallower than LicenseChecker, so the path is
-        // genuinely different — keep them in sync if directory depth
+        // genuinely different, keep them in sync if directory depth
         // ever changes.
         $composerJson = __DIR__ . '/../../../composer.json';
 

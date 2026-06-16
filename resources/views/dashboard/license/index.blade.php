@@ -69,7 +69,7 @@
                 <div class="alert alert-warning mt-3 mb-0">
                     <strong>Central license API is unreachable.</strong>
                     Your premium features stay active until
-                    <strong>{{ $state['grace_until'] ?? '—' }}</strong>.
+                    <strong>{{ $state['grace_until'] ?? '-' }}</strong>.
                     Resolve before that to avoid feature deactivation.
                 </div>
             @elseif($stateKey === 'invalid')
@@ -94,15 +94,15 @@
                                 </tr>
                                 <tr>
                                     <th class="ps-3">Plan</th>
-                                    <td>{{ $state['plan'] ?? '—' }}</td>
+                                    <td>{{ $state['plan'] ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <th class="ps-3">Expires</th>
-                                    <td>{{ $state['expires_at'] ?? '—' }}</td>
+                                    <td>{{ $state['expires_at'] ?? '-' }}</td>
                                 </tr>
                                 <tr>
                                     <th class="ps-3">Last checked</th>
-                                    <td>{{ $state['last_checked_at'] ?? '—' }}</td>
+                                    <td>{{ $state['last_checked_at'] ?? '-' }}</td>
                                 </tr>
                                 @if(! empty($state['last_valid_at']))
                                     <tr>
@@ -132,7 +132,7 @@
                                         @if(isset($state['domain_limit']))
                                             {{ $state['domains_used'] ?? '?' }} / {{ $state['domain_limit'] }}
                                         @else
-                                            —
+                                            -
                                         @endif
                                     </td>
                                 </tr>

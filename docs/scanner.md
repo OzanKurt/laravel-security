@@ -45,11 +45,11 @@ php artisan shield:scan-cancel <run-id>
 php artisan shield:scan-status
 ```
 
-Or from the dashboard at `/shield/scanner` — "Start scan" button.
+Or from the dashboard at `/shield/scanner`, "Start scan" button.
 
 ## Signatures
 
-Built-in baseline (~33 patterns) is seeded on install — covers classic webshells (c99, r57, WSO, b374k, AlfaShell, p0wny, IndoXploit, FilesMan), eval/assert/preg_replace obfuscation chains, exec on superglobals, file_put_contents with chr() chains, etc.
+Built-in baseline (~33 patterns) is seeded on install, covers classic webshells (c99, r57, WSO, b374k, AlfaShell, p0wny, IndoXploit, FilesMan), eval/assert/preg_replace obfuscation chains, exec on superglobals, file_put_contents with chr() chains, etc.
 
 Sync from the hosted feed:
 
@@ -57,15 +57,15 @@ Sync from the hosted feed:
 php artisan shield:signatures-sync
 ```
 
-Falls back to the embedded baseline when the remote (GitHub Releases on `OzanKurt/laravel-shield-signatures`) is unreachable. Idempotent — upserts by `(source, source_ref)` and bumps `version`.
+Falls back to the embedded baseline when the remote (GitHub Releases on `OzanKurt/laravel-shield-signatures`) is unreachable. Idempotent, upserts by `(source, source_ref)` and bumps `version`.
 
 Pin to a specific tag via `LS_SIGNATURE_PIN=v2026.05` in `.env`.
 
 ## Quarantine
 
 Per-target policy controls what happens on a finding:
-- `move_and_stub` — moves the file to `storage/shield/quarantine/<uuid>.bin`, writes sidecar metadata JSON, leaves an empty stub at the original path
-- `log_only` — never touches the file; just records the finding
+- `move_and_stub`, moves the file to `storage/shield/quarantine/<uuid>.bin`, writes sidecar metadata JSON, leaves an empty stub at the original path
+- `log_only`, never touches the file; just records the finding
 
 Restore from CLI or dashboard:
 

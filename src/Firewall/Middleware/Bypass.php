@@ -42,7 +42,7 @@ class Bypass
     private function headerKeyMatches(Request $request): bool
     {
         // Read directly from env() rather than config() so this still works
-        // after `php artisan config:cache` — sensitive keys should not be cached.
+        // after `php artisan config:cache`, sensitive keys should not be cached.
         $expected = env('LS_BYPASS_KEY');
 
         if (! $expected) {

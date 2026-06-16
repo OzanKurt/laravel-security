@@ -64,7 +64,7 @@ final class DeliveryResult
             return false;
         }
         // Retry on connection failures + 5xx; 4xx is permanent (signature
-        // wrong, license inactive, payload malformed — won't fix by retry).
+        // wrong, license inactive, payload malformed, won't fix by retry).
         return $this->httpStatus === 0 || $this->httpStatus >= 500;
     }
 

@@ -1,4 +1,4 @@
-# Bypass — Admin Lockout Recovery
+# Bypass, Admin Lockout Recovery
 
 Three independent layers, all audit-logged when used. Pick the one that fits your situation; combine them for defense in depth.
 
@@ -26,7 +26,7 @@ Audit-logged as `bypass.used` with `mechanism=header_key`.
 LS_BYPASS_IPS=203.0.113.5,2001:db8::/32
 ```
 
-Comma-separated list of IPs or CIDR ranges. These IPs ALWAYS bypass everything, can never be auto-blocked, and can't be removed from the dashboard — only by editing `.env`.
+Comma-separated list of IPs or CIDR ranges. These IPs ALWAYS bypass everything, can never be auto-blocked, and can't be removed from the dashboard, only by editing `.env`.
 
 **When to use:** office static IPs, your home IP, dev/staging server IPs, infrastructure admin IPs.
 
@@ -48,7 +48,7 @@ When any of the three layers fires:
 
 - `firewall.acl` short-circuits (no blacklist/block enforcement)
 - `firewall.live_traffic` still records (so the bypass usage is visible)
-- Domain firewall middlewares (xss / sqli / lfi / etc.) **still run** — bypass doesn't disable WAF rule evaluation, only the IP-level ACL gate
+- Domain firewall middlewares (xss / sqli / lfi / etc.) **still run**, bypass doesn't disable WAF rule evaluation, only the IP-level ACL gate
 
 If you need to bypass WAF rules too, attach `firewall.bypass` middleware to your route explicitly.
 

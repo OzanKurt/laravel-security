@@ -42,7 +42,7 @@ class LiveTrafficCapturedEvent implements ShouldBroadcast
         // Realtime live-traffic broadcast is a premium feature. Free tier
         // can poll the /shield/live-traffic page on a timer; only paid
         // sites get the WebSocket push channel. Silently returns false
-        // on errors so a broken license check doesn't cascade — operators
+        // on errors so a broken license check doesn't cascade, operators
         // diagnose via /shield/license + /shield/webhook-deliveries.
         try {
             return \OzanKurt\Shield\Facades\Shield::isFeatureAvailable('realtime_live_traffic');
