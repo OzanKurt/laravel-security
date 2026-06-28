@@ -1124,6 +1124,12 @@ return [
         'self_detected_sources' => ['honeypot', 'honeypot_form', 'waf', 'scoring', 'auth', 'manual'],
         'reconcile_batch' => 200,
 
+        // Reaction jobs make outbound HTTP calls (Cloudflare, AbuseIPDB). Run them
+        // on a real queue worker; on the 'sync' connection a block fires the API
+        // call inline on the request thread.
+        'connection' => env('LS_REACTIONS_QUEUE_CONNECTION'),
+        'queue' => env('LS_REACTIONS_QUEUE'),
+
         'cloudflare' => [
             'enabled' => env('LS_CLOUDFLARE_ENABLED', false),
             'api_token' => env('LS_CLOUDFLARE_API_TOKEN'),

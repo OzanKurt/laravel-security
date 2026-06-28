@@ -77,4 +77,17 @@ class ReactionManagerTest extends TestCase
 
         Bus::assertNotDispatched(RunAclReactionJob::class);
     }
+
+    public function testDispatchPinsConfiguredQueue()
+    {
+        Bus::fake();
+        config(['shield.reactions.cloudflare.enabled' => true]);
+        config(['shield.reactions.cloudflare.api_token' => 'tok']);
+        config(['shield.reactions.cloudflare.zone_id' => 'z']);
+        config(['shield.reactions.queue' => 'reactions']);
+
+        app(ReactionManager::class)->onBlock($this->block('honeypot'));
+
+        Bus::assertDispatched(RunAclReactionJob::class, fn ($j) => $j->queue === 'reactions');
+    }
 }

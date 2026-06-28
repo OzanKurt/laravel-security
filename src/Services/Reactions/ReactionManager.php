@@ -36,7 +36,10 @@ class ReactionManager
 
         foreach ($this->reactions as $reaction) {
             if ($reaction->isEnabled() && $reaction->appliesTo($acl)) {
-                RunAclReactionJob::dispatch($reaction->name(), $acl->getKey(), 'ban')->afterCommit();
+                RunAclReactionJob::dispatch($reaction->name(), $acl->getKey(), 'ban')
+                    ->onConnection(config('shield.reactions.connection'))
+                    ->onQueue(config('shield.reactions.queue'))
+                    ->afterCommit();
             }
         }
     }
@@ -45,7 +48,10 @@ class ReactionManager
     {
         foreach ($this->reactions as $reaction) {
             if ($reaction->isEnabled()) {
-                RunAclReactionJob::dispatch($reaction->name(), $acl->getKey(), 'unban')->afterCommit();
+                RunAclReactionJob::dispatch($reaction->name(), $acl->getKey(), 'unban')
+                    ->onConnection(config('shield.reactions.connection'))
+                    ->onQueue(config('shield.reactions.queue'))
+                    ->afterCommit();
             }
         }
     }
