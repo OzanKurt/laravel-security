@@ -70,6 +70,11 @@ class CloudflareReaction implements AclReaction
         $this->clearMeta($acl);
     }
 
+    public function reversible(): bool
+    {
+        return true;
+    }
+
     private function isPublicIp(string $ip): bool
     {
         return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;

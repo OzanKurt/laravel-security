@@ -20,4 +20,7 @@ interface AclReaction
 
     /** Reverse the side effect (no-op for one-shot reactions). */
     public function unban(Acl $acl): void;
+
+    /** True when unban() performs a real reversal (so it is worth dispatching). */
+    public function reversible(): bool;
 }

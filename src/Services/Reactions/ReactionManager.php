@@ -47,7 +47,7 @@ class ReactionManager
     public function onUnblock(Acl $acl): void
     {
         foreach ($this->reactions as $reaction) {
-            if ($reaction->isEnabled()) {
+            if ($reaction->isEnabled() && $reaction->reversible()) {
                 RunAclReactionJob::dispatch($reaction->name(), $acl->getKey(), 'unban')
                     ->onConnection(config('shield.reactions.connection'))
                     ->onQueue(config('shield.reactions.queue'))

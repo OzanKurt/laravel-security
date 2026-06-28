@@ -78,6 +78,21 @@ class ReactionManagerTest extends TestCase
         Bus::assertNotDispatched(RunAclReactionJob::class);
     }
 
+    public function testUnblockDispatchesOnlyForReversibleReactions()
+    {
+        Bus::fake();
+        config(['shield.reactions.cloudflare.enabled' => true]);
+        config(['shield.reactions.cloudflare.api_token' => 'tok']);
+        config(['shield.reactions.cloudflare.zone_id' => 'z']);
+        config(['shield.reactions.abuseipdb_report.enabled' => true]);
+        config(['shield.reactions.abuseipdb_report.api_key' => 'k']);
+
+        app(ReactionManager::class)->onUnblock($this->block('honeypot'));
+
+        Bus::assertDispatched(RunAclReactionJob::class, fn ($j) => $j->reactionName === 'cloudflare' && $j->op === 'unban');
+        Bus::assertNotDispatched(RunAclReactionJob::class, fn ($j) => $j->reactionName === 'abuseipdb_report' && $j->op === 'unban');
+    }
+
     public function testDispatchPinsConfiguredQueue()
     {
         Bus::fake();

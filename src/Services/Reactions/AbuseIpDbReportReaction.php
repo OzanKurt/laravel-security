@@ -75,6 +75,11 @@ class AbuseIpDbReportReaction implements AclReaction
         // Community reports are permanent; nothing to reverse.
     }
 
+    public function reversible(): bool
+    {
+        return false;
+    }
+
     private function comment(Acl $acl): string
     {
         // Reason only, no secrets. Keep it generic + short.
