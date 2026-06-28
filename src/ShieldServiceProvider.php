@@ -47,6 +47,15 @@ class ShieldServiceProvider extends ServiceProvider
 
         $this->app->alias(Shield::class, 'shield');
 
+        $this->app->singleton(\OzanKurt\Shield\Services\Reactions\CloudflareClient::class);
+
+        $this->app->singleton(\OzanKurt\Shield\Services\Reactions\ReactionManager::class, function ($app) {
+            return new \OzanKurt\Shield\Services\Reactions\ReactionManager([
+                $app->make(\OzanKurt\Shield\Services\Reactions\CloudflareReaction::class),
+                $app->make(\OzanKurt\Shield\Services\Reactions\AbuseIpDbReportReaction::class),
+            ]);
+        });
+
         $this->app->singleton(\OzanKurt\Shield\Support\CorrelationId::class);
         $this->app->singleton(\OzanKurt\Shield\Support\CspNonce::class);
         $this->app->singleton(\OzanKurt\Shield\Support\RequestDataRedactor::class);
@@ -115,6 +124,17 @@ class ShieldServiceProvider extends ServiceProvider
         $this->registerCspNonceBladeDirective();
         $this->registerHoneypotRoutes($router);
         $this->registerPreconfiguredRateLimiters();
+
+        \Illuminate\Support\Facades\Blade::component('shield-honeypot', \OzanKurt\Shield\View\Components\Honeypot::class);
+        \Illuminate\Support\Facades\Blade::directive('shieldHoneypot', function () {
+            return "<?php echo \\Illuminate\\Support\\Facades\\Blade::renderComponent(new \\OzanKurt\\Shield\\View\\Components\\Honeypot()); ?>";
+        });
+
+        \Illuminate\Foundation\Console\AboutCommand::add('Shield', fn () => [
+            'Cloudflare Reaction' => config('shield.reactions.cloudflare.enabled') ? 'ENABLED' : 'OFF',
+            'AbuseIPDB Reporting' => config('shield.reactions.abuseipdb_report.enabled') ? 'ENABLED' : 'OFF',
+            'Form Honeypot' => config('shield.honeypot.form.enabled') ? 'ENABLED' : 'OFF',
+        ]);
 
         if (config('shield.dashboard.enabled')) {
             $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
@@ -215,15 +235,17 @@ class ShieldServiceProvider extends ServiceProvider
         $router->aliasMiddleware('firewall.bypass', \OzanKurt\Shield\Firewall\Middleware\Bypass::class);
         $router->aliasMiddleware('firewall.acl', \OzanKurt\Shield\Firewall\Middleware\Acl::class);
         $router->aliasMiddleware('firewall.live_traffic', \OzanKurt\Shield\Http\Middleware\LiveTrafficCapture::class);
+        $router->aliasMiddleware('firewall.honeypot_regex', \OzanKurt\Shield\Firewall\Middleware\HoneypotRegex::class);
         $router->aliasMiddleware('firewall.av_uploads', \OzanKurt\Shield\Firewall\Middleware\AvUploads::class);
         $router->aliasMiddleware('firewall.headers', \OzanKurt\Shield\Firewall\Middleware\SecurityHeaders::class);
         $router->aliasMiddleware('firewall.https', \OzanKurt\Shield\Firewall\Middleware\EnforceHttps::class);
         $router->aliasMiddleware('firewall.disabled_routes', \OzanKurt\Shield\Firewall\Middleware\DisabledRoutes::class);
+        $router->aliasMiddleware('shield.honeypot-form', \OzanKurt\Shield\Http\Middleware\ProtectAgainstSpam::class);
 
         // firewall.all group: correlation → bypass → acl → live_traffic (terminable) → configured middlewares
         // bypass must come BEFORE acl so the acl short-circuit can fire on bypassed requests
         $router->middlewareGroup('firewall.all', array_merge(
-            ['firewall.correlation', 'firewall.bypass', 'firewall.acl', 'firewall.live_traffic'],
+            ['firewall.correlation', 'firewall.bypass', 'firewall.acl', 'firewall.live_traffic', 'firewall.honeypot_regex'],
             config('shield.all_middleware', [])
         ));
 
@@ -303,6 +325,8 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\LicenseClearCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\HeartbeatCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\CentralTestCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ReactionsReconcileCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\AclManageCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
@@ -310,6 +334,11 @@ class ShieldServiceProvider extends ServiceProvider
                     ->command('shield:unblock-ips')
                     ->cron(config('shield.crons.unblock_ips.cron_expression'));
             }
+
+            app(\Illuminate\Console\Scheduling\Schedule::class)
+                ->command('shield:reactions-reconcile')
+                ->everyMinute()
+                ->withoutOverlapping();
 
             if (config('shield.notifications.security_report.enabled')) {
                 app(Schedule::class)

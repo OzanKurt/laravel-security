@@ -835,6 +835,29 @@ return [
         ],
 
         'block_duration' => 86400,                      // 24h
+
+        'regex_paths' => [
+            // Full PCRE patterns, matched against request()->path():
+            // '#^\.env#i', '#wp-config\.php$#i', '#\.git(/|$)#i',
+            // Each pattern is tested against the path both with and without a
+            // leading slash, so '#^/wp-admin#' and '#^wp-admin#' both match.
+            // A malformed pattern is skipped (never fatal) and logged once.
+        ],
+
+        'form' => [
+            'enabled' => env('LS_HONEYPOT_FORM_ENABLED', false),
+            'name_field' => 'shield_hp',
+            'valid_from_field' => 'shield_hp_time',
+            'randomize' => false,
+            'require_timestamp' => true,
+            'min_time_seconds' => 1,
+            'max_time_seconds' => 3600,
+            // redirect_back | ok | <int status>. The default 'redirect_back'
+            // requires the route to be in the 'web' middleware group (it needs
+            // a session); use 'ok' or a numeric status for stateless/API forms.
+            'response' => 'redirect_back',
+            'score' => 50,
+        ],
     ],
 
     'redaction' => [
@@ -1100,6 +1123,32 @@ return [
                 'LS_PREMIUM_HEARTBEAT_URL',
                 'https://laravel-shield.ozankurt.com/api/heartbeat'
             ),
+        ],
+    ],
+
+    'reactions' => [
+        'self_detected_sources' => ['honeypot', 'honeypot_form', 'waf', 'scoring', 'auth', 'manual'],
+        'reconcile_batch' => 200,
+
+        // Reaction jobs make outbound HTTP calls (Cloudflare, AbuseIPDB). Run them
+        // on a real queue worker; on the 'sync' connection a block fires the API
+        // call inline on the request thread.
+        'connection' => env('LS_REACTIONS_QUEUE_CONNECTION'),
+        'queue' => env('LS_REACTIONS_QUEUE'),
+
+        'cloudflare' => [
+            'enabled' => env('LS_CLOUDFLARE_ENABLED', false),
+            'api_token' => env('LS_CLOUDFLARE_API_TOKEN'),
+            'zone_id' => env('LS_CLOUDFLARE_ZONE_ID'),
+            'account_id' => env('LS_CLOUDFLARE_ACCOUNT_ID'),
+            'note_category' => env('LS_CLOUDFLARE_NOTE_CATEGORY', 'shield-block'),
+        ],
+
+        'abuseipdb_report' => [
+            'enabled' => env('LS_ABUSEIPDB_REPORT_ENABLED', false),
+            'api_key' => env('LS_ABUSEIPDB_KEY'),
+            'categories' => [21, 19],
+            'max_age_days' => 30,
         ],
     ],
 
