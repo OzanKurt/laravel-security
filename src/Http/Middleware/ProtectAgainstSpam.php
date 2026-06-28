@@ -57,7 +57,7 @@ class ProtectAgainstSpam
             return 'tampered';
         }
 
-        if (! is_array($payload) || ! isset($payload['n'], $payload['t'])) {
+        if (! is_array($payload) || ! isset($payload['n'], $payload['t']) || ! is_string($payload['n']) || ! is_numeric($payload['t'])) {
             return 'tampered';
         }
 
