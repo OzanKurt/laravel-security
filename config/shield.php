@@ -852,7 +852,10 @@ return [
             'require_timestamp' => true,
             'min_time_seconds' => 1,
             'max_time_seconds' => 3600,
-            'response' => 'redirect_back', // redirect_back | ok | <int status>
+            // redirect_back | ok | <int status>. The default 'redirect_back'
+            // requires the route to be in the 'web' middleware group (it needs
+            // a session); use 'ok' or a numeric status for stateless/API forms.
+            'response' => 'redirect_back',
             'score' => 50,
         ],
     ],

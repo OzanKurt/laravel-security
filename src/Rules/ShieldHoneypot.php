@@ -31,13 +31,22 @@ class ShieldHoneypot implements ValidationRule
         $raw = request()->input($timeField);
 
         try {
-            $submittedAt = (int) Crypt::decryptString((string) $raw);
+            $payload = json_decode(Crypt::decryptString((string) $raw), true);
         } catch (\Throwable) {
             $this->escalateAndFail($fail);
 
             return;
         }
 
+        // The trap field name ('n') is ignored here, the rule validates its own
+        // developer-named attribute; only the timestamp ('t') is needed.
+        if (! is_array($payload) || ! isset($payload['t'])) {
+            $this->escalateAndFail($fail);
+
+            return;
+        }
+
+        $submittedAt = (int) $payload['t'];
         $elapsed = now()->timestamp - $submittedAt;
         $min = (int) config('shield.honeypot.form.min_time_seconds', 1);
         $max = (int) config('shield.honeypot.form.max_time_seconds', 3600);

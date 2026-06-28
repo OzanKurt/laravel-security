@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Crypt;
 use OzanKurt\Shield\Http\Middleware\ProtectAgainstSpam;
 use OzanKurt\Shield\Services\Scoring\SuspicionScorer;
 use OzanKurt\Shield\Tests\TestCase;
+use OzanKurt\Shield\View\Components\Honeypot;
 
 class FormHoneypotTest extends TestCase
 {
@@ -28,7 +29,7 @@ class FormHoneypotTest extends TestCase
     {
         $request = Request::create('/contact', 'POST', [
             'shield_hp' => '',
-            'shield_hp_time' => Crypt::encryptString((string) now()->subSeconds(5)->timestamp),
+            'shield_hp_time' => Crypt::encryptString(json_encode(['n' => 'shield_hp', 't' => now()->subSeconds(5)->timestamp])),
         ]);
 
         $result = (new ProtectAgainstSpam())->handle($request, fn ($r) => 'next');
@@ -42,7 +43,7 @@ class FormHoneypotTest extends TestCase
 
         $request = Request::create('/contact', 'POST', [
             'shield_hp' => 'i-am-a-bot',
-            'shield_hp_time' => Crypt::encryptString((string) now()->subSeconds(5)->timestamp),
+            'shield_hp_time' => Crypt::encryptString(json_encode(['n' => 'shield_hp', 't' => now()->subSeconds(5)->timestamp])),
         ]);
         $request->server->set('REMOTE_ADDR', '203.0.113.70');
 
@@ -57,11 +58,34 @@ class FormHoneypotTest extends TestCase
     {
         $request = Request::create('/contact', 'POST', [
             'shield_hp' => '',
-            'shield_hp_time' => Crypt::encryptString((string) now()->timestamp), // 0s elapsed
+            'shield_hp_time' => Crypt::encryptString(json_encode(['n' => 'shield_hp', 't' => now()->timestamp])), // 0s elapsed
         ]);
         $request->server->set('REMOTE_ADDR', '203.0.113.71');
 
         $response = (new ProtectAgainstSpam())->handle($request, fn ($r) => 'next');
         $this->assertNotSame('next', $response);
+    }
+
+    public function testRandomizedFieldNameTrips()
+    {
+        config(['shield.honeypot.form.randomize' => true]);
+
+        $scorer = $this->spy(SuspicionScorer::class);
+        $this->app->instance(SuspicionScorer::class, $scorer);
+
+        $component = app(Honeypot::class);
+        $this->assertNotSame('shield_hp', $component->nameField); // randomized
+
+        $request = Request::create('/contact', 'POST', [
+            $component->nameField => 'i-am-a-bot',
+            'shield_hp_time' => $component->token,
+        ]);
+        $request->server->set('REMOTE_ADDR', '203.0.113.72');
+
+        $response = (new ProtectAgainstSpam())->handle($request, fn ($r) => 'next');
+
+        $this->assertNotSame('next', $response);
+        $this->assertSame(200, $response->getStatusCode());
+        $scorer->shouldHaveReceived('bump')->once();
     }
 }

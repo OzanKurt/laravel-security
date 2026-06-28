@@ -43,15 +43,8 @@ class ProtectAgainstSpam
     /** @return string|null reason key, or null when the submission is clean */
     private function trippedReason(Request $request): ?string
     {
-        $nameField = (string) config('shield.honeypot.form.name_field', 'shield_hp');
-        if (filled($request->input($nameField))) {
-            return 'filled';
-        }
-
-        if (! config('shield.honeypot.form.require_timestamp', true)) {
-            return null;
-        }
-
+        // The companion field name is fixed; its encrypted value carries the
+        // (possibly randomized) trap field name plus the submission timestamp.
         $timeField = (string) config('shield.honeypot.form.valid_from_field', 'shield_hp_time');
         $raw = $request->input($timeField);
         if (! is_string($raw) || $raw === '') {
@@ -59,11 +52,24 @@ class ProtectAgainstSpam
         }
 
         try {
-            $submittedAt = (int) Crypt::decryptString($raw);
+            $payload = json_decode(Crypt::decryptString($raw), true);
         } catch (\Throwable) {
             return 'tampered';
         }
 
+        if (! is_array($payload) || ! isset($payload['n'], $payload['t'])) {
+            return 'tampered';
+        }
+
+        if (filled($request->input((string) $payload['n']))) {
+            return 'filled';
+        }
+
+        if (! config('shield.honeypot.form.require_timestamp', true)) {
+            return null;
+        }
+
+        $submittedAt = (int) $payload['t'];
         $elapsed = now()->timestamp - $submittedAt;
         if ($elapsed < (int) config('shield.honeypot.form.min_time_seconds', 1)) {
             return 'too_fast';
