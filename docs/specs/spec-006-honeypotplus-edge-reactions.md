@@ -1,6 +1,6 @@
 # Spec 006: HoneypotPlus parity - edge reactions, AbuseIPDB reporting, form input-trap
 
-- Status: Draft
+- Status: Implemented
 - Track: Core (firewall reactions + honeypot). New track, separate from the 001-005 specs.
 - Tier: All FREE. `laravel-honeypotplus` is MIT; per the port-WF-free-code rule, everything here ships in the free package.
 - Premium flag: none.

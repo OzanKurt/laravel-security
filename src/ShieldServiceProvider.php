@@ -130,6 +130,12 @@ class ShieldServiceProvider extends ServiceProvider
             return "<?php echo \\Illuminate\\Support\\Facades\\Blade::renderComponent(new \\OzanKurt\\Shield\\View\\Components\\Honeypot()); ?>";
         });
 
+        \Illuminate\Foundation\Console\AboutCommand::add('Shield', fn () => [
+            'Cloudflare Reaction' => config('shield.reactions.cloudflare.enabled') ? 'ENABLED' : 'OFF',
+            'AbuseIPDB Reporting' => config('shield.reactions.abuseipdb_report.enabled') ? 'ENABLED' : 'OFF',
+            'Form Honeypot' => config('shield.honeypot.form.enabled') ? 'ENABLED' : 'OFF',
+        ]);
+
         if (config('shield.dashboard.enabled')) {
             $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
                 $gate->define('viewShieldDashboard', fn ($user = null) => false);
