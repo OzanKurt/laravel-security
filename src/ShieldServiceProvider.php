@@ -125,6 +125,11 @@ class ShieldServiceProvider extends ServiceProvider
         $this->registerHoneypotRoutes($router);
         $this->registerPreconfiguredRateLimiters();
 
+        \Illuminate\Support\Facades\Blade::component('shield-honeypot', \OzanKurt\Shield\View\Components\Honeypot::class);
+        \Illuminate\Support\Facades\Blade::directive('shieldHoneypot', function () {
+            return "<?php echo \\Illuminate\\Support\\Facades\\Blade::renderComponent(new \\OzanKurt\\Shield\\View\\Components\\Honeypot()); ?>";
+        });
+
         if (config('shield.dashboard.enabled')) {
             $this->callAfterResolving(\Illuminate\Contracts\Auth\Access\Gate::class, function (Gate $gate, Application $app) {
                 $gate->define('viewShieldDashboard', fn ($user = null) => false);
@@ -229,6 +234,7 @@ class ShieldServiceProvider extends ServiceProvider
         $router->aliasMiddleware('firewall.headers', \OzanKurt\Shield\Firewall\Middleware\SecurityHeaders::class);
         $router->aliasMiddleware('firewall.https', \OzanKurt\Shield\Firewall\Middleware\EnforceHttps::class);
         $router->aliasMiddleware('firewall.disabled_routes', \OzanKurt\Shield\Firewall\Middleware\DisabledRoutes::class);
+        $router->aliasMiddleware('shield.honeypot-form', \OzanKurt\Shield\Http\Middleware\ProtectAgainstSpam::class);
 
         // firewall.all group: correlation → bypass → acl → live_traffic (terminable) → configured middlewares
         // bypass must come BEFORE acl so the acl short-circuit can fire on bypassed requests
