@@ -56,6 +56,23 @@ class AbuseIpDbReportReactionTest extends TestCase
         $this->assertFalse(app(AbuseIpDbReportReaction::class)->appliesTo($this->block('192.168.1.5')));
     }
 
+    public function testAllowActionDoesNotApply()
+    {
+        config(['shield.reactions.abuseipdb_report.enabled' => true]);
+        config(['shield.reactions.abuseipdb_report.api_key' => 'k']);
+
+        $lookups = app(LookupResolver::class);
+        $acl = Acl::create([
+            'kind_id' => $lookups->id(AclKind::class, 'ip'),
+            'action_id' => $lookups->id(AclAction::class, 'allow'),
+            'value' => '203.0.113.22',
+            'source' => 'manual',
+            'reason' => 'whitelisted office IP',
+        ]);
+
+        $this->assertFalse(app(AbuseIpDbReportReaction::class)->appliesTo($acl));
+    }
+
     public function testStaleBlockDoesNotApply()
     {
         config(['shield.reactions.abuseipdb_report.enabled' => true]);

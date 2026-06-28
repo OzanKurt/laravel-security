@@ -5,6 +5,7 @@ namespace OzanKurt\Shield\Services\Reactions;
 use Illuminate\Support\Facades\Http;
 use OzanKurt\Shield\Contracts\AclReaction;
 use OzanKurt\Shield\Models\Acl;
+use OzanKurt\Shield\Models\Lookups\AclAction;
 use OzanKurt\Shield\Models\Lookups\AclKind;
 use OzanKurt\Shield\Services\Lookups\LookupResolver;
 
@@ -29,6 +30,9 @@ class AbuseIpDbReportReaction implements AclReaction
     {
         if ($acl->kind_id !== $this->lookups->id(AclKind::class, 'ip')) {
             return false;
+        }
+        if ($acl->action_id !== $this->lookups->id(AclAction::class, 'block')) {
+            return false; // never report allow/whitelist entries
         }
         if (! empty($acl->meta['reactions']['abuseipdb']['reported_at'])) {
             return false; // already reported (dedupe)
