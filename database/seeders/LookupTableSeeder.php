@@ -176,6 +176,8 @@ class LookupTableSeeder extends Seeder
             'role.attached', 'role.detached',
             'config.drift', 'file.drift', 'composer.changed', '.env.changed',
             'acl.added', 'acl.updated', 'acl.deleted', 'acl.expired',
+            'honeypot.form_trap',
+            'reaction.cloudflare', 'reaction.abuseipdb',
             'scanner.started', 'scanner.completed', 'scanner.finding', 'scanner.quarantine',
             'threat_feed.sync_started', 'threat_feed.sync_completed', 'threat_feed.sync_failed', 'threat_feed.sync_skipped',
             'notification.sent',

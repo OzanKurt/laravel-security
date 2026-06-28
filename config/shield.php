@@ -835,6 +835,23 @@ return [
         ],
 
         'block_duration' => 86400,                      // 24h
+
+        'regex_paths' => [
+            // Full PCRE patterns, matched against request()->path():
+            // '#^\.env#i', '#wp-config\.php$#i', '#\.git(/|$)#i',
+        ],
+
+        'form' => [
+            'enabled' => env('LS_HONEYPOT_FORM_ENABLED', false),
+            'name_field' => 'shield_hp',
+            'valid_from_field' => 'shield_hp_time',
+            'randomize' => false,
+            'require_timestamp' => true,
+            'min_time_seconds' => 1,
+            'max_time_seconds' => 3600,
+            'response' => 'redirect_back', // redirect_back | ok | <int status>
+            'score' => 50,
+        ],
     ],
 
     'redaction' => [
@@ -1100,6 +1117,26 @@ return [
                 'LS_PREMIUM_HEARTBEAT_URL',
                 'https://laravel-shield.ozankurt.com/api/heartbeat'
             ),
+        ],
+    ],
+
+    'reactions' => [
+        'self_detected_sources' => ['honeypot', 'honeypot_form', 'waf', 'scoring', 'auth', 'manual'],
+        'reconcile_batch' => 200,
+
+        'cloudflare' => [
+            'enabled' => env('LS_CLOUDFLARE_ENABLED', false),
+            'api_token' => env('LS_CLOUDFLARE_API_TOKEN'),
+            'zone_id' => env('LS_CLOUDFLARE_ZONE_ID'),
+            'account_id' => env('LS_CLOUDFLARE_ACCOUNT_ID'),
+            'note_category' => env('LS_CLOUDFLARE_NOTE_CATEGORY', 'shield-block'),
+        ],
+
+        'abuseipdb_report' => [
+            'enabled' => env('LS_ABUSEIPDB_REPORT_ENABLED', false),
+            'api_key' => env('LS_ABUSEIPDB_KEY'),
+            'categories' => [21, 19],
+            'max_age_days' => 30,
         ],
     ],
 
