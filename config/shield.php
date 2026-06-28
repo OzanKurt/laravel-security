@@ -839,6 +839,9 @@ return [
         'regex_paths' => [
             // Full PCRE patterns, matched against request()->path():
             // '#^\.env#i', '#wp-config\.php$#i', '#\.git(/|$)#i',
+            // Each pattern is tested against the path both with and without a
+            // leading slash, so '#^/wp-admin#' and '#^wp-admin#' both match.
+            // A malformed pattern is skipped (never fatal) and logged once.
         ],
 
         'form' => [
