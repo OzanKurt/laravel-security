@@ -312,6 +312,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\LicenseClearCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\HeartbeatCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\CentralTestCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\ReactionsReconcileCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
@@ -319,6 +320,11 @@ class ShieldServiceProvider extends ServiceProvider
                     ->command('shield:unblock-ips')
                     ->cron(config('shield.crons.unblock_ips.cron_expression'));
             }
+
+            app(\Illuminate\Console\Scheduling\Schedule::class)
+                ->command('shield:reactions-reconcile')
+                ->everyMinute()
+                ->withoutOverlapping();
 
             if (config('shield.notifications.security_report.enabled')) {
                 app(Schedule::class)

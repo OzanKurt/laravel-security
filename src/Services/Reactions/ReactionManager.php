@@ -46,13 +46,16 @@ class ReactionManager
 
     public function onUnblock(Acl $acl): void
     {
+        // Note: unban is NOT gated on isEnabled(). Reconcile must be able to
+        // clear orphaned edge rules even after the operator disables the
+        // integration; the job's handle() still re-checks isEnabled() and
+        // no-ops safely when the reaction is off, so this only affects whether
+        // the cleanup job is enqueued, never the side effect itself.
         foreach ($this->reactions as $reaction) {
-            if ($reaction->isEnabled()) {
-                RunAclReactionJob::dispatch($reaction->name(), $acl->getKey(), 'unban')
-                    ->onConnection(config('shield.reactions.connection'))
-                    ->onQueue(config('shield.reactions.queue'))
-                    ->afterCommit();
-            }
+            RunAclReactionJob::dispatch($reaction->name(), $acl->getKey(), 'unban')
+                ->onConnection(config('shield.reactions.connection'))
+                ->onQueue(config('shield.reactions.queue'))
+                ->afterCommit();
         }
     }
 
