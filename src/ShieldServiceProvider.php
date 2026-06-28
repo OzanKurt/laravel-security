@@ -47,6 +47,15 @@ class ShieldServiceProvider extends ServiceProvider
 
         $this->app->alias(Shield::class, 'shield');
 
+        $this->app->singleton(\OzanKurt\Shield\Services\Reactions\CloudflareClient::class);
+
+        $this->app->singleton(\OzanKurt\Shield\Services\Reactions\ReactionManager::class, function ($app) {
+            return new \OzanKurt\Shield\Services\Reactions\ReactionManager([
+                $app->make(\OzanKurt\Shield\Services\Reactions\CloudflareReaction::class),
+                $app->make(\OzanKurt\Shield\Services\Reactions\AbuseIpDbReportReaction::class),
+            ]);
+        });
+
         $this->app->singleton(\OzanKurt\Shield\Support\CorrelationId::class);
         $this->app->singleton(\OzanKurt\Shield\Support\CspNonce::class);
         $this->app->singleton(\OzanKurt\Shield\Support\RequestDataRedactor::class);

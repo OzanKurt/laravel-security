@@ -2,6 +2,7 @@
 
 namespace OzanKurt\Shield\Tests\Feature\Reactions;
 
+use Illuminate\Support\Facades\Bus;
 use OzanKurt\Shield\Models\Acl;
 use OzanKurt\Shield\Models\Lookups\AclAction;
 use OzanKurt\Shield\Models\Lookups\AclKind;
@@ -27,6 +28,9 @@ class CloudflareReactionTest extends TestCase
 
     public function testBanStoresRuleIdInMeta()
     {
+        // AclObserver now fires onBlock on create; fake the bus so the
+        // incidental queued reaction job does not run during this unit test.
+        Bus::fake();
         config(['shield.reactions.cloudflare.enabled' => true]);
 
         $this->mock(CloudflareClient::class, function ($m) {
@@ -42,6 +46,9 @@ class CloudflareReactionTest extends TestCase
 
     public function testUnbanDeletesStoredRuleAndClearsMarker()
     {
+        // AclObserver now fires onBlock on create; fake the bus so the
+        // incidental queued reaction job does not run during this unit test.
+        Bus::fake();
         config(['shield.reactions.cloudflare.enabled' => true]);
 
         $this->mock(CloudflareClient::class, function ($m) {
@@ -59,6 +66,9 @@ class CloudflareReactionTest extends TestCase
 
     public function testDoesNotApplyToPrivateIp()
     {
+        // AclObserver now fires onBlock on create; fake the bus so the
+        // incidental queued reaction job does not run during this unit test.
+        Bus::fake();
         config(['shield.reactions.cloudflare.enabled' => true]);
         $acl = $this->block('10.0.0.1');
         $this->assertFalse(app(CloudflareReaction::class)->appliesTo($acl));
