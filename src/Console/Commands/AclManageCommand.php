@@ -49,6 +49,12 @@ class AclManageCommand extends Command
 
     private function menu(LookupResolver $lookups): int
     {
+        if (! $this->input->isInteractive() || $this->option('no-interaction')) {
+            $this->error('shield:acl requires an interactive terminal, or pass --list, --ban=IP, or --unban=IP.');
+
+            return self::FAILURE;
+        }
+
         while (true) {
             $choice = $this->choice('Shield ACL', ['List', 'Ban', 'Unban', 'Search', 'Stats', 'Quit'], 0);
 
@@ -100,7 +106,7 @@ class AclManageCommand extends Command
             return;
         }
 
-        $count = Acl::query()->where('value', $ip)->get()->each->delete()->count();
+        $count = Acl::query()->ofKind('ip')->where('value', $ip)->get()->each->delete()->count();
         $this->info("Removed {$count} ACL entr(ies) for {$ip}.");
     }
 

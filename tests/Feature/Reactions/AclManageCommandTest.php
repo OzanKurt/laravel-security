@@ -30,4 +30,9 @@ class AclManageCommandTest extends TestCase
     {
         $this->artisan('shield:acl --list')->assertExitCode(0);
     }
+
+    public function testBareCommandWithoutInteractionFails()
+    {
+        $this->artisan('shield:acl --no-interaction')->assertExitCode(1);
+    }
 }
