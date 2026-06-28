@@ -30,11 +30,19 @@ class CloudflareClient
             return null;
         }
 
-        $response = $this->http()->post($this->scopePath() . '/firewall/access_rules/rules', [
-            'mode' => 'block',
-            'configuration' => ['target' => 'ip', 'value' => $ip],
-            'notes' => $note,
-        ]);
+        try {
+            $response = $this->http()->post($this->scopePath() . '/firewall/access_rules/rules', [
+                'mode' => 'block',
+                'configuration' => ['target' => 'ip', 'value' => $ip],
+                'notes' => $note,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Cloudflare access rule create failed', [
+                'ip' => $ip, 'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
 
         if (! $response->successful() || ! $response->json('success')) {
             Log::warning('Cloudflare access rule create failed', [
@@ -53,12 +61,20 @@ class CloudflareClient
             return false;
         }
 
-        $response = $this->http()->delete($this->scopePath() . '/firewall/access_rules/rules/' . $ruleId);
+        try {
+            $response = $this->http()->delete($this->scopePath() . '/firewall/access_rules/rules/' . $ruleId);
+        } catch (\Throwable $e) {
+            Log::warning('Cloudflare access rule delete failed', [
+                'rule_id' => $ruleId, 'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
 
         return $response->successful() && (bool) $response->json('success');
     }
 
-    private function http()
+    private function http(): \Illuminate\Http\Client\PendingRequest
     {
         return Http::timeout(20)
             ->withToken((string) config('shield.reactions.cloudflare.api_token'))

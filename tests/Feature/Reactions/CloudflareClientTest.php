@@ -50,4 +50,28 @@ class CloudflareClientTest extends TestCase
 
         $this->assertNull(app(CloudflareClient::class)->createBlockRule('203.0.113.7', 'x'));
     }
+
+    public function testCreateReturnsNullWhenNotConfigured()
+    {
+        config(['shield.reactions.cloudflare.api_token' => null]);
+        config(['shield.reactions.cloudflare.zone_id' => null]);
+        config(['shield.reactions.cloudflare.account_id' => null]);
+
+        Http::fake();
+
+        $this->assertNull(app(CloudflareClient::class)->createBlockRule('203.0.113.7', 'x'));
+        Http::assertNothingSent();
+    }
+
+    public function testCreateReturnsNullOnConnectionException()
+    {
+        config(['shield.reactions.cloudflare.api_token' => 'tok']);
+        config(['shield.reactions.cloudflare.zone_id' => 'zone123']);
+
+        Http::fake(function () {
+            throw new \Illuminate\Http\Client\ConnectionException('refused');
+        });
+
+        $this->assertNull(app(CloudflareClient::class)->createBlockRule('203.0.113.7', 'x'));
+    }
 }
