@@ -320,6 +320,7 @@ class ShieldServiceProvider extends ServiceProvider
         $this->commands(\OzanKurt\Shield\Console\Commands\HeartbeatCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\CentralTestCommand::class);
         $this->commands(\OzanKurt\Shield\Console\Commands\ReactionsReconcileCommand::class);
+        $this->commands(\OzanKurt\Shield\Console\Commands\AclManageCommand::class);
 
         $this->app->booted(function () {
             if (config('shield.crons.unblock_ips.enabled')) {
