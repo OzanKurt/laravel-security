@@ -224,6 +224,7 @@ class ShieldServiceProvider extends ServiceProvider
         $router->aliasMiddleware('firewall.bypass', \OzanKurt\Shield\Firewall\Middleware\Bypass::class);
         $router->aliasMiddleware('firewall.acl', \OzanKurt\Shield\Firewall\Middleware\Acl::class);
         $router->aliasMiddleware('firewall.live_traffic', \OzanKurt\Shield\Http\Middleware\LiveTrafficCapture::class);
+        $router->aliasMiddleware('firewall.honeypot_regex', \OzanKurt\Shield\Firewall\Middleware\HoneypotRegex::class);
         $router->aliasMiddleware('firewall.av_uploads', \OzanKurt\Shield\Firewall\Middleware\AvUploads::class);
         $router->aliasMiddleware('firewall.headers', \OzanKurt\Shield\Firewall\Middleware\SecurityHeaders::class);
         $router->aliasMiddleware('firewall.https', \OzanKurt\Shield\Firewall\Middleware\EnforceHttps::class);
@@ -232,7 +233,7 @@ class ShieldServiceProvider extends ServiceProvider
         // firewall.all group: correlation → bypass → acl → live_traffic (terminable) → configured middlewares
         // bypass must come BEFORE acl so the acl short-circuit can fire on bypassed requests
         $router->middlewareGroup('firewall.all', array_merge(
-            ['firewall.correlation', 'firewall.bypass', 'firewall.acl', 'firewall.live_traffic'],
+            ['firewall.correlation', 'firewall.bypass', 'firewall.acl', 'firewall.live_traffic', 'firewall.honeypot_regex'],
             config('shield.all_middleware', [])
         ));
 
