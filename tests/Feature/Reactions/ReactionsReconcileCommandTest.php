@@ -12,6 +12,17 @@ use OzanKurt\Shield\Tests\TestCase;
 
 class ReactionsReconcileCommandTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Reconcile only matters when Cloudflare is enabled (the normal case);
+        // onUnblock dispatches per-reaction only when isEnabled() is true.
+        config(['shield.reactions.cloudflare.enabled' => true]);
+        config(['shield.reactions.cloudflare.api_token' => 'tok']);
+        config(['shield.reactions.cloudflare.zone_id' => 'z']);
+    }
+
     private function block(string $ip, ?string $ruleId, $expiresAt): Acl
     {
         $lookups = app(LookupResolver::class);
@@ -44,7 +55,10 @@ class ReactionsReconcileCommandTest extends TestCase
 
         $this->artisan('shield:reactions-reconcile')->assertExitCode(0);
 
-        Bus::assertNotDispatched(RunAclReactionJob::class);
+        // The block is still active, so reconcile must not unban it. (An
+        // incidental ban job fires on creation via the observer; we only
+        // assert no unban was dispatched.)
+        Bus::assertNotDispatched(RunAclReactionJob::class, fn ($j) => $j->op === 'unban');
     }
 
     public function testExpiredBlockWithoutRuleIdDoesNotReconcile()
@@ -54,6 +68,8 @@ class ReactionsReconcileCommandTest extends TestCase
 
         $this->artisan('shield:reactions-reconcile')->assertExitCode(0);
 
-        Bus::assertNotDispatched(RunAclReactionJob::class);
+        // No cloudflare rule_id in meta, so there is nothing to reconcile; the
+        // command must not unban it. (Incidental ban on creation is ignored.)
+        Bus::assertNotDispatched(RunAclReactionJob::class, fn ($j) => $j->op === 'unban');
     }
 }

@@ -24,8 +24,13 @@ class ReactionsReconcileCommand extends Command
 
         // Rows that still carry a cloudflare rule id but are no longer an
         // active block: expired, OR soft-deleted (withTrashed catches those).
+        // The rule_id check is pushed into SQL (json_extract IS NOT NULL) so
+        // the batch limit only counts actionable orphans. Expired ACL rows are
+        // never deleted, just expired, so filtering rule_id in PHP after the
+        // limit could fill an entire batch with already-reconciled rows and
+        // never reach real orphans.
         $rows = Acl::withTrashed()
-            ->whereNotNull('meta')
+            ->whereNotNull('meta->reactions->cloudflare->rule_id')
             ->where(function ($q) {
                 $q->whereNotNull('deleted_at')
                   ->orWhere(function ($q2) {
@@ -33,8 +38,7 @@ class ReactionsReconcileCommand extends Command
                   });
             })
             ->limit($batch)
-            ->get()
-            ->filter(fn (Acl $acl) => ! empty($acl->meta['reactions']['cloudflare']['rule_id']));
+            ->get();
 
         foreach ($rows as $acl) {
             $manager->onUnblock($acl);
